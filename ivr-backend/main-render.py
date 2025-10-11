@@ -48,7 +48,7 @@ app.add_middleware(
 # Import services with error handling
 try:
     from services.voice_agent import VoiceAgent
-    from services.speech_to_text import SpeechToTextService
+    from services.speech_to_text_cloud import SpeechToTextService  # Cloud-compatible version
     from services.text_to_speech import TextToSpeechService
     from services.nlp_service import NLPService
     from services.conversation_manager import ConversationManager
