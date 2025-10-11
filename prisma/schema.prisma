@@ -21,8 +21,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  drivers Driver[]
-  riders  Rider[]
+  drivers  Driver[]
+  riders   Rider[]
+  UserRole UserRole[]
 }
 
 model Driver {
@@ -666,4 +667,135 @@ model TranslationSegment {
   @@index([sessionId, sequenceNumber])
   @@index([confidence, qualityScore])
   @@index([needsReview, humanValidated])
+}
+
+// Administrative Models for Enhanced Management
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions Json // Array of permission strings
+  isSystem    Boolean  @default(false) // System roles cannot be deleted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userRoles UserRole[]
+}
+
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  type        String // string, number, boolean, json
+  category    String // voice, integration, system, etc.
+  description String?
+  isEncrypted Boolean  @default(false)
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@index([category])
+}
+
+model Integration {
+  id            String    @id @default(cuid())
+  name          String
+  type          String // webhook, api, service
+  endpoint      String?
+  apiKey        String? // Encrypted
+  secretKey     String? // Encrypted
+  isActive      Boolean   @default(true)
+  configuration Json? // Integration-specific config
+  lastSync      DateTime?
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  logs IntegrationLog[]
+}
+
+model IntegrationLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  method        String // GET, POST, etc.
+  endpoint      String
+  requestData   Json?
+  responseData  Json?
+  statusCode    Int
+  success       Boolean
+  errorMessage  String?
+  duration      Int // milliseconds
+  createdAt     DateTime @default(now())
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+  @@index([createdAt])
+  @@index([success])
+}
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String // debug, info, warn, error
+  message   String
+  category  String // system, api, database, etc.
+  metadata  Json?
+  userId    String?
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([level])
+  @@index([category])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model SystemHealth {
+  id              String   @id @default(cuid())
+  component       String // database, api, storage, etc.
+  status          String // healthy, degraded, down
+  responseTime    Int? // milliseconds
+  cpuUsage        Float?
+  memoryUsage     Float?
+  diskUsage       Float?
+  uptime          Int? // seconds
+  lastHealthCheck DateTime @default(now())
+  metadata        Json?
+
+  @@unique([component])
+  @@index([status])
+  @@index([lastHealthCheck])
+}
+
+model SystemAlert {
+  id         String    @id @default(cuid())
+  type       String // error, warning, info
+  title      String
+  message    String
+  component  String?
+  severity   String // low, medium, high, critical
+  isResolved Boolean   @default(false)
+  resolvedBy String?
+  resolvedAt DateTime?
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([isResolved])
+  @@index([createdAt])
 }
