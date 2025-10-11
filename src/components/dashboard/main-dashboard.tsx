@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Activity, 
-  Users, 
-  Phone, 
-  Settings, 
+import {
+  Activity,
+  Users,
+  Phone,
+  Settings,
   BarChart3,
   Bot,
   GitBranch as Workflow,
@@ -37,7 +37,7 @@ import {
 import WorkflowBuilder from '@/components/ivr/workflow-builder';
 import { AdminDashboard } from '@/components/admin';
 import { SystemMonitoring } from '@/components/admin';
-import AIAgentDashboard from '@/components/ai-agent/ai-agent-dashboard';
+import AIAgentManagement from '@/components/ai-agent/ai-agent-management';
 import DispatcherDashboard from '@/components/dispatcher/dispatcher-dashboard';
 import AdvancedAnalyticsDashboard from '@/components/advanced-dashboard/advanced-analytics-dashboard';
 import MalayalamIVRAnalytics from '@/components/analytics/malayalam-ivr-analytics';
@@ -272,7 +272,7 @@ export default function MainDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-orange-700">Revenue (₹)</p>
-                <p className="text-3xl font-bold text-orange-900">₹{(stats.revenue/1000).toFixed(0)}K</p>
+                <p className="text-3xl font-bold text-orange-900">₹{(stats.revenue / 1000).toFixed(0)}K</p>
                 <p className="text-xs text-orange-600">Monthly target: ₹500K</p>
               </div>
               <TrendingUp className="h-10 w-10 text-orange-600" />
@@ -308,13 +308,73 @@ export default function MainDashboard() {
                   </div>
                 </div>
                 <Badge variant={
-                  service.status === 'online' ? 'default' : 
-                  service.status === 'degraded' ? 'secondary' : 'destructive'
+                  service.status === 'online' ? 'default' :
+                    service.status === 'degraded' ? 'secondary' : 'destructive'
                 }>
                   {service.status}
                 </Badge>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Agents Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-6 w-6 text-blue-600" />
+            AI Agents Overview
+          </CardTitle>
+          <CardDescription>Malayalam-enabled AI agents and their performance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{stats.totalAgents}</div>
+              <div className="text-sm text-gray-600">Total Agents</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{stats.activeAgents}</div>
+              <div className="text-sm text-gray-600">Active Agents</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">1.2K</div>
+              <div className="text-sm text-gray-600">Daily Executions</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">94%</div>
+              <div className="text-sm text-gray-600">Success Rate</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Globe className="h-4 w-4 text-green-600" />
+                <span className="font-medium">Malayalam Support</span>
+              </div>
+              <p className="text-sm text-gray-600">8 agents with native Malayalam capabilities</p>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4 text-purple-600" />
+                <span className="font-medium">AI Models</span>
+              </div>
+              <p className="text-sm text-gray-600">GPT-4, Claude, and local models integrated</p>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <span className="font-medium">Performance</span>
+              </div>
+              <p className="text-sm text-gray-600">Average 1.8s response time</p>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center">
+            <Button onClick={() => setActiveTab('agents')} className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Manage AI Agents
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -365,64 +425,64 @@ export default function MainDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('rides')}
             >
               <Car className="h-6 w-6" />
               Manage Rides
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('drivers')}
             >
               <Users className="h-6 w-6" />
               Manage Drivers
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('customers')}
             >
               <Phone className="h-6 w-6" />
               Manage Customers
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('workflows')}
             >
               <Workflow className="h-6 w-6" />
               Create Workflow
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('agents')}
             >
               <Bot className="h-6 w-6" />
               AI Agents
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('analytics')}
             >
               <BarChart3 className="h-6 w-6" />
               Analytics
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('dispatcher')}
             >
               <AudioLines className="h-6 w-6" />
               Dispatcher
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('admin')}
             >
@@ -446,7 +506,7 @@ export default function MainDashboard() {
       case 'workflows':
         return <WorkflowBuilder />;
       case 'agents':
-        return <AIAgentDashboard />;
+        return <AIAgentManagement />;
       case 'dispatcher':
         return <DispatcherDashboard />;
       case 'analytics':
@@ -498,16 +558,15 @@ export default function MainDashboard() {
             {navigationTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                    isActive
+                  className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${isActive
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   {tab.name}
