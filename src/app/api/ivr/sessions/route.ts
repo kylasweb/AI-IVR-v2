@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Get API URL from environment variables
-const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fairgo-imos-backend.onrender.com'
 
 export async function GET() {
   try {
@@ -13,7 +13,7 @@ export async function GET() {
       // Add timeout for production
       signal: AbortSignal.timeout(10000),
     })
-    
+
     if (!response.ok) {
       console.error('Backend response error:', response.status, response.statusText)
       // Return mock data for better UX during backend issues
@@ -23,14 +23,14 @@ export async function GET() {
         mock: true
       })
     }
-    
+
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error fetching sessions:', error)
     // Return empty sessions array instead of error for better UX
     return NextResponse.json(
-      { 
+      {
         sessions: [],
         error: 'Failed to fetch sessions',
         mock: true
@@ -43,7 +43,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     const response = await fetch(`${PYTHON_BACKEND_URL}/api/call/start`, {
       method: 'POST',
       headers: {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15000), // 15 second timeout
     })
-    
+
     if (!response.ok) {
       console.error('Backend response error:', response.status, response.statusText)
       // Return mock response for better UX
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json(mockResponse)
     }
-    
+
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
