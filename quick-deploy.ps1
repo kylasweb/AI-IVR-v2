@@ -20,7 +20,8 @@ if ($status) {
         $commit_msg = "Update: Deploy latest frontend changes to Render.com"
     }
     git commit -m $commit_msg
-} else {
+}
+else {
     Write-Host "✅ No uncommitted changes found" -ForegroundColor Green
 }
 
@@ -41,7 +42,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "   1. Go to Render.com Dashboard" -ForegroundColor White
     Write-Host "   2. Find 'fairgo-imos-frontend' service" -ForegroundColor White
     Write-Host "   3. Click 'Manual Deploy' → 'Deploy Latest Commit'" -ForegroundColor White
-} else {
+}
+else {
     Write-Host "❌ Failed to push to GitHub. Please check your connection." -ForegroundColor Red
     exit 1
 }
