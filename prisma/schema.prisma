@@ -1,0 +1,669 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  drivers Driver[]
+  riders  Rider[]
+}
+
+model Driver {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  phone       String
+  vehicleType String // auto, car, bike, etc.
+  vehicleNo   String
+  licenseNo   String
+  isAvailable Boolean  @default(true)
+  currentLat  Float?
+  currentLng  Float?
+  rating      Float    @default(0.0)
+  totalRides  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id])
+  rides Ride[]
+}
+
+model Rider {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  phone      String
+  currentLat Float?
+  currentLng Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id])
+  rides Ride[]
+}
+
+model Ride {
+  id             String    @id @default(cuid())
+  riderId        String
+  driverId       String?
+  pickupLocation String
+  pickupLat      Float
+  pickupLng      Float
+  dropLocation   String
+  dropLat        Float
+  dropLng        Float
+  vehicleType    String
+  fare           Float
+  status         String    @default("pending") // pending, accepted, ongoing, completed, cancelled
+  paymentStatus  String    @default("pending") // pending, paid, failed
+  scheduledFor   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  rider  Rider   @relation(fields: [riderId], references: [id])
+  driver Driver? @relation(fields: [driverId], references: [id])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Workflow Builder Models
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String   @default("CUSTOM")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  nodes      WorkflowNode[]
+  executions WorkflowExecution[]
+  versions   WorkflowVersion[]
+}
+
+model WorkflowNode {
+  id          String   @id @default(cuid())
+  workflowId  String
+  type        String // trigger, stt, nlu, tts, agent, condition, data, api, end
+  config      String   @default("{}")
+  position    Int      @default(0)
+  label       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  workflow          Workflow         @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sourceConnections NodeConnection[] @relation("SourceNode")
+  targetConnections NodeConnection[] @relation("TargetNode")
+}
+
+model NodeConnection {
+  id           String   @id @default(cuid())
+  sourceNodeId String
+  targetNodeId String
+  sourceHandle String   @default("source")
+  targetHandle String   @default("target")
+  condition    String?
+  createdAt    DateTime @default(now())
+
+  // Relations
+  sourceNode WorkflowNode @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode WorkflowNode @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowExecution {
+  id          String    @id @default(cuid())
+  workflowId  String
+  input       String
+  output      String
+  status      String    @default("PENDING") // PENDING, RUNNING, SUCCESS, FAILED
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+// Workflow Versioning
+model WorkflowVersion {
+  id                String   @id @default(cuid())
+  workflowId        String
+  version           Int
+  changeDescription String?
+  workflowData      String // JSON string of complete workflow state
+  createdBy         String   @default("system")
+  createdAt         DateTime @default(now())
+
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, version])
+}
+
+// Strategic Engine Operations - Production Tracking
+model EngineExecution {
+  id              String   @id @default(cuid())
+  executionId     String   @unique // Generated execution ID for tracking
+  engineType      String // EngineType enum value
+  inputData       String // JSON string of input parameters
+  outputData      String? // JSON string of execution results
+  status          String // success, failed, partial
+  executionTime   Int // Duration in milliseconds
+  culturalContext String // JSON string of cultural context used
+  culturalAlign   Float    @default(0.0) // Cultural alignment score (0-1)
+  malayalamProc   Boolean  @default(false) // Malayalam processing enabled
+  errorMessage    String? // Error details if execution failed
+  createdAt       DateTime @default(now())
+
+  // Performance metrics
+  responseTime Int   @default(0) // Response time in ms
+  memoryUsage  Float @default(0.0) // Memory usage during execution
+  cpuUsage     Float @default(0.0) // CPU usage percentage
+
+  // Relations to other executions (orchestrated batches)
+  batchId String?
+  batch   EngineExecutionBatch? @relation(fields: [batchId], references: [id])
+
+  @@index([engineType])
+  @@index([status])
+  @@index([createdAt])
+  @@index([batchId])
+}
+
+// Batch execution tracking for orchestrated engine runs
+model EngineExecutionBatch {
+  id               String    @id @default(cuid())
+  batchId          String    @unique // User-facing batch identifier
+  executionMode    String // sequential, parallel, adaptive
+  totalEngines     Int       @default(0)
+  completedEngines Int       @default(0)
+  failedEngines    Int       @default(0)
+  status           String // running, completed, failed, partial
+  startTime        DateTime  @default(now())
+  endTime          DateTime?
+  totalDuration    Int? // Total batch execution time in ms
+  culturalAlign    Float     @default(0.0) // Overall cultural alignment
+  malayalamProc    Boolean   @default(false)
+
+  // Relations
+  executions EngineExecution[]
+
+  @@index([status])
+  @@index([startTime])
+}
+
+// Engine Configuration Management
+model EngineConfiguration {
+  id                    String  @id @default(cuid())
+  engineType            String  @unique // EngineType enum value
+  version               String  @default("1.0.0")
+  config                String // JSON string of engine configuration
+  status                String // active, deprecated, disabled
+  description           String? // Configuration change description
+  isDefault             Boolean @default(false) // Is this the default configuration
+  culturalSettings      String // JSON string of cultural-specific settings
+  performanceThresholds String // JSON string of performance thresholds
+
+  // A/B Testing support
+  experimentGroup String? // For A/B testing configurations
+  trafficPercent  Float   @default(100.0) // Percentage of traffic using this config
+
+  // Metadata
+  createdBy   String    @default("system")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  activatedAt DateTime?
+
+  @@index([engineType])
+  @@index([status])
+  @@index([isDefault])
+}
+
+// Cultural Context Analytics
+model CulturalMetrics {
+  id         String  @id @default(cuid())
+  engineType String // EngineType enum value
+  language   String // ml, en, manglish
+  region     String // kerala, etc.
+  community  String // malayali, etc.
+  festival   String? // onam, vishu, etc.
+  timeOfDay  String // morning, afternoon, evening, night
+
+  // Metrics
+  alignmentScore   Float @default(0.0) // Cultural alignment score (0-1)
+  responseQuality  Float @default(0.0) // Quality of cultural response (0-1)
+  userSatisfaction Float @default(0.0) // User satisfaction with cultural context
+
+  // Aggregation data
+  executionCount Int   @default(1) // Number of executions for this context
+  averageTime    Float @default(0.0) // Average execution time for this context
+  successRate    Float @default(0.0) // Success rate for this cultural context
+
+  // Timestamps
+  recordDate  DateTime @default(now()) // Date of this metric record
+  lastUpdated DateTime @updatedAt
+
+  @@unique([engineType, language, region, community, festival, timeOfDay, recordDate])
+  @@index([engineType, language, region])
+  @@index([recordDate])
+}
+
+// Performance Monitoring
+model EnginePerformanceMetric {
+  id         String   @id @default(cuid())
+  engineType String // EngineType enum value
+  metricType String // response_time, success_rate, throughput, uptime, memory, cpu
+  value      Float // Metric value
+  unit       String // ms, percent, requests_per_sec, etc.
+  timestamp  DateTime @default(now())
+
+  // Aggregation level
+  aggregationLevel String   @default("hourly") // hourly, daily, weekly, monthly
+  periodStart      DateTime
+  periodEnd        DateTime
+
+  // Additional context
+  environment String @default("production") // production, staging, development
+  version     String @default("1.0.0") // Engine version
+
+  @@index([engineType, metricType, timestamp])
+  @@index([aggregationLevel, periodStart])
+}
+
+// ========================
+// Cloud Communication Schema Extensions
+// ========================
+
+// Call Recording and Transcription (Phase 1)
+model CallRecord {
+  id        String  @id @default(cuid())
+  callId    String  @unique // External call system ID
+  sessionId String? // IVR session ID if applicable
+
+  // Call metadata
+  startTime        DateTime
+  endTime          DateTime?
+  duration         Int? // Duration in seconds
+  callType         String // inbound, outbound, conference
+  participantCount Int       @default(1)
+
+  // Recording details
+  recordingUrl    String? // Cloud storage URL
+  recordingSize   BigInt? // File size in bytes
+  recordingFormat String  @default("wav") // wav, mp3, webm
+  encryptionKey   String? // Encryption key reference
+
+  // Transcription
+  transcriptionId String?
+  transcription   CallTranscription?
+
+  // Quality metrics
+  audioQuality   Float? @default(0.0) // MOS score (1-5)
+  noiseLevel     Float? @default(0.0) // Background noise level
+  signalStrength Float? @default(0.0) // Signal quality
+
+  // Compliance and retention
+  retentionPolicy String    @default("standard") // standard, extended, legal_hold
+  retentionExpiry DateTime?
+  gdprCompliant   Boolean   @default(true)
+  hipaaCompliant  Boolean   @default(false)
+
+  // Cultural context
+  primaryLanguage  String  @default("en") // en, ml, hi
+  culturalContext  Json? // Cultural metadata
+  malayalamContent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([callId])
+  @@index([startTime])
+  @@index([callType, primaryLanguage])
+  @@index([retentionExpiry])
+}
+
+model CallTranscription {
+  id           String     @id @default(cuid())
+  callRecordId String     @unique
+  callRecord   CallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+
+  // Transcription metadata
+  provider       String // azure, google, openai, custom
+  language       String // Language code (en-IN, ml-IN, etc.)
+  confidence     Float  @default(0.0) // Overall confidence score
+  processingTime Int    @default(0) // Processing time in ms
+
+  // Content
+  fullTranscript String? // Complete transcript
+  segments       Json? // Time-segmented transcript with speaker info
+  summary        String? // AI-generated summary
+  keyPhrases     Json? // Extracted key phrases
+  sentiment      String? // positive, negative, neutral
+
+  // Cultural analysis
+  culturalTone      String? // formal, casual, respectful, urgent
+  malayalamAccuracy Float?  @default(0.0) // Malayalam-specific accuracy
+  codeSwiting       Json? // Malayalam-English code switching points
+
+  // Quality metrics
+  wordCount       Int @default(0)
+  speakerCount    Int @default(1)
+  silenceDuration Int @default(0) // Total silence in seconds
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([language, confidence])
+  @@index([provider, processingTime])
+}
+
+// Audio Conferencing (Phase 2)
+model ConferenceSession {
+  id        String @id @default(cuid())
+  sessionId String @unique
+
+  // Conference metadata
+  title           String
+  description     String?
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int? // Duration in seconds
+  maxParticipants Int       @default(50)
+
+  // Technical details
+  conferenceType       String // audio_only, video, screen_share
+  quality              String  @default("hd") // sd, hd, fhd
+  recordingEnabled     Boolean @default(true)
+  transcriptionEnabled Boolean @default(true)
+
+  // Business context
+  purpose    String? // customer_support, internal_meeting, training
+  department String? // Department or team
+  ticketId   String? // Related support ticket
+
+  // Cultural settings
+  primaryLanguage  String  @default("en")
+  culturalMode     String  @default("standard") // standard, formal, casual
+  malayalamSupport Boolean @default(false)
+
+  // Status and metrics
+  status            String @default("scheduled") // scheduled, active, completed, cancelled
+  participantCount  Int    @default(0)
+  totalSpeakingTime Int    @default(0) // Total speaking time across all participants
+
+  // Relations
+  participants   ConferenceParticipant[]
+  recordings     ConferenceRecording[]
+  transcriptions ConferenceTranscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([status, startTime])
+  @@index([purpose, department])
+}
+
+model ConferenceParticipant {
+  id        String            @id @default(cuid())
+  sessionId String
+  session   ConferenceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Participant details
+  userId String? // Internal user ID
+  name   String
+  email  String?
+  phone  String?
+  role   String  @default("participant") // host, moderator, participant
+
+  // Participation metrics
+  joinTime           DateTime?
+  leaveTime          DateTime?
+  speakingTime       Int       @default(0) // Speaking time in seconds
+  participationScore Float     @default(0.0) // Engagement score (0-1)
+
+  // Audio quality
+  averageSignal  Float? @default(0.0)
+  networkQuality Float? @default(0.0)
+  audioIssues    Json? // Connection issues, dropouts, etc.
+
+  // Cultural preferences
+  preferredLanguage String @default("en")
+  culturalContext   Json? // Cultural communication preferences
+
+  status String @default("invited") // invited, joined, left, disconnected
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId, role])
+  @@index([userId])
+  @@index([joinTime, leaveTime])
+}
+
+model ConferenceRecording {
+  id        String            @id @default(cuid())
+  sessionId String
+  session   ConferenceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Recording details
+  recordingUrl  String
+  recordingSize BigInt
+  format        String @default("webm")
+  duration      Int // Duration in seconds
+
+  // Quality and processing
+  audioQuality      Float   @default(0.0)
+  processingStatus  String  @default("processing") // processing, completed, failed
+  encryptionEnabled Boolean @default(true)
+
+  // Segments and chapters
+  segments   Json? // Time-based segments with topics
+  chapters   Json? // Auto-generated chapter markers
+  highlights Json? // Important moments
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([processingStatus])
+}
+
+model ConferenceTranscription {
+  id        String            @id @default(cuid())
+  sessionId String
+  session   ConferenceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Transcription metadata
+  provider          String // azure, google, custom
+  language          String
+  overallConfidence Float  @default(0.0)
+  processingTime    Int    @default(0)
+
+  // Content
+  fullTranscript  String?
+  speakerSegments Json? // Time-based segments with speaker identification
+  summary         String? // Meeting summary
+  actionItems     Json? // Extracted action items
+  decisions       Json? // Key decisions made
+
+  // Cultural analysis
+  languageMix   Json? // Language switching patterns
+  culturalTone  Json? // Tone analysis per speaker
+  respectLevels Json? // Cultural respect indicators
+
+  // Intelligence insights
+  sentiment Json? // Sentiment analysis per segment
+  topics    Json? // Topic extraction and timeline
+  keywords  Json? // Important keywords and frequency
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId, language])
+  @@index([provider, overallConfidence])
+}
+
+// Answering Machine Detection (Phase 3)
+model AMDAnalysis {
+  id     String @id @default(cuid())
+  callId String @unique
+
+  // Detection results
+  isAnsweringMachine Boolean
+  confidence         Float   @default(0.0) // Confidence score (0-1)
+  detectionTime      Int     @default(0) // Time to detection in ms
+
+  // Audio analysis
+  audioPatterns        Json? // Detected patterns
+  silenceDuration      Int     @default(0) // Initial silence in ms
+  beepDetected         Boolean @default(false)
+  voiceCharacteristics Json? // Voice analysis results
+
+  // Cultural context
+  greetingLanguage String? // Detected greeting language
+  culturalPattern  String? // malayalam_formal, english_casual, etc.
+  greetingText     String? // Transcribed greeting if human
+
+  // Response strategy
+  messageStrategy   String? // leave_message, callback, personalized
+  messageDelivered  Boolean   @default(false)
+  callbackScheduled Boolean   @default(false)
+  callbackTime      DateTime?
+
+  // Campaign context
+  campaignId       String?
+  customerProfile  Json? // Customer demographic and preferences
+  previousAttempts Int     @default(0)
+
+  // Performance metrics
+  accuracy          Float? @default(0.0) // Validated accuracy
+  falsePositiveRate Float? @default(0.0)
+  processingLatency Int    @default(0) // Total processing time
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([callId])
+  @@index([isAnsweringMachine, confidence])
+  @@index([campaignId, createdAt])
+  @@index([culturalPattern, greetingLanguage])
+}
+
+// Live Translation Research (Phase 4)
+model TranslationSession {
+  id        String @id @default(cuid())
+  sessionId String @unique
+
+  // Session context
+  sourceLanguage String // ml, en, hi
+  targetLanguage String // en, ml, hi
+  sessionType    String // call, conference, chat
+
+  // Translation engine
+  engine       String  @default("custom") // custom, azure, google
+  model        String? // Model version or configuration
+  realTimeMode Boolean @default(true)
+
+  // Quality metrics
+  latency              Int   @default(0) // Average latency in ms
+  accuracy             Float @default(0.0) // Overall accuracy score
+  culturalPreservation Float @default(0.0) // Cultural context preservation
+  fluentness           Float @default(0.0) // Translation fluency
+
+  // Cultural analysis
+  idiomsTranslated   Int   @default(0) // Successfully translated idioms
+  culturalReferences Json? // Cultural references handled
+  emotionalTone      Json? // Emotional tone preservation
+
+  // Research data
+  researchMode Boolean @default(false) // Research data collection enabled
+  anonymized   Boolean @default(true) // Personal data anonymized
+  consentGiven Boolean @default(false) // Research consent
+
+  // Performance data
+  segmentCount   Int @default(0) // Number of translated segments
+  totalDuration  Int @default(0) // Total session duration
+  processingTime Int @default(0) // Total processing time
+
+  // Relations
+  segments TranslationSegment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([sourceLanguage, targetLanguage])
+  @@index([researchMode, consentGiven])
+}
+
+model TranslationSegment {
+  id        String             @id @default(cuid())
+  sessionId String
+  session   TranslationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Segment details
+  sequenceNumber Int
+  timestamp      DateTime
+  duration       Int      @default(0) // Segment duration in ms
+
+  // Content
+  sourceText     String
+  translatedText String
+  confidence     Float  @default(0.0)
+  latency        Int    @default(0) // Processing latency for this segment
+
+  // Linguistic analysis
+  sourceTokens Json? // Tokenized source text
+  targetTokens Json? // Tokenized target text
+  alignment    Json? // Word/phrase alignment
+
+  // Cultural context
+  culturalElements  Json? // Identified cultural elements
+  adaptations       Json? // Cultural adaptations made
+  preservationScore Float @default(0.0)
+
+  // Quality flags
+  needsReview    Boolean @default(false)
+  humanValidated Boolean @default(false)
+  qualityScore   Float   @default(0.0)
+
+  // Research annotations
+  linguistNotes String?
+  culturalNotes String?
+  errorAnalysis Json? // Error categorization
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId, sequenceNumber])
+  @@index([confidence, qualityScore])
+  @@index([needsReview, humanValidated])
+}

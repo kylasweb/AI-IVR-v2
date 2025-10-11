@@ -1,0 +1,43 @@
+services:
+  # Next.js Frontend Service with Malayalam Support
+  - type: web
+    name: ai-ivr-malayalam-frontend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Will be set manually to backend URL
+      - key: NEXT_PUBLIC_PRIMARY_LANGUAGE
+        value: malayalam
+      - key: NEXT_PUBLIC_SUPPORTS_MANGLISH
+        value: "true"
+    autoDeploy: true
+    
+  # Malayalam Python FastAPI Backend Service
+  - type: web
+    name: ai-ivr-malayalam-backend
+    runtime: python
+    plan: free
+    rootDir: ivr-backend
+    buildCommand: pip install -r requirements-ml.txt
+    startCommand: python main-ml.py
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: ENVIRONMENT
+        value: production
+      - key: PRIMARY_LANGUAGE
+        value: malayalam
+      - key: SUPPORTS_MANGLISH
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        sync: false  # Will be set to frontend URL
+    autoDeploy: true

@@ -1,0 +1,30 @@
+services:
+  # Malayalam AI IVR Backend Service
+  - type: web
+    name: ai-ivr-malayalam-backend
+    runtime: python
+    plan: free
+    env: python
+    buildCommand: pip install -r requirements-ml.txt
+    startCommand: python main-ml.py
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: ENVIRONMENT
+        value: production
+      - key: PRIMARY_LANGUAGE
+        value: malayalam
+      - key: SUPPORTS_MANGLISH
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        sync: false  # Will be set manually to frontend URL
+    autoDeploy: true
+
+databases:
+  # PostgreSQL Database (if needed for future scaling)
+  - name: ai-ivr-ml-db
+    databaseName: aiivr_malayalam
+    user: aiivr_ml_user

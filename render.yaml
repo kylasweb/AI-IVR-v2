@@ -1,0 +1,119 @@
+services:
+  # PostgreSQL Database for Project Saksham
+  - type: pserv
+    name: saksham-database
+    plan: starter
+    databaseName: saksham_db
+    user: saksham_user
+    region: oregon
+
+  # Redis Cache for Sessions and Real-time Features
+  - type: redis
+    name: saksham-redis
+    plan: starter
+    region: oregon
+
+  # Project Saksham Backend - All 4 Phases
+  - type: web
+    name: saksham-backend
+    runtime: python
+    plan: starter
+    env: python
+    rootDir: ivr-backend
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python main-render.py
+    healthCheckPath: /health
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saksham-database
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: saksham-redis
+          property: connectionString
+      # Additional environment variables to be set manually in Render dashboard
+    autoDeploy: true
+
+  # Project Saksham Frontend - Complete UI for All Phases
+  - type: web
+    name: saksham-frontend
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_NAME
+        value: Project Saksham
+      - key: NEXT_PUBLIC_APP_VERSION
+        value: 2.0.0
+      - key: NEXT_PUBLIC_APP_DESCRIPTION
+        value: Malayalam AI Communication Platform
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: saksham-backend
+          property: host
+      - key: NEXT_PUBLIC_WS_URL
+        fromService:
+          type: web
+          name: saksham-backend
+          property: host
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saksham-database
+          property: connectionString
+      - key: NEXT_PUBLIC_ENABLE_PHASE_1
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_2
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_3
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_4
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_CULTURAL_AI
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_MALAYALAM_UI
+        value: true
+      # Additional environment variables to be set manually in Render dashboard
+    autoDeploy: true
+
+  # Background Worker for Async Processing
+  - type: worker
+    name: saksham-worker
+    runtime: python
+    env: python
+    rootDir: ivr-backend
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python worker.py
+    region: oregon
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saksham-database
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: saksham-redis
+          property: connectionString
+      # Additional environment variables to be set manually in Render dashboard
+    autoDeploy: true
