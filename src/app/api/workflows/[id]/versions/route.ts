@@ -3,11 +3,12 @@ import { db } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const versions = await db.workflowVersion.findMany({
-      where: { workflowId: params.id },
+      where: { workflowId: id },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
@@ -21,15 +22,16 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { changeDescription } = body;
 
     // Get current workflow
     const workflow = await db.workflow.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         nodes: {
           include: {
@@ -46,14 +48,14 @@ export async function POST(
 
     // Get latest version number
     const latestVersion = await db.workflowVersion.findFirst({
-      where: { workflowId: params.id },
+      where: { workflowId: id },
       orderBy: { version: 'desc' },
     });
 
     // Create version snapshot
     const version = await db.workflowVersion.create({
       data: {
-        workflowId: params.id,
+        workflowId: id,
         version: (latestVersion?.version || 0) + 1,
         changeDescription: changeDescription || 'Manual save',
         workflowData: JSON.stringify({

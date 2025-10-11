@@ -3,10 +3,11 @@ import { db } from '@/lib/db';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const rideId = params.id;
+    const { id } = await params;
+    const rideId = id;
     const { driverId } = await request.json();
 
     // Update ride with driver

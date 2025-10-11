@@ -4,11 +4,12 @@ import ZAI from 'z-ai-web-dev-sdk';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const workflow = await db.workflow.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         nodes: {
           include: {
@@ -55,12 +56,12 @@ export async function POST(
     });
   } catch (error: any) {
     console.error('Error executing workflow:', error);
-    
+
     // Log failed execution
     try {
       await db.workflowExecution.create({
         data: {
-          workflowId: params.id,
+          workflowId: id,
           input: JSON.stringify(await request.json()),
           output: JSON.stringify({ error: error.message }),
           status: 'FAILED',
@@ -214,7 +215,7 @@ async function executeNLUNode(node: any, inputData: any, context: any) {
 async function executeTTSNode(node: any, inputData: any, context: any) {
   const config = node.config;
   const text = inputData.text || "Thank you for calling. How can I help you today?";
-  
+
   // Simulate TTS processing
   return {
     audioUrl: `https://example.com/audio/${Date.now()}.mp3`,
@@ -230,7 +231,7 @@ async function executeAgentNode(node: any, inputData: any, context: any) {
 
   try {
     const zai = await ZAI.create();
-    
+
     const systemPrompt = `You are an AI ${agentType} agent. Handle the customer request professionally and helpfully.`;
     const userPrompt = inputData.text || "Customer needs assistance";
 
@@ -263,7 +264,7 @@ async function executeAgentNode(node: any, inputData: any, context: any) {
 async function executeConditionNode(node: any, inputData: any, context: any) {
   const config = node.config;
   const condition = config.condition || "true";
-  
+
   // Simple condition evaluation (in production, use a proper expression evaluator)
   let result = false;
   try {

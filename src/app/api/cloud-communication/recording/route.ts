@@ -240,7 +240,7 @@ async function triggerTranscriptionProcessing(callRecord: any) {
 }
 
 // Quality scoring algorithm
-export function calculateAudioQuality(
+function calculateAudioQuality(
     signalStrength: number,
     noiseLevel: number,
     duration: number

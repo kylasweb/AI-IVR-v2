@@ -7,10 +7,10 @@ import { strategicEngineOrchestrator } from '@/features/strategic-engines/orches
 // GET /api/strategic-engines/[engineId]/analytics - Get engine analytics
 export async function GET(
     request: NextRequest,
-    { params }: { params: { engineId: string } }
+    { params }: { params: Promise<{ engineId: string }> }
 ) {
+    const { engineId } = await params;
     try {
-        const { engineId } = params;
         const { searchParams } = new URL(request.url);
 
         // Parse query parameters
@@ -61,7 +61,7 @@ export async function GET(
             }
         });
     } catch (error) {
-        console.error(`Failed to get analytics for engine ${params.engineId}:`, error);
+        console.error(`Failed to get analytics for engine ${engineId}:`, error);
         return NextResponse.json(
             {
                 success: false,

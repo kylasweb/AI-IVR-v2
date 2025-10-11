@@ -3,14 +3,15 @@ import { db } from '@/lib/db';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { config, position, label, description } = body;
 
     const node = await db.workflowNode.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(config && { config: JSON.stringify(config) }),
         ...(position !== undefined && { position }),
@@ -38,22 +39,23 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Delete connections first
     await db.nodeConnection.deleteMany({
       where: {
         OR: [
-          { sourceNodeId: params.id },
-          { targetNodeId: params.id },
+          { sourceNodeId: id },
+          { targetNodeId: id },
         ],
       },
     });
 
     // Delete the node
     await db.workflowNode.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Workflow node deleted successfully' });

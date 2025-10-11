@@ -8,11 +8,10 @@ import { CulturalContext } from '@/features/strategic-engines/types';
 // GET /api/strategic-engines/[engineId] - Get engine status and metrics
 export async function GET(
     request: NextRequest,
-    { params }: { params: { engineId: string } }
+    { params }: { params: Promise<{ engineId: string }> }
 ) {
+    const { engineId } = await params;
     try {
-        const { engineId } = params;
-
         const [status, metrics] = await Promise.all([
             strategicEngineOrchestrator.getEngineStatus(engineId),
             strategicEngineOrchestrator.getEngineMetrics(engineId)
@@ -28,7 +27,7 @@ export async function GET(
             }
         });
     } catch (error) {
-        console.error(`Failed to get engine ${params.engineId} status:`, error);
+        console.error(`Failed to get engine ${engineId} status:`, error);
         return NextResponse.json(
             {
                 success: false,
@@ -43,10 +42,10 @@ export async function GET(
 // POST /api/strategic-engines/[engineId]/execute - Execute engine
 export async function POST(
     request: NextRequest,
-    { params }: { params: { engineId: string } }
+    { params }: { params: Promise<{ engineId: string }> }
 ) {
+    const { engineId } = await params;
     try {
-        const { engineId } = params;
         const requestBody = await request.json();
 
         // Extract execution parameters
@@ -88,7 +87,7 @@ export async function POST(
             executionId: execution.sessionId
         });
     } catch (error) {
-        console.error(`Failed to execute engine ${params.engineId}:`, error);
+        console.error(`Failed to execute engine ${engineId}:`, error);
         return NextResponse.json(
             {
                 success: false,
@@ -103,10 +102,10 @@ export async function POST(
 // DELETE /api/strategic-engines/[engineId] - Unregister engine
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { engineId: string } }
+    { params }: { params: Promise<{ engineId: string }> }
 ) {
+    const { engineId } = await params;
     try {
-        const { engineId } = params;
 
         await strategicEngineOrchestrator.unregisterEngine(engineId);
 
@@ -115,7 +114,7 @@ export async function DELETE(
             message: `Engine ${engineId} unregistered successfully`
         });
     } catch (error) {
-        console.error(`Failed to unregister engine ${params.engineId}:`, error);
+        console.error(`Failed to unregister engine ${engineId}:`, error);
         return NextResponse.json(
             {
                 success: false,

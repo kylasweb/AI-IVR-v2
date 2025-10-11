@@ -5,10 +5,10 @@ const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fairgo-im
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const sessionId = params.sessionId
+    const { sessionId } = await params
 
     const response = await fetch(`${PYTHON_BACKEND_URL}/api/sessions/${sessionId}/end`, {
       method: 'POST',
