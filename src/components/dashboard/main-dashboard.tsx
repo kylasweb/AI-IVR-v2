@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -203,7 +204,7 @@ export default function MainDashboard() {
         <div className="max-w-4xl">
           <h1 className="text-4xl font-bold mb-4">World's First Malayalam-Native AI IVR Platform</h1>
           <p className="text-xl mb-6 opacity-90">
-            Enterprise-grade Vertical SaaS Platform designed for Kerala's mobile-first, voice-first economy with advanced AI automation
+            Enterprise-grade Vertical SaaS Platform designed for world's mobile-first, voice-first economy with advanced AI automation
           </p>
           <div className="flex flex-wrap gap-3">
             <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
@@ -480,10 +481,12 @@ export default function MainDashboard() {
               <CheckCircle className="h-3 w-3 mr-1" />
               All Systems Operational
             </Badge>
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+            <Link href="/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
