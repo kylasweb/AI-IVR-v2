@@ -1,21 +1,21 @@
 services:
-  # PostgreSQL Database for Project Saksham
+  # PostgreSQL Database for FairGo IMOS
   - type: pserv
-    name: saksham-database
+    name: fairgo-imos-database
     plan: starter
-    databaseName: saksham_db
-    user: saksham_user
+    databaseName: fairgo_imos_db
+    user: fairgo_imos_user
     region: oregon
 
   # Redis Cache for Sessions and Real-time Features
   - type: redis
-    name: saksham-redis
+    name: fairgo-imos-redis
     plan: starter
     region: oregon
 
-  # Project Saksham Backend - All 4 Phases
+  # FairGo IMOS Backend - All 4 Phases
   - type: web
-    name: saksham-backend
+    name: fairgo-imos-backend
     runtime: python
     plan: starter
     env: python
@@ -37,19 +37,19 @@ services:
         value: info
       - key: DATABASE_URL
         fromDatabase:
-          name: saksham-database
+          name: fairgo-imos-database
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
-          name: saksham-redis
+          name: fairgo-imos-redis
           property: connectionString
       # Additional environment variables to be set manually in Render dashboard
     autoDeploy: true
 
-  # Project Saksham Frontend - Complete UI for All Phases
+  # FairGo IMOS Frontend - Complete UI for All Phases
   - type: web
-    name: saksham-frontend
+    name: fairgo-imos-frontend
     runtime: node
     plan: starter
     buildCommand: npm install && npm run build
@@ -60,7 +60,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_APP_NAME
-        value: Project Saksham
+        value: FairGo IMOS
       - key: NEXT_PUBLIC_APP_VERSION
         value: 2.0.0
       - key: NEXT_PUBLIC_APP_DESCRIPTION
@@ -68,16 +68,16 @@ services:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
-          name: saksham-backend
+          name: fairgo-imos-backend
           property: host
       - key: NEXT_PUBLIC_WS_URL
         fromService:
           type: web
-          name: saksham-backend
+          name: fairgo-imos-backend
           property: host
       - key: DATABASE_URL
         fromDatabase:
-          name: saksham-database
+          name: fairgo-imos-database
           property: connectionString
       - key: NEXT_PUBLIC_ENABLE_PHASE_1
         value: true
@@ -96,7 +96,7 @@ services:
 
   # Background Worker for Async Processing
   - type: worker
-    name: saksham-worker
+    name: fairgo-imos-worker
     runtime: python
     env: python
     rootDir: ivr-backend
@@ -108,12 +108,12 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: saksham-database
+          name: fairgo-imos-database
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: redis
-          name: saksham-redis
+          name: fairgo-imos-redis
           property: connectionString
       # Additional environment variables to be set manually in Render dashboard
     autoDeploy: true

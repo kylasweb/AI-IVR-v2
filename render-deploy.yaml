@@ -1,0 +1,173 @@
+# FairGo IMOS - Render.com Deployment Configuration
+# Updated for existing PostgreSQL database
+# GitHub Repo: https://github.com/kylasweb/AI-IVR-v2
+# Render Account: kailaspnair@yahoo.com
+
+services:
+  # Redis Cache for Sessions and Real-time Features
+  - type: redis
+    name: fairgo-imos-redis
+    plan: starter
+    region: oregon
+
+  # FairGo IMOS Backend - All 4 Phases
+  - type: web
+    name: fairgo-imos-backend
+    runtime: python
+    plan: starter
+    env: python
+    rootDir: ivr-backend
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python main-render.py
+    healthCheckPath: /health
+    region: oregon
+    envVars:
+      # Application Settings
+      - key: PORT
+        value: 10000
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: info
+
+      # Database Configuration (Your existing database)
+      - key: DATABASE_URL
+        value: postgresql://fairgo_imos_user:wMtYt7VsQ9WonvQEtYWpZvuSyObggSqB@dpg-d3krv0buibrs73c683o0-a/fairgo_imos_db
+      - key: POSTGRES_DB
+        value: fairgo_imos_db
+      - key: POSTGRES_USER
+        value: fairgo_imos_user
+      - key: POSTGRES_PASSWORD
+        value: wMtYt7VsQ9WonvQEtYWpZvuSyObggSqB
+      - key: POSTGRES_HOST
+        value: dpg-d3krv0buibrs73c683o0-a.oregon-postgres.render.com
+      - key: POSTGRES_PORT
+        value: 5432
+
+      # Security Settings
+      - key: SECRET_KEY
+        value: 59bdd240e8849a73c1934eba85157875ed099d4c2a33e485908068d3b4e72bdd
+      - key: JWT_SECRET
+        value: 4ecc71ffd6fc196d97c9850347ee2cbb2d5909e5110e9a95afd1a3158ab41d8c
+
+      # AI Services
+      - key: GOOGLE_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+      - key: GEMINI_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+      - key: GOOGLE_TRANSLATE_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+
+      # Redis Connection (from service)
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: fairgo-imos-redis
+          property: connectionString
+
+      # CORS Configuration
+      - key: ALLOWED_ORIGINS
+        value: https://fairgo-imos-frontend.onrender.com
+
+    autoDeploy: true
+
+  # FairGo IMOS Frontend - Complete UI for All Phases
+  - type: web
+    name: fairgo-imos-frontend
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    region: oregon
+    envVars:
+      # Application Settings
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_NAME
+        value: FairGo IMOS
+      - key: NEXT_PUBLIC_APP_VERSION
+        value: 2.0.0
+      - key: NEXT_PUBLIC_APP_DESCRIPTION
+        value: Malayalam AI Communication Platform
+
+      # API Configuration (from backend service)
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: fairgo-imos-backend
+          property: host
+      - key: NEXT_PUBLIC_WS_URL
+        fromService:
+          type: web
+          name: fairgo-imos-backend
+          property: host
+
+      # Database Configuration (Your existing database)
+      - key: DATABASE_URL
+        value: postgresql://fairgo_imos_user:wMtYt7VsQ9WonvQEtYWpZvuSyObggSqB@dpg-d3krv0buibrs73c683o0-a.oregon-postgres.render.com/fairgo_imos_db
+
+      # Authentication
+      - key: NEXTAUTH_URL
+        sync: false # Will be set to the frontend URL automatically
+      - key: NEXTAUTH_SECRET
+        value: 0ad7714cba537a618b99aad58c1e1990f7554c9482e5b0c70d3144c8ec74a74e
+      - key: JWT_SECRET
+        value: 4ecc71ffd6fc196d97c9850347ee2cbb2d5909e5110e9a95afd1a3158ab41d8c
+
+      # Feature Flags - All 4 Phases Enabled
+      - key: NEXT_PUBLIC_ENABLE_PHASE_1
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_2
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_3
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_PHASE_4
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_CULTURAL_AI
+        value: true
+      - key: NEXT_PUBLIC_ENABLE_MALAYALAM_UI
+        value: true
+
+      # AI Services
+      - key: NEXT_PUBLIC_GOOGLE_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+
+    autoDeploy: true
+
+  # Background Worker for Async Processing (Optional)
+  - type: worker
+    name: fairgo-imos-worker
+    runtime: python
+    env: python
+    rootDir: ivr-backend
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python worker.py
+    region: oregon
+    envVars:
+      # Application Settings
+      - key: ENVIRONMENT
+        value: production
+
+      # Database Configuration (Your existing database)
+      - key: DATABASE_URL
+        value: postgresql://fairgo_imos_user:wMtYt7VsQ9WonvQEtYWpZvuSyObggSqB@dpg-d3krv0buibrs73c683o0-a/fairgo_imos_db
+
+      # Redis Connection (from service)
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: fairgo-imos-redis
+          property: connectionString
+
+      # AI Services
+      - key: GOOGLE_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+      - key: GEMINI_API_KEY
+        value: AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8
+
+    autoDeploy: true
