@@ -201,7 +201,7 @@ export default function MainDashboard() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white rounded-lg p-8">
         <div className="max-w-4xl">
-          <h1 className="text-4xl font-bold mb-4">Kerala's First Malayalam-Native AI IVR Platform</h1>
+          <h1 className="text-4xl font-bold mb-4">World's First Malayalam-Native AI IVR Platform</h1>
           <p className="text-xl mb-6 opacity-90">
             Enterprise-grade Vertical SaaS Platform designed for Kerala's mobile-first, voice-first economy with advanced AI automation
           </p>
@@ -524,7 +524,7 @@ export default function MainDashboard() {
       <footer className="bg-white border-t border-gray-200 px-6 py-4 mt-8">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center gap-4">
-            <span>© 2024 FairGo IMOS - Kerala's First Malayalam-Native AI IVR Platform</span>
+            <span>© 2024 FairGo IMOS - World's First Malayalam-Native AI IVR Platform</span>
           </div>
           <div className="flex items-center gap-4">
             <Badge variant="outline">v2.0.0</Badge>

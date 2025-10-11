@@ -410,7 +410,7 @@ export default function MalayalamIVRAnalytics() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Malayalam AI IVR Analytics</h1>
-          <p className="text-gray-600">Comprehensive analytics for Kerala's first AI-powered IVR platform</p>
+          <p className="text-gray-600">Comprehensive analytics for world's first AI-powered IVR platform</p>
         </div>
         <div className="flex gap-2">
           <Select value={timeRange} onValueChange={setTimeRange}>
