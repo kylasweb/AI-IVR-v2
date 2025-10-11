@@ -263,7 +263,7 @@ export default function IVRDashboard() {
   // Check IVR backend health
   const checkHealth = async () => {
     try {
-      const response = await fetch('http://localhost:8000/health')
+      const response = await fetch('/api/health')
       setIsConnected(response.ok)
     } catch (error) {
       setIsConnected(false)

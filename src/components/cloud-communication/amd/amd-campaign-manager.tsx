@@ -109,6 +109,16 @@ const AMDCampaignManager: React.FC = () => {
     messageStrategy: 'personalized' as const,
   });
 
+  // Settings state
+  const [settings, setSettings] = useState({
+    culturalAdaptation: true,
+    personalizedMessages: true,
+    enableCallbacks: true,
+    respectCulturalTiming: true,
+    maxDetectionTime: 5,
+    confidenceThreshold: 0.85
+  });
+
   useEffect(() => {
     fetchCampaigns();
     fetchCallbackSchedules();
@@ -588,12 +598,29 @@ const AMDCampaignManager: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Max Detection Time (seconds)</Label>
-                    <Input type="number" defaultValue="5" min="1" max="10" />
+                    <Input 
+                      type="number" 
+                      value={settings.maxDetectionTime}
+                      onChange={(e) => 
+                        setSettings(prev => ({ ...prev, maxDetectionTime: parseInt(e.target.value) || 5 }))
+                      }
+                      min="1" 
+                      max="10" 
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label>Confidence Threshold</Label>
-                    <Input type="number" defaultValue="0.85" min="0.1" max="1.0" step="0.05" />
+                    <Input 
+                      type="number" 
+                      value={settings.confidenceThreshold}
+                      onChange={(e) => 
+                        setSettings(prev => ({ ...prev, confidenceThreshold: parseFloat(e.target.value) || 0.85 }))
+                      }
+                      min="0.1" 
+                      max="1.0" 
+                      step="0.05" 
+                    />
                   </div>
                 </div>
 
@@ -602,7 +629,12 @@ const AMDCampaignManager: React.FC = () => {
                     <Label className="text-base">Cultural Adaptation</Label>
                     <div className="text-sm text-gray-600">Adapt detection for Malayalam cultural patterns</div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={settings.culturalAdaptation}
+                    onCheckedChange={(checked) => 
+                      setSettings(prev => ({ ...prev, culturalAdaptation: checked }))
+                    }
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -610,7 +642,12 @@ const AMDCampaignManager: React.FC = () => {
                     <Label className="text-base">Personalized Messages</Label>
                     <div className="text-sm text-gray-600">Use customer profile for message personalization</div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={settings.personalizedMessages}
+                    onCheckedChange={(checked) => 
+                      setSettings(prev => ({ ...prev, personalizedMessages: checked }))
+                    }
+                  />
                 </div>
               </div>
 
@@ -623,7 +660,12 @@ const AMDCampaignManager: React.FC = () => {
                     <Label className="text-base">Enable Callbacks</Label>
                     <div className="text-sm text-gray-600">Schedule intelligent callbacks for AMD detections</div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={settings.enableCallbacks}
+                    onCheckedChange={(checked) => 
+                      setSettings(prev => ({ ...prev, enableCallbacks: checked }))
+                    }
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -643,7 +685,12 @@ const AMDCampaignManager: React.FC = () => {
                     <Label className="text-base">Respect Cultural Timing</Label>
                     <div className="text-sm text-gray-600">Avoid meal times and prayer times</div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={settings.respectCulturalTiming}
+                    onCheckedChange={(checked) => 
+                      setSettings(prev => ({ ...prev, respectCulturalTiming: checked }))
+                    }
+                  />
                 </div>
               </div>
 

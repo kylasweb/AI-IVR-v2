@@ -63,6 +63,17 @@ export default function AIAgentDashboard() {
   const [intentPerformance, setIntentPerformance] = useState<IntentPerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<AIAgent | null>(null);
+  
+  // Speech and NLP settings state
+  const [speechSettings, setSpeechSettings] = useState({
+    enableMalayalam: true,
+    enableManglish: true,
+    noiseReduction: true,
+    contextMemory: true,
+    culturalContext: true,
+    textToSpeech: true,
+    adaptiveLearning: true
+  });
 
   useEffect(() => {
     fetchData();
@@ -547,21 +558,36 @@ export default function AIAgentDashboard() {
                         <label className="text-sm font-medium">Enable Malayalam Speech</label>
                         <p className="text-sm text-gray-500">Process Malayalam voice inputs</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.enableMalayalam}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, enableMalayalam: checked }))
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="text-sm font-medium">Enable Manglish Support</label>
                         <p className="text-sm text-gray-500">Process Malayalam in English script</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.enableManglish}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, enableManglish: checked }))
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="text-sm font-medium">Noise Reduction</label>
                         <p className="text-sm text-gray-500">Filter background noise</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.noiseReduction}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, noiseReduction: checked }))
+                        }
+                      />
                     </div>
                   </div>
                 </div>
@@ -583,14 +609,24 @@ export default function AIAgentDashboard() {
                         <label className="text-sm font-medium">Context Memory</label>
                         <p className="text-sm text-gray-500">Remember context during conversation</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.contextMemory}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, contextMemory: checked }))
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="text-sm font-medium">Cultural Context</label>
                         <p className="text-sm text-gray-500">Apply Malayalam cultural context</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.culturalContext}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, culturalContext: checked }))
+                        }
+                      />
                     </div>
                   </div>
                 </div>
@@ -605,7 +641,12 @@ export default function AIAgentDashboard() {
                         <label className="text-sm font-medium">Text-to-Speech</label>
                         <p className="text-sm text-gray-500">Generate voice responses</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={speechSettings.textToSpeech}
+                        onCheckedChange={(checked) => 
+                          setSpeechSettings(prev => ({ ...prev, textToSpeech: checked }))
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
