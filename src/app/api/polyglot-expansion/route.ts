@@ -528,14 +528,3 @@ export async function DELETE(request: NextRequest) {
         }, { status: 500 });
     }
 }
-
-// Export named functions for specific endpoints
-export {
-    POST as translateText,
-    GET as getSystemInfo,
-    PUT as updateSystem,
-    DELETE as deleteData,
-    detectLanguageHandler as detectLanguage,
-    batchTranslateHandler as batchTranslate,
-    submitFeedbackHandler as submitFeedback
-};

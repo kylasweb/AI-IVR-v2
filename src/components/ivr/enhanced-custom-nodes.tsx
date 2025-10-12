@@ -13,7 +13,7 @@ import {
     Users,
     Globe,
     Zap,
-    Heart,
+    Star as Heart,
     Star,
     Shield,
     CheckCircle,
@@ -25,9 +25,9 @@ import {
     Info,
     Clock,
     TrendingUp,
-    Languages,
+    Globe as Languages,
     Target,
-    Network
+    GitBranch as Network
 } from 'lucide-react';
 
 interface EnhancedNodeData {
@@ -137,9 +137,9 @@ export const CoTReasoningNode: React.FC<NodeProps<EnhancedNodeData>> = ({ data, 
                         <div className="mt-2 space-y-1">
                             <div className="flex justify-between text-xs">
                                 <span>Cultural Accuracy:</span>
-                                <span className="font-medium">{(data.performance.culturalAccuracy * 100 || 0).toFixed(0)}%</span>
+                                <span className="font-medium">{((data.performance?.culturalAccuracy || 0) * 100).toFixed(0)}%</span>
                             </div>
-                            <Progress value={data.performance.culturalAccuracy * 100 || 0} className="h-1" />
+                            <Progress value={(data.performance?.culturalAccuracy || 0) * 100} className="h-1" />
                         </div>
                     )}
                 </div>
@@ -389,9 +389,9 @@ export const PolyglotTranslationNode: React.FC<NodeProps<EnhancedNodeData>> = ({
                         <div className="mt-2">
                             <div className="flex justify-between text-xs mb-1">
                                 <span>Quality Score:</span>
-                                <span className="font-medium">{(data.performance.culturalAccuracy * 100 || 0).toFixed(0)}%</span>
+                                <span className="font-medium">{((data.performance?.culturalAccuracy || 0) * 100).toFixed(0)}%</span>
                             </div>
-                            <Progress value={data.performance.culturalAccuracy * 100 || 0} className="h-1" />
+                            <Progress value={(data.performance?.culturalAccuracy || 0) * 100} className="h-1" />
                         </div>
                     )}
                 </div>

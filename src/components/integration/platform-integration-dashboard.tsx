@@ -16,22 +16,22 @@ import {
     Users,
     Globe,
     Zap,
-    Heart,
+    Star as HeartIcon,
     Star,
     Shield,
-    Network,
+    GitBranch as Network,
     TrendingUp,
     AlertTriangle,
     CheckCircle,
     Clock,
     Settings,
     BarChart3,
-    Languages,
+    Globe as Languages,
     Target,
-    Cpu,
+    Settings as Cpu,
     Database,
-    Wifi,
-    Battery
+    Zap as Wifi,
+    Zap as Battery
 } from 'lucide-react';
 
 interface SystemStatus {
@@ -232,7 +232,7 @@ const PlatformIntegrationDashboard: React.FC = () => {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Malayalam Interactions</CardTitle>
-                        <Heart className="h-4 w-4 text-orange-600" />
+                        <HeartIcon className="h-4 w-4 text-orange-600" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{metrics.malayalamInteractions.toLocaleString()}</div>
@@ -425,7 +425,7 @@ const PlatformIntegrationDashboard: React.FC = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Heart className="w-4 h-4 text-orange-600" />
+                                    <HeartIcon className="w-4 h-4 text-orange-600" />
                                     Malayalam Cultural Intelligence
                                 </CardTitle>
                             </CardHeader>
@@ -492,7 +492,7 @@ const PlatformIntegrationDashboard: React.FC = () => {
                     </div>
 
                     <Alert>
-                        <Heart className="h-4 w-4" />
+                        <HeartIcon className="h-4 w-4" />
                         <AlertDescription>
                             <strong>Cultural Intelligence Status:</strong> All systems are operating with high cultural sensitivity.
                             Malayalam-specific intelligence is performing at 96.8% accuracy with comprehensive Kerala cultural awareness.
