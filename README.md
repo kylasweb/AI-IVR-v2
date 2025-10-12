@@ -1,10 +1,28 @@
-# 🚀 Welcome to Z.ai Code Scaffold
+# 🚀 AI IVR v2 - Intelligent Interactive Voice Response System
 
-A modern, production-ready web application scaffold powered by cutting-edge technologies, designed to accelerate your development with [Z.ai](https://chat.z.ai)'s AI-powered coding assistance.
+A modern, production-ready AI-powered Interactive Voice Response system with advanced conversational AI, multilingual support, and cultural adaptability. Built with cutting-edge technologies and designed for scalable, intelligent communication solutions.
+
+## 📚 Documentation
+
+**📖 [Complete Documentation](./docs/README.md)** - Comprehensive documentation organized by category:
+
+- **🚀 [Deployment](./docs/deployment/)** - Deployment guides and configuration
+- **⚡ [Features](./docs/features/)** - Feature documentation and implementation guides  
+- **🏗️ [Development](./docs/development/)** - Development guides and technical improvements
+- **📋 [Project](./docs/project/)** - Project management and implementation phases
+
+## 🌟 Key Features
+
+- **🤖 Intelligent IVR System** - Advanced conversational AI with natural language processing
+- **🎯 AI Agent Builder** - Create custom conversational agents with configurable personalities
+- **🇮🇳 Malayalam Language Support** - Native support with cultural adaptations
+- **☁️ Cloud Communication** - Real-time communication capabilities with cloud integration
+- **🎨 Visual Flow Builder** - Design conversation flows with intuitive drag-and-drop interface
+- **🚀 Multi-platform Deployment** - Docker, Render, and cloud platform support
 
 ## ✨ Technology Stack
 
-This scaffold provides a robust foundation built with:
+This intelligent system is built with:
 
 ### 🎯 Core Framework
 - **⚡ Next.js 15** - The React framework for production with App Router
