@@ -276,7 +276,7 @@ export class StrategicEngineOrchestratorImpl implements EngineOrchestrator {
         const executionTime = execution.performanceData.processingTime;
 
         // Update running averages
-        metrics.averageResponseTime = (metrics.averageResponseTime + executionTime) / 2;
+        metrics.averageResponseTime = ((metrics.averageResponseTime || 0) + executionTime) / 2;
 
         if (execution.status === ExecutionStatus.COMPLETED) {
             metrics.successRate = Math.min(100, metrics.successRate + 0.1);

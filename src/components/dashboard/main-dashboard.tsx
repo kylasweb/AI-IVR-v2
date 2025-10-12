@@ -11,6 +11,7 @@ import {
   Activity,
   Users,
   Phone,
+  PhoneCall,
   Settings,
   BarChart3,
   Bot,
@@ -44,6 +45,7 @@ import MalayalamIVRAnalytics from '@/components/analytics/malayalam-ivr-analytic
 import RideManagement from '@/components/management/ride-management';
 import DriverManagement from '@/components/management/driver-management';
 import CustomerManagement from '@/components/management/customer-management';
+import AMDDashboard from '@/components/amd/amd-dashboard';
 
 interface DashboardStats {
   totalCalls: number;
@@ -131,6 +133,18 @@ export default function MainDashboard() {
       name: 'Dispatcher',
       icon: AudioLines,
       description: 'Real-time call management'
+    },
+    {
+      id: 'call-management',
+      name: 'Live Calls',
+      icon: PhoneCall,
+      description: 'Live call monitoring & control'
+    },
+    {
+      id: 'amd',
+      name: 'AMD System',
+      icon: Brain,
+      description: 'Answering Machine Detection with cultural intelligence'
     },
     {
       id: 'analytics',
@@ -509,6 +523,8 @@ export default function MainDashboard() {
         return <AIAgentManagement />;
       case 'dispatcher':
         return <DispatcherDashboard />;
+      case 'amd':
+        return <AMDDashboard />;
       case 'analytics':
         return <MalayalamIVRAnalytics />;
       case 'admin':
@@ -564,8 +580,8 @@ export default function MainDashboard() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${isActive
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                 >
                   <Icon className="h-4 w-4" />
