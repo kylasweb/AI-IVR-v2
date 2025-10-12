@@ -78,9 +78,25 @@ check_render_config() {
     print_success "render.yaml found"
 }
 
+# Setup database migrations
+setup_database() {
+    print_status "Setting up database migrations..."
+    
+    # Generate Prisma client
+    if ! npm run db:generate; then
+        print_error "Failed to generate Prisma client"
+        exit 1
+    fi
+    
+    print_success "Database setup completed locally"
+}
+
 # Deploy to Render
 deploy_to_render() {
     print_status "Deploying to Render.com..."
+    
+    # Setup database first
+    setup_database
     
     # Deploy the services
     render deploy
