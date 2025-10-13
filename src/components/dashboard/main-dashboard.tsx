@@ -46,6 +46,10 @@ import RideManagement from '@/components/management/ride-management';
 import DriverManagement from '@/components/management/driver-management';
 import CustomerManagement from '@/components/management/customer-management';
 import AMDDashboard from '@/components/amd/amd-dashboard';
+import AgentTemplates from '@/components/ai-agent/agent-templates';
+import AITaskBuilder from '@/components/ai-agent/ai-task-builder';
+import VoiceCloning from '@/components/voice-cloning/voice-cloning';
+import VideoIVR from '@/components/video-ivr/video-ivr';
 
 interface DashboardStats {
   totalCalls: number;
@@ -655,6 +659,14 @@ export default function MainDashboard() {
         return <CustomerManagement />;
       case 'workflows':
         return <WorkflowBuilder />;
+      case 'agent-templates':
+        return <AgentTemplates />;
+      case 'task-builder':
+        return <AITaskBuilder />;
+      case 'voice-cloning':
+        return <VoiceCloning />;
+      case 'video-ivr':
+        return <VideoIVR />;
       case 'dispatcher':
         return <DispatcherDashboard />;
       case 'amd':
@@ -707,8 +719,8 @@ export default function MainDashboard() {
                   }
                 }}
                 className={`w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${isActive
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 title={tab.description}
               >
