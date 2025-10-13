@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,9 +37,6 @@ import {
 
 // Import feature components
 import WorkflowBuilder from '@/components/ivr/workflow-builder';
-import { AdminDashboard } from '@/components/admin';
-import { SystemMonitoring } from '@/components/admin';
-import AIAgentManagement from '@/components/ai-agent/ai-agent-management';
 import DispatcherDashboard from '@/components/dispatcher/dispatcher-dashboard';
 import AdvancedAnalyticsDashboard from '@/components/advanced-dashboard/advanced-analytics-dashboard';
 import MalayalamIVRAnalytics from '@/components/analytics/malayalam-ivr-analytics';
@@ -68,6 +66,7 @@ interface SystemHealth {
 }
 
 export default function MainDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<DashboardStats>({
     totalCalls: 12847,
@@ -519,18 +518,12 @@ export default function MainDashboard() {
         return <CustomerManagement />;
       case 'workflows':
         return <WorkflowBuilder />;
-      case 'agents':
-        return <AIAgentManagement />;
       case 'dispatcher':
         return <DispatcherDashboard />;
       case 'amd':
         return <AMDDashboard />;
       case 'analytics':
         return <MalayalamIVRAnalytics />;
-      case 'admin':
-        return <AdminDashboard />;
-      case 'monitoring':
-        return <SystemMonitoring />;
       default:
         return renderOverview();
     }
@@ -578,7 +571,20 @@ export default function MainDashboard() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    // Redirect to dedicated pages for features that have them
+                    if (tab.id === 'call-management') {
+                      router.push('/call-management');
+                    } else if (tab.id === 'admin') {
+                      router.push('/admin');
+                    } else if (tab.id === 'agents') {
+                      router.push('/ai-agents');
+                    } else if (tab.id === 'monitoring') {
+                      router.push('/monitoring');
+                    } else {
+                      setActiveTab(tab.id);
+                    }
+                  }}
                   className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${isActive
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
