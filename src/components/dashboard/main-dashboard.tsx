@@ -32,7 +32,9 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Car
+  Car,
+  FileText,
+  Mic
 } from 'lucide-react';
 
 // Import feature components
@@ -198,6 +200,30 @@ export default function MainDashboard() {
       name: 'AI Agents',
       icon: Bot,
       description: 'AI agent management and training'
+    },
+    {
+      id: 'agent-templates',
+      name: 'Agent Templates',
+      icon: FileText,
+      description: 'Pre-built AI agent templates'
+    },
+    {
+      id: 'task-builder',
+      name: 'AI Task Builder',
+      icon: Zap,
+      description: 'Autonomous AI task automation'
+    },
+    {
+      id: 'voice-cloning',
+      name: 'Voice Cloning',
+      icon: Mic,
+      description: 'AI voice synthesis and cloning'
+    },
+    {
+      id: 'video-ivr',
+      name: 'Video IVR',
+      icon: Video,
+      description: 'Video-based IVR management'
     },
     {
       id: 'dispatcher',
@@ -641,92 +667,111 @@ export default function MainDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">FairGo IMOS</h1>
-                <p className="text-sm text-gray-600">Malayalam AI IVR Platform</p>
-              </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Vertical Sidebar */}
+      <div className="w-64 bg-white border-r border-gray-200">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <Bot className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">FairGo IMOS</h1>
+              <p className="text-xs text-gray-600">Malayalam AI IVR</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="outline" className="text-green-700 border-green-300">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              All Systems Operational
-            </Badge>
-            <Link href="/settings">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-4 py-6 space-y-2">
+          {navigationTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  // Redirect to dedicated pages for features that have them
+                  if (tab.id === 'call-management') {
+                    router.push('/call-management');
+                  } else if (tab.id === 'admin') {
+                    router.push('/admin');
+                  } else if (tab.id === 'agents') {
+                    router.push('/ai-agents');
+                  } else if (tab.id === 'monitoring') {
+                    router.push('/monitoring');
+                  } else {
+                    setActiveTab(tab.id);
+                  }
+                }}
+                className={`w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${isActive
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                title={tab.description}
+              >
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className="truncate">{tab.name}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* System Status */}
+        <div className="p-4 border-t border-gray-200">
+          <Badge variant="outline" className="w-full text-green-700 border-green-300 justify-center">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            All Systems Online
+          </Badge>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {navigationTabs.find(tab => tab.id === activeTab)?.name || 'Dashboard'}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {navigationTabs.find(tab => tab.id === activeTab)?.description}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full border border-gray-200">
+                <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'}`}></div>
+                <span>{loading ? 'Loading data...' : 'Live data • Updates every 30s'}</span>
+              </div>
+              <Link href="/settings">
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-6">
-          <nav className="flex space-x-8 overflow-x-auto">
-            {navigationTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    // Redirect to dedicated pages for features that have them
-                    if (tab.id === 'call-management') {
-                      router.push('/call-management');
-                    } else if (tab.id === 'admin') {
-                      router.push('/admin');
-                    } else if (tab.id === 'agents') {
-                      router.push('/ai-agents');
-                    } else if (tab.id === 'monitoring') {
-                      router.push('/monitoring');
-                    } else {
-                      setActiveTab(tab.id);
-                    }
-                  }}
-                  className={`flex items-center gap-2 py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${isActive
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.name}
-                </button>
-              );
-            })}
-          </nav>
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-auto">
+          {renderTabContent()}
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="p-6">
-        {renderTabContent()}
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 px-6 py-4 mt-8">
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <div className="flex items-center gap-4">
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between text-sm text-gray-600">
             <span>© 2024 FairGo IMOS - World's First Malayalam-Native AI IVR Platform</span>
+            <div className="flex items-center gap-4">
+              <Badge variant="outline">v2.0.0</Badge>
+              <span>Powered by Advanced AI & ML</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="outline">v2.0.0</Badge>
-            <span>Powered by Advanced AI & ML</span>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
