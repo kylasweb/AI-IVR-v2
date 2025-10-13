@@ -18,23 +18,23 @@ import {
     Phone,
     Brain,
     Zap,
-    ShoppingCart,
-    HeadphonesIcon,
-    GraduationCap,
-    Heart,
-    Building,
     Car,
-    Utensils,
-    Music,
-    Camera,
-    Code,
     Plus,
     Download,
     Eye,
-    ThumbsUp,
     Clock,
     TrendingUp
 } from 'lucide-react';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import HeadphonesIcon from 'lucide-react/dist/esm/icons/headphones';
+import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
+import Heart from 'lucide-react/dist/esm/icons/heart';
+import Building from 'lucide-react/dist/esm/icons/building';
+import Utensils from 'lucide-react/dist/esm/icons/utensils';
+import Mic from 'lucide-react/dist/esm/icons/mic';
+import Camera from 'lucide-react/dist/esm/icons/camera';
+import Code from 'lucide-react/dist/esm/icons/code';
+import ThumbsUp from 'lucide-react/dist/esm/icons/thumbs-up';
 
 interface AgentTemplate {
     id: string;

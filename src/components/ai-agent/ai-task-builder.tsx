@@ -18,7 +18,6 @@ import {
     Trash2,
     Settings,
     Zap,
-    CalendarDays as Calendar,
     Clock,
     Users,
     Mail,
@@ -31,11 +30,10 @@ import {
     CheckCircle,
     ArrowRight,
     GitBranch,
-    Clock as Timer,
     Target,
-    Brain,
-    GitBranch as Workflow
+    Brain
 } from 'lucide-react';
+import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
 
 interface TaskStep {
     id: string;
@@ -72,7 +70,7 @@ export default function AITaskBuilder() {
             items: [
                 { type: 'trigger', name: 'Incoming Call', icon: Phone, description: 'Triggered when a new call is received' },
                 { type: 'trigger', name: 'Call Ended', icon: Phone, description: 'Triggered when a call ends' },
-                { type: 'trigger', name: 'Schedule', icon: Calendar, description: 'Triggered at specific times/dates' },
+                { type: 'trigger', name: 'Schedule', icon: CalendarDays, description: 'Triggered at specific times/dates' },
                 { type: 'trigger', name: 'Webhook', icon: Zap, description: 'Triggered by external API call' },
                 { type: 'trigger', name: 'Email Received', icon: Mail, description: 'Triggered when email is received' }
             ]
@@ -80,7 +78,7 @@ export default function AITaskBuilder() {
         {
             category: 'Conditions',
             items: [
-                { type: 'condition', name: 'Call Duration', icon: Timer, description: 'Check call duration criteria' },
+                { type: 'condition', name: 'Call Duration', icon: Clock, description: 'Check call duration criteria' },
                 { type: 'condition', name: 'Language Detected', icon: MessageSquare, description: 'Check detected language' },
                 { type: 'condition', name: 'Customer Type', icon: Users, description: 'Check customer category/type' },
                 { type: 'condition', name: 'Time of Day', icon: Clock, description: 'Check current time conditions' },
@@ -287,7 +285,7 @@ export default function AITaskBuilder() {
                 <Card className="lg:col-span-3">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Workflow className="h-5 w-5" />
+                            <GitBranch className="h-5 w-5" />
                             Visual Workflow Builder
                         </CardTitle>
                         <CardDescription>Design your automation workflow</CardDescription>
@@ -295,7 +293,7 @@ export default function AITaskBuilder() {
                     <CardContent>
                         <div className="border-2 border-dashed border-gray-300 rounded-lg h-96 flex items-center justify-center">
                             <div className="text-center text-gray-500">
-                                <Workflow className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                <GitBranch className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                                 <p className="text-lg font-medium">Drag steps here to build your workflow</p>
                                 <p className="text-sm">Start with a trigger, add conditions and actions</p>
                             </div>
@@ -431,7 +429,7 @@ export default function AITaskBuilder() {
                 <TabsContent value="builder">
                     {isCreating ? renderTaskBuilder() : (
                         <div className="text-center py-12">
-                            <Workflow className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                            <GitBranch className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No Task Selected</h3>
                             <p className="text-gray-600 mb-4">Create a new task or select an existing one to edit</p>
                             <Button onClick={handleCreateTask}>
@@ -451,7 +449,7 @@ export default function AITaskBuilder() {
                                         <p className="text-sm font-medium text-gray-600">Total Tasks</p>
                                         <p className="text-3xl font-bold">{mockTasks.length}</p>
                                     </div>
-                                    <Workflow className="h-8 w-8 text-blue-600" />
+                                    <GitBranch className="h-8 w-8 text-blue-600" />
                                 </div>
                             </CardContent>
                         </Card>
