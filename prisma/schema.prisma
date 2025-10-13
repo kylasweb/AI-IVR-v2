@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -21,9 +21,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  drivers  Driver[]
-  riders   Rider[]
-  UserRole UserRole[]
+  drivers         Driver[]
+  riders          Rider[]
+  UserRole        UserRole[]
+  voiceProfile    VoiceProfile?
+  operatorProfile OperatorProfile?
 }
 
 model Driver {
@@ -341,8 +343,10 @@ model CallRecord {
   culturalContext  Json? // Cultural metadata
   malayalamContent Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  SpeakerDiarization SpeakerDiarization?
+  CallHandoff        CallHandoff[]
 
   @@index([callId])
   @@index([startTime])
@@ -798,4 +802,249 @@ model SystemAlert {
   @@index([severity])
   @@index([isResolved])
   @@index([createdAt])
+}
+
+// ========================
+// Voice Biometrics and Speaker Verification
+// ========================
+
+model VoiceProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  displayName String
+  language    String  @default("ml") // ml, en, manglish
+  voiceType   String  @default("adult") // adult, child, elderly
+  gender      String? // male, female, other
+
+  // Voice characteristics
+  fundamentalFrequency Float? // Average F0 in Hz
+  formantFeatures      Json? // F1, F2, F3 formant frequencies
+  spectralFeatures     Json? // Spectral envelope characteristics
+  prosodyFeatures      Json? // Rhythm, stress, intonation patterns
+
+  // Malayalam-specific features
+  malayalamPhonemes Json? // Malayalam phoneme-specific characteristics
+  dialectMarkers    Json? // Regional dialect markers
+  codeSwitch        Boolean @default(false) // Malayalam-English code-switching patterns
+
+  // Biometric data
+  voiceprintHash      String // Encrypted voice biometric template
+  confidenceThreshold Float  @default(0.8) // Minimum confidence for verification
+
+  // Training metadata
+  enrollmentQuality Float  @default(0.0) // Quality of enrollment samples
+  sampleCount       Int    @default(0) // Number of training samples
+  modelVersion      String @default("1.0") // Voice model version
+
+  // Usage statistics
+  verificationCount       Int       @default(0)
+  successfulVerifications Int       @default(0)
+  failedVerifications     Int       @default(0)
+  lastVerified            DateTime?
+
+  // Security and compliance
+  encryptionKey       String? // Reference to encryption key
+  isActive            Boolean   @default(true)
+  gdprConsent         Boolean   @default(false)
+  dataRetentionExpiry DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verificationLogs VoiceVerification[]
+
+  @@index([userId])
+  @@index([language])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model VoiceVerification {
+  id             String  @id @default(cuid())
+  voiceProfileId String
+  sessionId      String? // Associated call session
+
+  // Verification attempt
+  isSuccessful Boolean
+  confidence   Float // Confidence score 0.0-1.0
+  threshold    Float // Threshold used for verification
+  reason       String? // Reason for failure (if any)
+
+  // Audio metadata
+  audioQuality  Float? // Quality of input audio
+  signalToNoise Float? // Signal to noise ratio
+  durationMs    Int? // Duration of audio sample
+
+  // Malayalam-specific verification
+  dialectMatch    Float? // How well dialect matches enrolled profile
+  languageMix     Json? // Language mixing analysis (Malayalam/English)
+  culturalContext Json? // Cultural context during verification
+
+  // Security and forensics
+  ipAddress  String?
+  userAgent  String?
+  deviceInfo Json?
+  location   Json? // Geographic location (if available)
+
+  // Performance metrics
+  processingTimeMs Int? // Time taken for verification
+  modelVersion     String @default("1.0")
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  voiceProfile VoiceProfile @relation(fields: [voiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([voiceProfileId])
+  @@index([sessionId])
+  @@index([isSuccessful])
+  @@index([createdAt])
+  @@index([confidence])
+}
+
+model SpeakerDiarization {
+  id           String @id @default(cuid())
+  callRecordId String @unique
+
+  // Speaker identification
+  speakerCount Int  @default(1)
+  speakers     Json // Array of speaker profiles with timestamps
+  segments     Json // Time-segmented speaker identification
+
+  // Malayalam speaker analysis
+  malayalamSpeakers Int     @default(0) // Count of Malayalam speakers
+  languageSegments  Json? // Language identification per segment
+  codeSwithcing     Boolean @default(false) // Detected code-switching
+
+  // Quality metrics
+  confidence     Float  @default(0.0) // Overall confidence in diarization
+  accuracy       Float? // Accuracy if ground truth available
+  processingTime Int? // Processing time in milliseconds
+
+  // Cultural context
+  culturalMarkers Json? // Cultural speech markers detected
+  formalityLevel  Float? // Formality level analysis
+  respectMarkers  Json? // Respect and politeness markers
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations  
+  callRecord CallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+
+  @@index([callRecordId])
+  @@index([speakerCount])
+  @@index([malayalamSpeakers])
+  @@index([createdAt])
+}
+
+// ========================
+// Enhanced Operator and Handoff Management
+// ========================
+
+model OperatorProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  operatorId  String @unique // Internal operator ID
+  displayName String
+
+  // Operator capabilities
+  languages      Json // Supported languages ['ml', 'en', 'hi', 'ta']
+  specialization Json // Areas of expertise
+  skillLevel     String @default("junior") // junior, senior, expert, specialist
+
+  // Malayalam-specific skills
+  malayalamFluency  Float @default(0.0) // Malayalam fluency score
+  culturalKnowledge Float @default(0.0) // Cultural knowledge score
+  dialectSupport    Json? // Supported Malayalam dialects
+
+  // Availability and status
+  isOnline           Boolean @default(false)
+  currentStatus      String  @default("offline") // offline, available, busy, break
+  maxConcurrentCalls Int     @default(3)
+  currentCallCount   Int     @default(0)
+
+  // Performance metrics
+  averageHandleTime    Int   @default(0) // Average call handle time in seconds
+  customerSatisfaction Float @default(0.0) // Average satisfaction rating
+  escalationRate       Float @default(0.0) // Rate of further escalations
+  resolutionRate       Float @default(0.0) // First call resolution rate
+
+  // Shift and scheduling
+  workingHours      Json? // Working hours and time zone
+  lastLogin         DateTime?
+  totalCallsHandled Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handoffs    CallHandoff[] @relation("HandoffOperator")
+  assignments CallHandoff[] @relation("AssignedOperator")
+
+  @@index([userId])
+  @@index([operatorId])
+  @@index([isOnline])
+  @@index([currentStatus])
+  @@index([skillLevel])
+}
+
+model CallHandoff {
+  id           String @id @default(cuid())
+  callRecordId String
+  sessionId    String // Active call session ID
+
+  // Handoff details
+  fromOperatorId String? // AI system if null
+  toOperatorId   String
+  handoffType    String // escalation, transfer, specialty_required, cultural_assistance
+  priority       String  @default("normal") // low, normal, high, urgent
+
+  // Handoff reason and context
+  reason          String // Reason for handoff
+  customerIssue   String? // Customer's primary issue
+  aiContext       Json? // Context from AI conversation
+  culturalContext Json? // Cultural considerations
+
+  // Malayalam-specific handoff
+  languageRequirement String? // Required language support
+  culturalSensitivity Boolean @default(false) // Requires cultural sensitivity
+  dialectSpecific     String? // Specific dialect requirement
+
+  // Handoff status and timing
+  status       String    @default("pending") // pending, accepted, rejected, completed
+  requestedAt  DateTime  @default(now())
+  acceptedAt   DateTime?
+  completedAt  DateTime?
+  responseTime Int? // Time to accept handoff (seconds)
+
+  // Quality and satisfaction
+  handoffQuality       Float? // Quality rating of handoff
+  customerSatisfaction Float? // Customer satisfaction after handoff
+  resolutionStatus     String? // resolved, escalated, transferred_again
+
+  // Notes and feedback
+  handoffNotes     String? // Notes from transferring party
+  operatorNotes    String? // Notes from receiving operator
+  customerFeedback String? // Customer feedback on handoff
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  callRecord   CallRecord       @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+  fromOperator OperatorProfile? @relation("HandoffOperator", fields: [fromOperatorId], references: [id])
+  toOperator   OperatorProfile  @relation("AssignedOperator", fields: [toOperatorId], references: [id])
+
+  @@index([callRecordId])
+  @@index([sessionId])
+  @@index([fromOperatorId])
+  @@index([toOperatorId])
+  @@index([status])
+  @@index([priority])
+  @@index([handoffType])
+  @@index([requestedAt])
 }

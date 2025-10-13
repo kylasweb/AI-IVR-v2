@@ -26,13 +26,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   AlertCircle, Bot, Mic, Volume2, GitBranch, Database, Zap, Settings, Play, Save, Trash2,
   Mail, MessageSquare, Clock, BarChart3, FileText, RotateCcw, Copy, Download, Upload,
   Eye, EyeOff, Maximize2, Minimize2, Grid3X3, Layers, Search, Filter, ChevronDown,
   Check, X, AlertTriangle, Info
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useRealTimeWorkflowData } from '@/hooks/use-realtime-workflows';
 
 // Types
 interface WorkflowNodeData {
@@ -75,155 +76,312 @@ interface NodeConnection {
   condition?: string;
 }
 
-// Enhanced Node type definitions with categories
+// Enhanced Node type definitions with comprehensive categories and detailed explanations
 const nodeTypes = {
-  // Input/Trigger Nodes
-  trigger: { 
-    icon: Zap, 
-    label: 'Trigger', 
+  // Input/Trigger Nodes - Entry points for workflows
+  trigger: {
+    icon: Zap,
+    label: 'Call Trigger',
     color: 'bg-green-500',
     category: 'Input',
-    description: 'Workflow entry point - triggers on phone calls, events, or schedules'
+    description: 'Workflow entry point - triggers on incoming phone calls, scheduled events, or webhook calls',
+    usage: 'Place at start of workflow. Configure trigger conditions like phone numbers, time schedules, or event types.',
+    examples: ['Incoming call from customer', 'Daily 9AM reminder', 'Emergency hotline activation']
   },
-  webhook: { 
-    icon: Database, 
-    label: 'Webhook', 
+  webhook: {
+    icon: Database,
+    label: 'Webhook Receiver',
     color: 'bg-green-600',
     category: 'Input',
-    description: 'Receives HTTP requests from external systems'
+    description: 'Receives HTTP POST/GET requests from external systems and CRM platforms',
+    usage: 'Configure endpoint URL and authentication. Parse incoming JSON data for workflow variables.',
+    examples: ['CRM lead notification', 'Payment confirmation', 'Form submission trigger']
   },
-  
-  // Processing Nodes
-  stt: { 
-    icon: Mic, 
-    label: 'Speech to Text', 
+  dtmf: {
+    icon: MessageSquare,
+    label: 'DTMF Input',
+    color: 'bg-green-700',
+    category: 'Input',
+    description: 'Captures dual-tone multi-frequency (keypad) input from callers',
+    usage: 'Set timeout duration, valid digits, and minimum/maximum input length. Handle menu selections.',
+    examples: ['Press 1 for English, 2 for Malayalam', 'Enter account number', 'Menu selection']
+  },
+
+  // Advanced AI Processing Nodes
+  stt: {
+    icon: Mic,
+    label: 'Speech to Text',
     color: 'bg-blue-500',
-    category: 'Processing',
-    description: 'Converts audio speech to text using AI transcription'
+    category: 'AI Processing',
+    description: 'Converts audio speech to text with Malayalam and English support using advanced AI models',
+    usage: 'Configure language detection, noise reduction, and confidence thresholds. Supports real-time streaming.',
+    examples: ['Customer query transcription', 'Voice command processing', 'Meeting audio conversion']
   },
-  nlu: { 
-    icon: Bot, 
-    label: 'NLU Processing', 
+  nlu: {
+    icon: Bot,
+    label: 'NLU Analysis',
     color: 'bg-purple-500',
-    category: 'Processing',
-    description: 'Natural Language Understanding - extracts intent and entities'
+    category: 'AI Processing',
+    description: 'Natural Language Understanding - extracts intents, entities, and sentiment with cultural awareness',
+    usage: 'Train with Malayalam phrases, configure confidence thresholds, map intents to actions.',
+    examples: ['Intent: book_appointment', 'Entity: date, time', 'Sentiment: frustrated customer']
   },
-  agent: { 
-    icon: Bot, 
-    label: 'AI Agent', 
+  agent: {
+    icon: Bot,
+    label: 'AI Conversation Agent',
     color: 'bg-indigo-500',
-    category: 'Processing',
-    description: 'Intelligent agent with cultural awareness and conversation skills'
+    category: 'AI Processing',
+    description: 'Intelligent conversational agent with Kerala cultural awareness and multilingual capabilities',
+    usage: 'Configure personality, knowledge base, conversation flow, and cultural context parameters.',
+    examples: ['Customer support chat', 'Appointment booking', 'Product recommendation']
   },
-  variable: { 
-    icon: Database, 
-    label: 'Variable Store', 
+  malayalam_cultural: {
+    icon: Bot,
+    label: 'Cultural Intelligence',
+    color: 'bg-indigo-700',
+    category: 'AI Processing',
+    description: 'Specialized AI for Malayalam cultural context, festivals, traditions, and regional dialects',
+    usage: 'Automatically detects cultural references, adjusts responses for festivals, handles regional variations.',
+    examples: ['Onam greetings adaptation', 'Regional dialect detection', 'Festival-aware responses']
+  },
+  amd_detection: {
+    icon: AlertCircle,
+    label: 'AMD Detection',
+    color: 'bg-purple-700',
+    category: 'AI Processing',
+    description: 'Answering Machine Detection with Malayalam greeting pattern recognition',
+    usage: 'Analyzes initial audio for human vs machine patterns. Configurable sensitivity and cultural patterns.',
+    examples: ['Outbound call screening', 'Voicemail detection', 'Human verification']
+  },
+  sentiment_analysis: {
+    icon: BarChart3,
+    label: 'Sentiment Analysis',
+    color: 'bg-purple-600',
+    category: 'AI Processing',
+    description: 'Real-time emotion and sentiment detection from voice and text with cultural sensitivity',
+    usage: 'Configure emotion thresholds, cultural context, and escalation triggers for negative sentiment.',
+    examples: ['Angry customer detection', 'Satisfaction scoring', 'Escalation triggers']
+  },
+
+  // Data Processing & Storage Nodes
+  variable: {
+    icon: Database,
+    label: 'Variable Store',
     color: 'bg-teal-500',
-    category: 'Processing',
-    description: 'Store and retrieve variables during workflow execution'
+    category: 'Data',
+    description: 'Store, retrieve, and manipulate variables during workflow execution with persistence',
+    usage: 'Define variable names, types, default values, and persistence scope (session/global/permanent).',
+    examples: ['Customer name storage', 'Session preferences', 'Call history tracking']
   },
-  
-  // Logic Nodes
-  condition: { 
-    icon: GitBranch, 
-    label: 'Condition', 
-    color: 'bg-yellow-500',
-    category: 'Logic',
-    description: 'Conditional branching based on rules and expressions'
-  },
-  loop: { 
-    icon: GitBranch, 
-    label: 'Loop', 
-    color: 'bg-yellow-600',
-    category: 'Logic',
-    description: 'Iterate through data or repeat actions with conditions'
-  },
-  switch: { 
-    icon: GitBranch, 
-    label: 'Switch', 
-    color: 'bg-amber-500',
-    category: 'Logic',
-    description: 'Multi-way branching based on variable values'
-  },
-  
-  // Data Nodes
-  data: { 
-    icon: Database, 
-    label: 'Data Query', 
+  data: {
+    icon: Database,
+    label: 'Database Query',
     color: 'bg-cyan-500',
     category: 'Data',
-    description: 'Query databases, APIs, or external data sources'
+    description: 'Execute SQL queries against databases with connection pooling and caching',
+    usage: 'Configure database connection, write SQL queries, handle results and errors gracefully.',
+    examples: ['Customer lookup', 'Inventory check', 'Order status query']
   },
-  transform: { 
-    icon: Database, 
-    label: 'Transform', 
+  transform: {
+    icon: Database,
+    label: 'Data Transform',
     color: 'bg-cyan-600',
     category: 'Data',
-    description: 'Transform and manipulate data using expressions'
+    description: 'Transform, filter, and manipulate data using expressions and built-in functions',
+    usage: 'Use JavaScript expressions, built-in functions, and data mapping to transform variables.',
+    examples: ['Format phone numbers', 'Calculate totals', 'Parse JSON responses']
   },
-  
-  // External Nodes
-  api: { 
-    icon: Zap, 
-    label: 'API Call', 
+  cache: {
+    icon: Database,
+    label: 'Cache Manager',
+    color: 'bg-cyan-700',
+    category: 'Data',
+    description: 'High-performance caching for frequently accessed data with TTL and invalidation',
+    usage: 'Set cache keys, expiration times, and invalidation patterns. Improves response times.',
+    examples: ['Customer profile cache', 'Product catalog cache', 'API response cache']
+  },
+
+  // Advanced Logic & Control Flow
+  condition: {
+    icon: GitBranch,
+    label: 'Smart Condition',
+    color: 'bg-yellow-500',
+    category: 'Logic',
+    description: 'Advanced conditional branching with complex expressions, AI-powered decisions, and fuzzy logic',
+    usage: 'Write complex conditions using variables, AI confidence scores, and business rules.',
+    examples: ['if (confidence > 0.8 && language === "malayalam")', 'Customer tier routing', 'Time-based logic']
+  },
+  loop: {
+    icon: GitBranch,
+    label: 'Smart Loop',
+    color: 'bg-yellow-600',
+    category: 'Logic',
+    description: 'Intelligent iteration with break conditions, timeout protection, and performance monitoring',
+    usage: 'Configure loop conditions, maximum iterations, timeout values, and break conditions.',
+    examples: ['Retry failed API calls', 'Process customer list', 'Multi-attempt verification']
+  },
+  switch: {
+    icon: GitBranch,
+    label: 'Multi-Path Switch',
+    color: 'bg-amber-500',
+    category: 'Logic',
+    description: 'Multi-way intelligent routing based on AI predictions, variables, or complex conditions',
+    usage: 'Define multiple output paths with conditions. Supports default fallback and priority routing.',
+    examples: ['Department routing', 'Language selection', 'Priority level routing']
+  },
+  parallel: {
+    icon: GitBranch,
+    label: 'Parallel Processing',
+    color: 'bg-yellow-700',
+    category: 'Logic',
+    description: 'Execute multiple workflow branches simultaneously and synchronize results',
+    usage: 'Split workflow into parallel branches, set synchronization points, handle partial failures.',
+    examples: ['Multi-API calls', 'Concurrent validations', 'Background processing']
+  },
+
+  // External Integrations
+  api: {
+    icon: Zap,
+    label: 'REST API Call',
     color: 'bg-pink-500',
     category: 'External',
-    description: 'Make HTTP requests to external APIs and services'
+    description: 'Advanced HTTP client with retry logic, authentication, and response caching',
+    usage: 'Configure endpoints, authentication, headers, retry policies, and response handling.',
+    examples: ['CRM integration', 'Payment processing', 'External validation']
   },
-  
-  // Output Nodes
-  tts: { 
-    icon: Volume2, 
-    label: 'Text to Speech', 
+  soap: {
+    icon: Zap,
+    label: 'SOAP Service',
+    color: 'bg-pink-600',
+    category: 'External',
+    description: 'SOAP web service client for legacy system integration with WSDL parsing',
+    usage: 'Import WSDL, configure service endpoints, handle complex types and fault responses.',
+    examples: ['Legacy banking systems', 'Government portals', 'Enterprise integrations']
+  },
+  graphql: {
+    icon: Zap,
+    label: 'GraphQL Query',
+    color: 'bg-pink-700',
+    category: 'External',
+    description: 'GraphQL client with query optimization and subscription support',
+    usage: 'Write GraphQL queries, manage variables, handle real-time subscriptions.',
+    examples: ['Modern API queries', 'Real-time updates', 'Flexible data fetching']
+  },
+
+  // Communication & Output Nodes
+  tts: {
+    icon: Volume2,
+    label: 'Neural TTS',
     color: 'bg-orange-500',
     category: 'Output',
-    description: 'Converts text to natural speech with cultural awareness'
+    description: 'Neural text-to-speech with natural Malayalam voices, emotion control, and SSML support',
+    usage: 'Select voice models, adjust speed/pitch, use SSML for emphasis, configure cultural pronunciation.',
+    examples: ['Natural Malayalam speech', 'Emotional responses', 'SSML-enhanced audio']
   },
-  sms: { 
-    icon: Bot, 
-    label: 'Send SMS', 
+  sms: {
+    icon: MessageSquare,
+    label: 'SMS Gateway',
     color: 'bg-orange-600',
     category: 'Output',
-    description: 'Send SMS messages to phone numbers'
+    description: 'Multi-carrier SMS with delivery tracking, Unicode support, and template management',
+    usage: 'Configure SMS gateways, create templates, handle delivery receipts, support Malayalam text.',
+    examples: ['OTP delivery', 'Appointment reminders', 'Marketing messages']
   },
-  email: { 
-    icon: Bot, 
-    label: 'Send Email', 
+  email: {
+    icon: Mail,
+    label: 'Email Service',
     color: 'bg-orange-700',
     category: 'Output',
-    description: 'Send email notifications with templates'
+    description: 'Rich email with templates, attachments, tracking, and multilingual content',
+    usage: 'Design email templates, manage attachments, track opens/clicks, support Malayalam content.',
+    examples: ['Confirmation emails', 'Report delivery', 'Newsletter campaigns']
   },
-  
-  // Analytics Nodes
-  analytics: { 
-    icon: Settings, 
-    label: 'Analytics', 
+  whatsapp: {
+    icon: MessageSquare,
+    label: 'WhatsApp Business',
+    color: 'bg-green-400',
+    category: 'Output',
+    description: 'WhatsApp Business API integration with rich media, templates, and interactive buttons',
+    usage: 'Configure business account, create message templates, handle interactive responses.',
+    examples: ['Order confirmations', 'Customer support', 'Interactive menus']
+  },
+
+  // Analytics & Monitoring
+  analytics: {
+    icon: BarChart3,
+    label: 'Advanced Analytics',
     color: 'bg-gray-500',
     category: 'Analytics',
-    description: 'Track metrics, events, and workflow performance'
+    description: 'Comprehensive workflow analytics with custom metrics, KPIs, and real-time dashboards',
+    usage: 'Define custom events, set up KPI tracking, configure real-time alerts and dashboards.',
+    examples: ['Call success rates', 'Customer satisfaction', 'Performance metrics']
   },
-  log: { 
-    icon: Settings, 
-    label: 'Log Event', 
+  log: {
+    icon: FileText,
+    label: 'Smart Logging',
     color: 'bg-gray-600',
     category: 'Analytics',
-    description: 'Log custom events and debug information'
+    description: 'Structured logging with levels, filtering, and integration with monitoring systems',
+    usage: 'Set log levels, configure structured data, integrate with monitoring tools.',
+    examples: ['Debug information', 'Audit trails', 'Error tracking']
   },
-  
-  // Control Nodes
-  delay: { 
-    icon: Settings, 
-    label: 'Delay', 
+  metrics: {
+    icon: BarChart3,
+    label: 'Custom Metrics',
+    color: 'bg-gray-700',
+    category: 'Analytics',
+    description: 'Custom business metrics collection with aggregation and real-time monitoring',
+    usage: 'Define business metrics, set aggregation rules, configure alerting thresholds.',
+    examples: ['Revenue tracking', 'Customer metrics', 'Performance KPIs']
+  },
+
+  // Security & Compliance
+  auth: {
+    icon: AlertCircle,
+    label: 'Authentication',
+    color: 'bg-red-400',
+    category: 'Security',
+    description: 'Multi-factor authentication with OTP, biometrics, and identity verification',
+    usage: 'Configure auth methods, set verification levels, handle failed attempts.',
+    examples: ['Phone verification', 'Identity confirmation', 'Access control']
+  },
+  encryption: {
+    icon: AlertCircle,
+    label: 'Data Encryption',
+    color: 'bg-red-500',
+    category: 'Security',
+    description: 'End-to-end encryption for sensitive data with key management and compliance',
+    usage: 'Configure encryption algorithms, manage keys, ensure compliance requirements.',
+    examples: ['PII protection', 'Payment data', 'Medical records']
+  },
+
+  // System Control
+  delay: {
+    icon: Clock,
+    label: 'Smart Delay',
     color: 'bg-slate-500',
     category: 'Control',
-    description: 'Add delays or pauses in workflow execution'
+    description: 'Intelligent delays with jitter, business hours awareness, and dynamic timing',
+    usage: 'Set delay duration, add randomization, configure business hours respect.',
+    examples: ['Rate limiting', 'Natural pauses', 'Retry delays']
   },
-  end: { 
-    icon: Settings, 
-    label: 'End', 
+  end: {
+    icon: X,
+    label: 'Workflow End',
     color: 'bg-red-500',
     category: 'Control',
-    description: 'Workflow termination point with status codes'
+    description: 'Graceful workflow termination with status codes, cleanup, and final actions',
+    usage: 'Set exit status, configure cleanup actions, define success/failure conditions.',
+    examples: ['Successful completion', 'Error termination', 'User hangup']
+  },
+  error_handler: {
+    icon: AlertTriangle,
+    label: 'Error Handler',
+    color: 'bg-red-600',
+    category: 'Control',
+    description: 'Comprehensive error handling with recovery strategies and notification systems',
+    usage: 'Define error types, set recovery actions, configure notification channels.',
+    examples: ['API failures', 'Timeout handling', 'System errors']
   },
 };
 
@@ -231,24 +389,23 @@ const nodeTypes = {
 const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id }) => {
   const nodeType = nodeTypes[data.type as keyof typeof nodeTypes];
   const Icon = nodeType?.icon || Settings;
-  
+
   // Validation status
   const isValid = validateNode(data);
   const hasWarning = checkNodeWarnings(data);
-  
+
   // Status indicator
-  const StatusIcon = isValid ? 
-    (hasWarning ? AlertTriangle : Check) : 
+  const StatusIcon = isValid ?
+    (hasWarning ? AlertTriangle : Check) :
     (X);
-  const statusColor = isValid ? 
-    (hasWarning ? 'text-yellow-500' : 'text-green-500') : 
+  const statusColor = isValid ?
+    (hasWarning ? 'text-yellow-500' : 'text-green-500') :
     'text-red-500';
 
   return (
     <div
-      className={`relative px-4 py-3 shadow-lg rounded-lg bg-white border-2 transition-all duration-200 ${
-        selected ? 'border-blue-500 shadow-blue-200' : 'border-gray-200'
-      } hover:shadow-xl min-w-[160px] max-w-[250px]`}
+      className={`relative px-4 py-3 shadow-lg rounded-lg bg-white border-2 transition-all duration-200 ${selected ? 'border-blue-500 shadow-blue-200' : 'border-gray-200'
+        } hover:shadow-xl min-w-[160px] max-w-[250px]`}
     >
       {/* Input Handle */}
       <Handle
@@ -257,12 +414,12 @@ const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id 
         className="w-3 h-3 bg-gray-500 hover:bg-blue-500 transition-colors"
         id={`${id}-input`}
       />
-      
+
       {/* Status Indicator */}
       <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 border shadow-sm">
         <StatusIcon className={`w-3 h-3 ${statusColor}`} />
       </div>
-      
+
       {/* Node Header */}
       <div className="flex items-center gap-2 mb-2">
         <div className={`p-1.5 rounded-md ${nodeType?.color || 'bg-gray-500'} shadow-sm`}>
@@ -275,12 +432,12 @@ const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id 
           )}
         </div>
       </div>
-      
+
       {/* Node Description */}
       {data.description && (
         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{data.description}</p>
       )}
-      
+
       {/* Configuration Preview */}
       {Object.keys(data.config).length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
@@ -297,15 +454,14 @@ const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id 
           )}
         </div>
       )}
-      
+
       {/* Execution Status (if available) */}
       {data.executionStatus && (
-        <div className={`text-xs p-1 rounded ${
-          data.executionStatus === 'success' ? 'bg-green-100 text-green-700' :
+        <div className={`text-xs p-1 rounded ${data.executionStatus === 'success' ? 'bg-green-100 text-green-700' :
           data.executionStatus === 'error' ? 'bg-red-100 text-red-700' :
-          data.executionStatus === 'running' ? 'bg-blue-100 text-blue-700' :
-          'bg-gray-100 text-gray-700'
-        }`}>
+            data.executionStatus === 'running' ? 'bg-blue-100 text-blue-700' :
+              'bg-gray-100 text-gray-700'
+          }`}>
           Status: {data.executionStatus}
         </div>
       )}
@@ -317,7 +473,7 @@ const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id 
         className="w-3 h-3 bg-gray-500 hover:bg-blue-500 transition-colors"
         id={`${id}-success`}
       />
-      
+
       {/* Conditional output handles for branching nodes */}
       {(data.type === 'condition' || data.type === 'switch') && (
         <>
@@ -345,7 +501,7 @@ const CustomNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected, id 
 const validateNode = (data: WorkflowNodeData): boolean => {
   // Basic validation - check if required fields are present
   if (!data.type || !data.label) return false;
-  
+
   // Type-specific validation
   switch (data.type) {
     case 'api':
@@ -389,9 +545,9 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
 
   useEffect(() => {
     if (selectedNode) {
-    setConfig(selectedNode?.data?.config || {});
-    setLabel(selectedNode?.data?.label || '');
-    setDescription(selectedNode?.data?.description || '');
+      setConfig(selectedNode?.data?.config || {});
+      setLabel(selectedNode?.data?.label || '');
+      setDescription(selectedNode?.data?.description || '');
     }
   }, [selectedNode]);
 
@@ -408,8 +564,8 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
   const renderConfigFields = () => {
     if (!selectedNode) return null;
 
-  const nodeType = selectedNode?.data?.type;
-    
+    const nodeType = selectedNode?.data?.type;
+
     switch (nodeType) {
       case 'agent':
         return (
@@ -470,7 +626,7 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             </div>
           </div>
         );
-      
+
       case 'api':
         return (
           <div className="space-y-4">
@@ -517,7 +673,7 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             </div>
           </div>
         );
-      
+
       case 'condition':
         return (
           <div className="space-y-4">
@@ -548,7 +704,7 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             </div>
           </div>
         );
-      
+
       case 'tts':
         return (
           <div className="space-y-4">
@@ -595,7 +751,378 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             </div>
           </div>
         );
-      
+
+      case 'dtmf':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="timeout">Timeout (seconds)</Label>
+              <Input
+                id="timeout"
+                type="number"
+                min="1"
+                max="60"
+                value={config.timeout || 10}
+                onChange={(e) => setConfig({ ...config, timeout: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="valid-digits">Valid Digits</Label>
+              <Input
+                id="valid-digits"
+                value={config.validDigits || '0123456789*#'}
+                onChange={(e) => setConfig({ ...config, validDigits: e.target.value })}
+                placeholder="0123456789*#"
+              />
+            </div>
+            <div>
+              <Label htmlFor="min-length">Minimum Length</Label>
+              <Input
+                id="min-length"
+                type="number"
+                min="1"
+                value={config.minLength || 1}
+                onChange={(e) => setConfig({ ...config, minLength: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="max-length">Maximum Length</Label>
+              <Input
+                id="max-length"
+                type="number"
+                min="1"
+                value={config.maxLength || 10}
+                onChange={(e) => setConfig({ ...config, maxLength: parseInt(e.target.value) })}
+              />
+            </div>
+          </div>
+        );
+
+      case 'stt':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="language">Primary Language</Label>
+              <Select
+                value={config.language || 'malayalam'}
+                onValueChange={(value) => setConfig({ ...config, language: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="malayalam">Malayalam</SelectItem>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="auto">Auto-detect</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="confidence-threshold">Confidence Threshold</Label>
+              <Input
+                id="confidence-threshold"
+                type="number"
+                min="0.1"
+                max="1"
+                step="0.1"
+                value={config.confidenceThreshold || 0.7}
+                onChange={(e) => setConfig({ ...config, confidenceThreshold: parseFloat(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="noise-reduction">Noise Reduction</Label>
+              <Select
+                value={config.noiseReduction || 'medium'}
+                onValueChange={(value) => setConfig({ ...config, noiseReduction: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case 'malayalam_cultural':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="dialect-region">Dialect Region</Label>
+              <Select
+                value={config.dialectRegion || 'auto'}
+                onValueChange={(value) => setConfig({ ...config, dialectRegion: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto-detect</SelectItem>
+                  <SelectItem value="northern">Northern Kerala</SelectItem>
+                  <SelectItem value="central">Central Kerala</SelectItem>
+                  <SelectItem value="southern">Southern Kerala</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="cultural-sensitivity">Cultural Sensitivity</Label>
+              <Select
+                value={config.culturalSensitivity || 'high'}
+                onValueChange={(value) => setConfig({ ...config, culturalSensitivity: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="festival-awareness">Festival Awareness</Label>
+              <Select
+                value={config.festivalAwareness ? 'enabled' : 'disabled'}
+                onValueChange={(value) => setConfig({ ...config, festivalAwareness: value === 'enabled' })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="enabled">Enabled</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case 'amd_detection':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="sensitivity">Detection Sensitivity</Label>
+              <Input
+                id="sensitivity"
+                type="number"
+                min="0.1"
+                max="1"
+                step="0.1"
+                value={config.sensitivity || 0.8}
+                onChange={(e) => setConfig({ ...config, sensitivity: parseFloat(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="max-detection-time">Max Detection Time (ms)</Label>
+              <Input
+                id="max-detection-time"
+                type="number"
+                min="1000"
+                max="10000"
+                value={config.maxDetectionTime || 3000}
+                onChange={(e) => setConfig({ ...config, maxDetectionTime: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="malayalam-patterns">Malayalam Pattern Detection</Label>
+              <Select
+                value={config.malayalamPatterns ? 'enabled' : 'disabled'}
+                onValueChange={(value) => setConfig({ ...config, malayalamPatterns: value === 'enabled' })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="enabled">Enabled</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case 'whatsapp':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="business-number">Business Phone Number</Label>
+              <Input
+                id="business-number"
+                value={config.businessNumber || ''}
+                onChange={(e) => setConfig({ ...config, businessNumber: e.target.value })}
+                placeholder="+91XXXXXXXXXX"
+              />
+            </div>
+            <div>
+              <Label htmlFor="template-id">Message Template ID</Label>
+              <Input
+                id="template-id"
+                value={config.templateId || ''}
+                onChange={(e) => setConfig({ ...config, templateId: e.target.value })}
+                placeholder="template_name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="interactive-type">Interactive Type</Label>
+              <Select
+                value={config.interactiveType || 'button'}
+                onValueChange={(value) => setConfig({ ...config, interactiveType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="button">Button</SelectItem>
+                  <SelectItem value="list">List</SelectItem>
+                  <SelectItem value="reply">Quick Reply</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case 'auth':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="auth-method">Authentication Method</Label>
+              <Select
+                value={config.authMethod || 'otp'}
+                onValueChange={(value) => setConfig({ ...config, authMethod: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="otp">OTP (SMS/Voice)</SelectItem>
+                  <SelectItem value="pin">PIN Verification</SelectItem>
+                  <SelectItem value="biometric">Biometric</SelectItem>
+                  <SelectItem value="token">Token-based</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="max-attempts">Maximum Attempts</Label>
+              <Input
+                id="max-attempts"
+                type="number"
+                min="1"
+                max="10"
+                value={config.maxAttempts || 3}
+                onChange={(e) => setConfig({ ...config, maxAttempts: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="timeout-minutes">Timeout (minutes)</Label>
+              <Input
+                id="timeout-minutes"
+                type="number"
+                min="1"
+                max="60"
+                value={config.timeoutMinutes || 5}
+                onChange={(e) => setConfig({ ...config, timeoutMinutes: parseInt(e.target.value) })}
+              />
+            </div>
+          </div>
+        );
+
+      case 'parallel':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="branch-count">Number of Branches</Label>
+              <Input
+                id="branch-count"
+                type="number"
+                min="2"
+                max="10"
+                value={config.branchCount || 2}
+                onChange={(e) => setConfig({ ...config, branchCount: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="sync-strategy">Synchronization Strategy</Label>
+              <Select
+                value={config.syncStrategy || 'wait_all'}
+                onValueChange={(value) => setConfig({ ...config, syncStrategy: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wait_all">Wait for All</SelectItem>
+                  <SelectItem value="wait_any">Wait for Any</SelectItem>
+                  <SelectItem value="wait_majority">Wait for Majority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="timeout-strategy">Timeout Strategy</Label>
+              <Select
+                value={config.timeoutStrategy || 'fail_slow'}
+                onValueChange={(value) => setConfig({ ...config, timeoutStrategy: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fail_slow">Fail Slow Branches</SelectItem>
+                  <SelectItem value="partial_success">Allow Partial Success</SelectItem>
+                  <SelectItem value="fail_all">Fail All on Timeout</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case 'error_handler':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="error-types">Handle Error Types</Label>
+              <Textarea
+                id="error-types"
+                value={config.errorTypes?.join('\n') || 'timeout\napi_error\nvalidation_error'}
+                onChange={(e) => setConfig({ ...config, errorTypes: e.target.value.split('\n').filter(t => t.trim()) })}
+                placeholder="timeout&#10;api_error&#10;validation_error"
+              />
+            </div>
+            <div>
+              <Label htmlFor="retry-attempts">Retry Attempts</Label>
+              <Input
+                id="retry-attempts"
+                type="number"
+                min="0"
+                max="10"
+                value={config.retryAttempts || 3}
+                onChange={(e) => setConfig({ ...config, retryAttempts: parseInt(e.target.value) })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="fallback-action">Fallback Action</Label>
+              <Select
+                value={config.fallbackAction || 'continue'}
+                onValueChange={(value) => setConfig({ ...config, fallbackAction: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="continue">Continue Workflow</SelectItem>
+                  <SelectItem value="terminate">Terminate Workflow</SelectItem>
+                  <SelectItem value="escalate">Escalate to Human</SelectItem>
+                  <SelectItem value="retry">Retry Operation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="space-y-4">
@@ -658,7 +1185,7 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             placeholder="Node label"
           />
         </div>
-        
+
         <div>
           <Label htmlFor="node-description">Description</Label>
           <Textarea
@@ -669,12 +1196,102 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
             rows={2}
           />
         </div>
-        
+
         <div className="pt-2 border-t">
           <h4 className="font-medium mb-3">Configuration</h4>
           {renderConfigFields()}
         </div>
-        
+
+        {/* Usage Guide Section */}
+        {nodeType && (
+          <div className="pt-4 border-t">
+            <Tabs defaultValue="config" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="config">Configuration</TabsTrigger>
+                <TabsTrigger value="guide">Usage Guide</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="config" className="mt-4">
+                {renderConfigFields()}
+              </TabsContent>
+
+              <TabsContent value="guide" className="mt-4 space-y-3">
+                <div>
+                  <h5 className="font-medium text-sm mb-2">Description</h5>
+                  <p className="text-xs text-gray-600">{nodeType.description}</p>
+                </div>
+
+                {nodeType.usage && (
+                  <div>
+                    <h5 className="font-medium text-sm mb-2">How to Use</h5>
+                    <p className="text-xs text-gray-600">{nodeType.usage}</p>
+                  </div>
+                )}
+
+                {nodeType.examples && (
+                  <div>
+                    <h5 className="font-medium text-sm mb-2">Examples</h5>
+                    <ul className="space-y-1">
+                      {nodeType.examples.map((example, idx) => (
+                        <li key={idx} className="text-xs text-gray-600 flex items-start gap-1">
+                          <span className="text-blue-500 mt-0.5">•</span>
+                          <span>{example}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <h5 className="font-medium text-sm mb-2 text-blue-800">Best Practices</h5>
+                  <div className="space-y-1 text-xs text-blue-700">
+                    {selectedNode?.data?.type === 'agent' && (
+                      <>
+                        <p>• Always provide clear, specific prompts</p>
+                        <p>• Test with various cultural contexts</p>
+                        <p>• Set appropriate temperature for creativity</p>
+                        <p>• Include fallback responses</p>
+                      </>
+                    )}
+                    {selectedNode?.data?.type === 'condition' && (
+                      <>
+                        <p>• Use clear, testable conditions</p>
+                        <p>• Handle edge cases</p>
+                        <p>• Test with sample data</p>
+                        <p>• Provide meaningful path labels</p>
+                      </>
+                    )}
+                    {selectedNode?.data?.type === 'api' && (
+                      <>
+                        <p>• Always set timeout values</p>
+                        <p>• Implement retry logic</p>
+                        <p>• Handle error responses</p>
+                        <p>• Use proper authentication</p>
+                      </>
+                    )}
+                    {selectedNode?.data?.type === 'tts' && (
+                      <>
+                        <p>• Choose appropriate voice for audience</p>
+                        <p>• Test pronunciation of technical terms</p>
+                        <p>• Consider cultural preferences</p>
+                        <p>• Use SSML for better control</p>
+                      </>
+                    )}
+                    {(selectedNode?.data?.type && !['agent', 'condition', 'api', 'tts'].includes(selectedNode.data.type)) && (
+                      <>
+                        <p>• Configure appropriate timeouts</p>
+                        <p>• Test error scenarios</p>
+                        <p>• Monitor performance</p>
+                        <p>• Document configuration</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
         <div className="flex gap-2 pt-4 border-t">
           <Button onClick={handleSave} className="flex-1">
             Save Changes
@@ -689,6 +1306,15 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
 };
 
 const WorkflowBuilder: React.FC = () => {
+  // Real-time data integration
+  const {
+    data: liveData,
+    isConnected,
+    error: wsError,
+    executeWorkflow,
+    getNodeStatus
+  } = useRealTimeWorkflowData();
+
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -698,7 +1324,7 @@ const WorkflowBuilder: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  
+
   const [newWorkflow, setNewWorkflow] = useState({
     name: '',
     description: '',
@@ -717,10 +1343,36 @@ const WorkflowBuilder: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
-  // Load workflows on component mount
+  // Load workflows on component mount and sync with live data
   useEffect(() => {
     loadWorkflows();
   }, []);
+
+  // Sync workflows with real-time data
+  useEffect(() => {
+    if (liveData.workflows.length > 0) {
+      setWorkflows(liveData.workflows);
+    }
+  }, [liveData.workflows]);
+
+  // Update node statuses with real-time data
+  useEffect(() => {
+    setNodes(currentNodes =>
+      currentNodes.map(node => {
+        const liveStatus = getNodeStatus(node.id);
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            executionStatus: liveStatus.status === 'idle' ? undefined : liveStatus.status,
+            lastExecuted: liveStatus.lastExecuted,
+            executionCount: liveStatus.executionCount,
+            averageTime: liveStatus.averageTime,
+          }
+        };
+      })
+    );
+  }, [liveData.nodeStatuses, getNodeStatus, setNodes]);
 
   // Node selection handler
   const onNodeClick = useCallback((event: any, node: Node<WorkflowNodeData>) => {
@@ -742,17 +1394,17 @@ const WorkflowBuilder: React.FC = () => {
   // Filter nodes by category
   const getFilteredNodeTypes = () => {
     let filtered = Object.entries(nodeTypes);
-    
+
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(([_, nodeType]) => nodeType.category === selectedCategory);
     }
-    
+
     if (nodeFilter) {
-      filtered = filtered.filter(([_, nodeType]) => 
+      filtered = filtered.filter(([_, nodeType]) =>
         nodeType.label.toLowerCase().includes(nodeFilter.toLowerCase())
       );
     }
-    
+
     return filtered;
   };
 
@@ -780,7 +1432,7 @@ const WorkflowBuilder: React.FC = () => {
       if (response.ok) {
         const workflow = await response.json();
         setSelectedWorkflow(workflow);
-        
+
         // Convert workflow nodes to ReactFlow format
         const flowNodes = workflow.nodes.map((node: WorkflowNode, index: number) => ({
           id: node.id,
@@ -912,29 +1564,31 @@ const WorkflowBuilder: React.FC = () => {
     }
   };
 
-  const executeWorkflow = async () => {
+  const executeWorkflowRealtime = async () => {
     if (!selectedWorkflow) return;
+
+    if (!isConnected) {
+      alert('Not connected to real-time server. Please check your connection.');
+      return;
+    }
 
     setIsExecuting(true);
     try {
-      const response = await fetch(`/api/workflows/${selectedWorkflow.id}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: { text: "Test customer input" },
-          context: { test: true },
-        }),
+      // Use real-time WebSocket execution
+      await executeWorkflow(selectedWorkflow.id, {
+        input: { text: "Test customer input", language: "malayalam" },
+        context: {
+          test: true,
+          culturalContext: "kerala",
+          timestamp: new Date().toISOString()
+        },
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        setTestResults(result);
-      } else {
-        alert('Workflow execution failed');
-      }
+      // The execution results will come through WebSocket events
+      // and be automatically reflected in the UI through the live data updates
     } catch (error) {
       console.error('Error executing workflow:', error);
-      alert('Error executing workflow');
+      alert('Error executing workflow: ' + (error as Error).message);
     } finally {
       setIsExecuting(false);
     }
@@ -1065,11 +1719,10 @@ const WorkflowBuilder: React.FC = () => {
                 {workflows.map((workflow) => (
                   <div
                     key={workflow.id}
-                    className={`p-2 border rounded cursor-pointer ${
-                      selectedWorkflow?.id === workflow.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200'
-                    }`}
+                    className={`p-2 border rounded cursor-pointer ${selectedWorkflow?.id === workflow.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200'
+                      }`}
                     onClick={() => loadWorkflow(workflow.id)}
                   >
                     <div className="font-medium text-sm">{workflow.name}</div>
@@ -1192,7 +1845,7 @@ const WorkflowBuilder: React.FC = () => {
                           {isSaving ? 'Saving...' : 'Save'}
                         </Button>
                         <Button
-                          onClick={executeWorkflow}
+                          onClick={executeWorkflowRealtime}
                           disabled={isExecuting}
                           size="sm"
                         >
@@ -1218,13 +1871,13 @@ const WorkflowBuilder: React.FC = () => {
                         fitView
                         attributionPosition="bottom-left"
                       >
-                        <Controls 
+                        <Controls
                           position="top-left"
                           showFitView={true}
                           showInteractive={true}
                         />
                         {showMiniMap && (
-                          <MiniMap 
+                          <MiniMap
                             position="bottom-right"
                             nodeColor={(node) => {
                               const nodeType = nodeTypes[node.data.type as keyof typeof nodeTypes];
@@ -1232,30 +1885,113 @@ const WorkflowBuilder: React.FC = () => {
                             }}
                           />
                         )}
-                        <Background 
-                          variant="dots" 
-                          gap={20} 
+                        <Background
+                          variant="dots"
+                          gap={20}
                           size={1}
                           color="#e2e8f0"
                         />
                       </ReactFlow>
                     </div>
 
-                    {/* Workflow Statistics */}
-                    <div className="mt-4 flex gap-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <BarChart3 className="w-4 h-4" />
-                        Nodes: {nodes.length}
+                    {/* Real-time Status Panel */}
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div className="bg-white border rounded-lg p-3">
+                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                          Real-time Status
+                        </h4>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Connection:</span>
+                            <span className={isConnected ? 'text-green-600' : 'text-red-600'}>
+                              {isConnected ? 'Connected' : 'Disconnected'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Active Workflows:</span>
+                            <span className="text-blue-600">{liveData.systemMetrics.activeWorkflows}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Queue:</span>
+                            <span className="text-orange-600">{liveData.systemMetrics.queuedExecutions}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>System Load:</span>
+                            <span className="text-purple-600">{liveData.systemMetrics.systemLoad.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        {wsError && (
+                          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                            {wsError}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <GitBranch className="w-4 h-4" />
-                        Connections: {edges.length}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-green-500" />
-                        Valid: {nodes.filter(n => validateNode(n.data)).length}
+
+                      <div className="bg-white border rounded-lg p-3">
+                        <h4 className="font-semibold text-sm mb-2">Workflow Statistics</h4>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Total Nodes:</span>
+                            <span className="text-blue-600">{nodes.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Connections:</span>
+                            <span className="text-green-600">{edges.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Valid Nodes:</span>
+                            <span className="text-emerald-600">{nodes.filter(n => validateNode(n.data)).length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Active Executions:</span>
+                            <span className="text-orange-600">
+                              {liveData.executions.filter(e => e.status === 'running').length}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Current Execution Status */}
+                    {liveData.executions.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="font-semibold text-sm mb-2">Recent Executions</h4>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {liveData.executions.slice(0, 3).map((execution) => (
+                            <div
+                              key={execution.workflowId}
+                              className="bg-gray-50 p-2 rounded text-xs"
+                            >
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-medium">Workflow: {execution.workflowId}</span>
+                                <Badge
+                                  variant={
+                                    execution.status === 'running' ? 'default' :
+                                      execution.status === 'completed' ? 'secondary' :
+                                        'destructive'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {execution.status}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between text-gray-600">
+                                <span>Progress: {execution.progress.toFixed(0)}%</span>
+                                <span>
+                                  {execution.currentNodeId && `Current: ${execution.currentNodeId}`}
+                                </span>
+                              </div>
+                              {execution.executionLog.length > 0 && (
+                                <div className="mt-1 text-gray-500 truncate">
+                                  Last: {execution.executionLog[execution.executionLog.length - 1].message}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {testResults && (
                       <Alert className="mt-4">
@@ -1263,9 +1999,9 @@ const WorkflowBuilder: React.FC = () => {
                         <AlertDescription>
                           <div className="flex items-center justify-between">
                             <span className="font-medium">Test Results</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => setTestResults(null)}
                             >
                               <X className="w-4 h-4" />
