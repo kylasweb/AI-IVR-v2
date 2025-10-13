@@ -38,9 +38,11 @@ import {
 
 import { AMDAnalyticsDashboard } from './amd-analytics-dashboard';
 import { AMDCampaignManagement } from './amd-campaign-management';
+import { AMDTestDetection } from './amd-test-detection';
 
 export default function AMDDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
+    const [testDetectionOpen, setTestDetectionOpen] = useState(false);
 
     return (
         <div className="space-y-6">
@@ -279,6 +281,7 @@ export default function AMDDashboard() {
                                 <Button
                                     variant="outline"
                                     className="h-20 flex-col space-y-2"
+                                    onClick={() => setTestDetectionOpen(true)}
                                 >
                                     <PhoneCall className="w-6 h-6" />
                                     <span>Test Detection</span>
@@ -426,6 +429,12 @@ export default function AMDDashboard() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            {/* Test Detection Dialog */}
+            <AMDTestDetection
+                open={testDetectionOpen}
+                onOpenChange={setTestDetectionOpen}
+            />
         </div>
     );
 }
