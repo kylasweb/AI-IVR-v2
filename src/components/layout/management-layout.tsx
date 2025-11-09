@@ -104,6 +104,13 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/ivr')
                 },
                 {
+                    title: 'Live Calls',
+                    url: '/call-management',
+                    icon: PhoneCall,
+                    badge: 'Live',
+                    isActive: pathname.includes('/call-management')
+                },
+                {
                     title: 'Workflow Builder',
                     url: '/workflows',
                     icon: Workflow,

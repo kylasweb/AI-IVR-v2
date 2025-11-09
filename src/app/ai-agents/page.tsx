@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -294,10 +295,10 @@ export default function AIAgentsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
+    <ManagementLayout>
+      <div className="space-y-6">
         {/* Navigation */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <Bot className="h-6 w-6 text-blue-600" />
@@ -358,6 +359,6 @@ export default function AIAgentsPage() {
           )}
         </div>
       </div>
-    </div>
+    </ManagementLayout>
   );
 }

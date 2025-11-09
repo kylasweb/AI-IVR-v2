@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -538,200 +539,202 @@ export default function LiveCallDashboard() {
     const selectedSession = selectedCall ? callManager.getCallById(selectedCall) : null;
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Live Call Management</h1>
-                    <p className="text-gray-600 flex items-center gap-2">
-                        Real-time IVR call monitoring and control
-                        {isConnected ? (
-                            <Badge className="flex items-center gap-1 bg-green-100 text-green-700">
-                                <Wifi className="w-3 h-3" />
-                                Connected
-                            </Badge>
-                        ) : (
-                            <Badge variant="destructive" className="flex items-center gap-1">
-                                <WifiOff className="w-3 h-3" />
-                                Disconnected
-                            </Badge>
-                        )}
-                    </p>
-                </div>
-                <Button
-                    onClick={() => setShowStartCallDialog(true)}
-                    className="flex items-center gap-2"
-                >
-                    <PhoneCall className="w-4 h-4" />
-                    Start Call
-                </Button>
-            </div>
-
-            {/* Connection Warning */}
-            {!isConnected && (
-                <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                        Connection to IVR backend lost. Attempting to reconnect...
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {/* Metrics Dashboard */}
-            <MetricsPanel metrics={metrics} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Active Calls List */}
-                <div className="lg:col-span-2 space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Activity className="w-5 h-5" />
-                                Active Calls ({activeCalls.length})
-                            </CardTitle>
-                            <CardDescription>
-                                Monitor and control live IVR sessions
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {activeCalls.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <Phone className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                    <p>No active calls</p>
-                                    <p className="text-sm">Start a new call to begin monitoring</p>
-                                </div>
+        <ManagementLayout>
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold">Live Call Management</h1>
+                        <p className="text-gray-600 flex items-center gap-2">
+                            Real-time IVR call monitoring and control
+                            {isConnected ? (
+                                <Badge className="flex items-center gap-1 bg-green-100 text-green-700">
+                                    <Wifi className="w-3 h-3" />
+                                    Connected
+                                </Badge>
                             ) : (
-                                <div className="space-y-3">
-                                    {activeCalls.map((call) => (
-                                        <div
-                                            key={call.id}
-                                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedCall === call.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
-                                                }`}
-                                            onClick={() => setSelectedCall(call.id)}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-3 h-3 rounded-full animate-pulse ${call.status === 'active' ? 'bg-green-500' :
-                                                        call.status === 'on_hold' ? 'bg-yellow-500' :
-                                                            call.status === 'transferring' ? 'bg-blue-500' :
-                                                                'bg-gray-500'
-                                                        }`} />
-                                                    <div>
-                                                        <div className="font-medium">{call.phoneNumber}</div>
-                                                        <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {call.status}
-                                                            </Badge>
-                                                            <span>{call.language.toUpperCase()}</span>
-                                                            {call.agent && (
-                                                                <span>• {call.agent.name}</span>
-                                                            )}
+                                <Badge variant="destructive" className="flex items-center gap-1">
+                                    <WifiOff className="w-3 h-3" />
+                                    Disconnected
+                                </Badge>
+                            )}
+                        </p>
+                    </div>
+                    <Button
+                        onClick={() => setShowStartCallDialog(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <PhoneCall className="w-4 h-4" />
+                        Start Call
+                    </Button>
+                </div>
+
+                {/* Connection Warning */}
+                {!isConnected && (
+                    <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                            Connection to IVR backend lost. Attempting to reconnect...
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {/* Metrics Dashboard */}
+                <MetricsPanel metrics={metrics} />
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Active Calls List */}
+                    <div className="lg:col-span-2 space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Activity className="w-5 h-5" />
+                                    Active Calls ({activeCalls.length})
+                                </CardTitle>
+                                <CardDescription>
+                                    Monitor and control live IVR sessions
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {activeCalls.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <Phone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                        <p>No active calls</p>
+                                        <p className="text-sm">Start a new call to begin monitoring</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {activeCalls.map((call) => (
+                                            <div
+                                                key={call.id}
+                                                className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedCall === call.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                                                    }`}
+                                                onClick={() => setSelectedCall(call.id)}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-3 h-3 rounded-full animate-pulse ${call.status === 'active' ? 'bg-green-500' :
+                                                            call.status === 'on_hold' ? 'bg-yellow-500' :
+                                                                call.status === 'transferring' ? 'bg-blue-500' :
+                                                                    'bg-gray-500'
+                                                            }`} />
+                                                        <div>
+                                                            <div className="font-medium">{call.phoneNumber}</div>
+                                                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    {call.status}
+                                                                </Badge>
+                                                                <span>{call.language.toUpperCase()}</span>
+                                                                {call.agent && (
+                                                                    <span>• {call.agent.name}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="font-mono text-sm">
+                                                            {Math.floor((Date.now() - call.startTime.getTime()) / 1000 / 60)}:
+                                                            {Math.floor(((Date.now() - call.startTime.getTime()) / 1000) % 60).toString().padStart(2, '0')}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {call.startTime.toLocaleTimeString()}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <div className="font-mono text-sm">
-                                                        {Math.floor((Date.now() - call.startTime.getTime()) / 1000 / 60)}:
-                                                        {Math.floor(((Date.now() - call.startTime.getTime()) / 1000) % 60).toString().padStart(2, '0')}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {call.startTime.toLocaleTimeString()}
-                                                    </div>
-                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                {/* Right Panel */}
-                <div className="space-y-4">
-                    <Tabs defaultValue="details" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="details">Details</TabsTrigger>
-                            <TabsTrigger value="transcript">Transcript</TabsTrigger>
-                            <TabsTrigger value="health">Health</TabsTrigger>
-                        </TabsList>
+                    {/* Right Panel */}
+                    <div className="space-y-4">
+                        <Tabs defaultValue="details" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="details">Details</TabsTrigger>
+                                <TabsTrigger value="transcript">Transcript</TabsTrigger>
+                                <TabsTrigger value="health">Health</TabsTrigger>
+                            </TabsList>
 
-                        <TabsContent value="details" className="space-y-4">
-                            {selectedSession ? (
-                                <CallControl
-                                    session={selectedSession}
-                                    onTransfer={handleTransferCall}
-                                    onHold={handleHoldCall}
-                                    onResume={handleResumeCall}
-                                    onEnd={handleEndCall}
-                                />
-                            ) : (
+                            <TabsContent value="details" className="space-y-4">
+                                {selectedSession ? (
+                                    <CallControl
+                                        session={selectedSession}
+                                        onTransfer={handleTransferCall}
+                                        onHold={handleHoldCall}
+                                        onResume={handleResumeCall}
+                                        onEnd={handleEndCall}
+                                    />
+                                ) : (
+                                    <Card>
+                                        <CardContent className="p-8 text-center text-gray-500">
+                                            <Phone className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                            <p>Select a call to view details</p>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="transcript">
                                 <Card>
-                                    <CardContent className="p-8 text-center text-gray-500">
-                                        <Phone className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                        <p>Select a call to view details</p>
+                                    <CardHeader>
+                                        <CardTitle className="text-base">Live Transcript</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-0">
+                                        {selectedSession ? (
+                                            <TranscriptPanel session={selectedSession} />
+                                        ) : (
+                                            <div className="p-8 text-center text-gray-500">
+                                                <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                                <p>Select a call to view transcript</p>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
-                            )}
-                        </TabsContent>
+                            </TabsContent>
 
-                        <TabsContent value="transcript">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base">Live Transcript</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-0">
-                                    {selectedSession ? (
-                                        <TranscriptPanel session={selectedSession} />
-                                    ) : (
-                                        <div className="p-8 text-center text-gray-500">
-                                            <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                            <p>Select a call to view transcript</p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-
-                        <TabsContent value="health">
-                            <Card>
-                                <CardContent className="p-4">
-                                    <SystemHealthPanel health={systemHealth} />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
+                            <TabsContent value="health">
+                                <Card>
+                                    <CardContent className="p-4">
+                                        <SystemHealthPanel health={systemHealth} />
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
                 </div>
+
+                {/* Start Call Dialog */}
+                {showStartCallDialog && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <Card className="w-96">
+                            <CardHeader>
+                                <CardTitle>Start New Call</CardTitle>
+                                <CardDescription>Enter phone number to initiate IVR call</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <input
+                                    type="tel"
+                                    placeholder="+1 (555) 123-4567"
+                                    value={newCallPhone}
+                                    onChange={(e) => setNewCallPhone(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-md"
+                                />
+                                <div className="flex gap-2">
+                                    <Button onClick={handleStartCall} className="flex-1">
+                                        Start Call
+                                    </Button>
+                                    <Button variant="outline" onClick={() => setShowStartCallDialog(false)}>
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
             </div>
-
-            {/* Start Call Dialog */}
-            {showStartCallDialog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <Card className="w-96">
-                        <CardHeader>
-                            <CardTitle>Start New Call</CardTitle>
-                            <CardDescription>Enter phone number to initiate IVR call</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <input
-                                type="tel"
-                                placeholder="+1 (555) 123-4567"
-                                value={newCallPhone}
-                                onChange={(e) => setNewCallPhone(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-md"
-                            />
-                            <div className="flex gap-2">
-                                <Button onClick={handleStartCall} className="flex-1">
-                                    Start Call
-                                </Button>
-                                <Button variant="outline" onClick={() => setShowStartCallDialog(false)}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-        </div>
+        </ManagementLayout>
     );
 }
