@@ -19,6 +19,7 @@ import {
     Mic,
     Play,
     Square,
+    RotateCcw,
     Download,
     Upload,
     Trash2,
@@ -27,24 +28,23 @@ import {
     Activity,
     Volume2,
     VolumeX,
-    RotateCcw,
     Save,
     Plus,
     Eye,
     Edit3,
+    Edit2,
     Clock,
     CheckCircle,
     AlertTriangle,
     XCircle,
     Zap,
     Brain,
-    Headphones,
     Globe,
     Star,
     TrendingUp,
-    FileAudio,
+    FileText as FileAudio,
     Layers,
-    Palette
+    Brush as Palette
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -104,8 +104,102 @@ interface VoiceStats {
     avgQuality: number;
 }
 
+// Mock data - moved before component to fix hoisting issue
+const mockModels: VoiceModel[] = [
+    {
+        id: '1',
+        name: 'Professional Male Voice',
+        description: 'Clear, professional male voice suitable for business communications',
+        type: 'neural',
+        language: 'English',
+        accent: 'American',
+        gender: 'male',
+        age: 'adult',
+        quality: 'ultra',
+        status: 'ready',
+        trainingProgress: 100,
+        audioSamples: 2500,
+        trainingDuration: '4h 32m',
+        accuracy: 97.8,
+        size: 45.6,
+        createdAt: '2024-10-15',
+        updatedAt: '2024-11-08',
+        usage: {
+            totalGenerations: 1250,
+            totalDuration: 3600,
+            lastUsed: '2024-11-08'
+        },
+        settings: {
+            pitch: 0,
+            speed: 1.0,
+            emotion: 'neutral',
+            emphasis: 50
+        }
+    },
+    {
+        id: '2',
+        name: 'Friendly Female Assistant',
+        description: 'Warm, friendly female voice perfect for customer service interactions',
+        type: 'neural',
+        language: 'English',
+        accent: 'British',
+        gender: 'female',
+        age: 'young',
+        quality: 'premium',
+        status: 'ready',
+        trainingProgress: 100,
+        audioSamples: 1800,
+        trainingDuration: '3h 15m',
+        accuracy: 95.2,
+        size: 38.2,
+        createdAt: '2024-10-20',
+        updatedAt: '2024-11-07',
+        usage: {
+            totalGenerations: 890,
+            totalDuration: 2400,
+            lastUsed: '2024-11-07'
+        },
+        settings: {
+            pitch: 5,
+            speed: 1.1,
+            emotion: 'happy',
+            emphasis: 60
+        }
+    },
+    {
+        id: '3',
+        name: 'Multilingual Indian Voice',
+        description: 'Versatile voice supporting Hindi and English with Indian accent',
+        type: 'neural',
+        language: 'Hindi/English',
+        accent: 'Indian',
+        gender: 'female',
+        age: 'adult',
+        quality: 'premium',
+        status: 'training',
+        trainingProgress: 75,
+        audioSamples: 1200,
+        trainingDuration: '2h 45m',
+        accuracy: 92.1,
+        size: 31.8,
+        createdAt: '2024-11-01',
+        updatedAt: '2024-11-08',
+        usage: {
+            totalGenerations: 156,
+            totalDuration: 480,
+            lastUsed: '2024-11-05'
+        },
+        settings: {
+            pitch: -2,
+            speed: 0.9,
+            emotion: 'calm',
+            emphasis: 45
+        }
+    }
+];
+
 const VoiceCloning: React.FC = () => {
-    const [models, setModels] = useState<VoiceModel[]>([]);
+    const [models, setModels] = useState<VoiceModel[]>(mockModels);
     const [generations, setGenerations] = useState<VoiceGeneration[]>([]);
     const [stats, setStats] = useState<VoiceStats>({
         totalModels: 0,
@@ -130,100 +224,6 @@ const VoiceCloning: React.FC = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    // Mock data
-    const mockModels: VoiceModel[] = [
-        {
-            id: '1',
-            name: 'Professional Male Voice',
-            description: 'Clear, professional male voice suitable for business communications',
-            type: 'neural',
-            language: 'English',
-            accent: 'American',
-            gender: 'male',
-            age: 'adult',
-            quality: 'ultra',
-            status: 'ready',
-            trainingProgress: 100,
-            audioSamples: 2500,
-            trainingDuration: '4h 32m',
-            accuracy: 97.8,
-            size: 45.6,
-            createdAt: '2024-10-15',
-            updatedAt: '2024-11-08',
-            usage: {
-                totalGenerations: 1250,
-                totalDuration: 3600,
-                lastUsed: '2024-11-08'
-            },
-            settings: {
-                pitch: 0,
-                speed: 1.0,
-                emotion: 'neutral',
-                emphasis: 50
-            }
-        },
-        {
-            id: '2',
-            name: 'Friendly Female Assistant',
-            description: 'Warm, friendly female voice perfect for customer service interactions',
-            type: 'neural',
-            language: 'English',
-            accent: 'British',
-            gender: 'female',
-            age: 'young',
-            quality: 'premium',
-            status: 'ready',
-            trainingProgress: 100,
-            audioSamples: 1800,
-            trainingDuration: '3h 15m',
-            accuracy: 95.2,
-            size: 38.2,
-            createdAt: '2024-10-20',
-            updatedAt: '2024-11-07',
-            usage: {
-                totalGenerations: 890,
-                totalDuration: 2400,
-                lastUsed: '2024-11-07'
-            },
-            settings: {
-                pitch: 5,
-                speed: 1.1,
-                emotion: 'happy',
-                emphasis: 60
-            }
-        },
-        {
-            id: '3',
-            name: 'Multilingual Indian Voice',
-            description: 'Versatile voice supporting Hindi and English with Indian accent',
-            type: 'neural',
-            language: 'Hindi/English',
-            accent: 'Indian',
-            gender: 'female',
-            age: 'adult',
-            quality: 'premium',
-            status: 'training',
-            trainingProgress: 75,
-            audioSamples: 1200,
-            trainingDuration: '2h 45m',
-            accuracy: 92.1,
-            size: 31.8,
-            createdAt: '2024-11-01',
-            updatedAt: '2024-11-08',
-            usage: {
-                totalGenerations: 156,
-                totalDuration: 480,
-                lastUsed: '2024-11-05'
-            },
-            settings: {
-                pitch: -2,
-                speed: 0.9,
-                emotion: 'calm',
-                emphasis: 45
-            }
-        }
-    ];
 
     useEffect(() => {
         loadVoiceModels();
@@ -825,7 +825,7 @@ const VoiceCloning: React.FC = () => {
 
                                     {/* Recording Guidelines */}
                                     <Alert>
-                                        <Headphones className="h-4 w-4" />
+                                        <Volume2 className="h-4 w-4" />
                                         <AlertTitle>Recording Tips</AlertTitle>
                                         <AlertDescription className="mt-2 space-y-2">
                                             <p>• Use a quiet environment with minimal background noise</p>

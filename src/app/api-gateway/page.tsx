@@ -9,6 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Activity,
     Plus,
@@ -21,8 +24,11 @@ import {
     BarChart3,
     Clock,
     Database,
-    Users
+    Users,
+    Trash2,
+    Edit3 as Edit
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface APIEndpoint {
     id: string;
@@ -36,7 +42,7 @@ interface APIEndpoint {
 }
 
 export default function APIGatewayPage() {
-    const [endpoints] = useState<APIEndpoint[]>([
+    const [endpoints, setEndpoints] = useState<APIEndpoint[]>([
         {
             id: '1',
             name: 'IVR Configuration API',
@@ -69,6 +75,63 @@ export default function APIGatewayPage() {
         }
     ]);
 
+    // Add Endpoint Dialog State
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [newEndpoint, setNewEndpoint] = useState({
+        name: '',
+        path: '',
+        method: 'GET',
+        description: '',
+        authentication: true,
+        rateLimit: 100
+    });
+
+    const handleAddEndpoint = () => {
+        if (!newEndpoint.name || !newEndpoint.path) {
+            toast({
+                title: "Error",
+                description: "Name and path are required",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const endpoint: APIEndpoint = {
+            id: Date.now().toString(),
+            name: newEndpoint.name,
+            path: newEndpoint.path,
+            method: newEndpoint.method,
+            status: 'active',
+            requests: 0,
+            latency: 0,
+            uptime: 100
+        };
+
+        setEndpoints(prev => [...prev, endpoint]);
+        setNewEndpoint({
+            name: '',
+            path: '',
+            method: 'GET',
+            description: '',
+            authentication: true,
+            rateLimit: 100
+        });
+        setIsAddDialogOpen(false);
+
+        toast({
+            title: "Success",
+            description: "Endpoint added successfully",
+        });
+    };
+
+    const handleDeleteEndpoint = (id: string) => {
+        setEndpoints(prev => prev.filter(ep => ep.id !== id));
+        toast({
+            title: "Success",
+            description: "Endpoint deleted successfully",
+        });
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'active': return 'bg-green-100 text-green-800';
@@ -100,10 +163,107 @@ export default function APIGatewayPage() {
                     </div>
                     <div className="flex gap-2">
                         <Badge variant="secondary">New Feature</Badge>
-                        <Button className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" />
-                            Add Endpoint
-                        </Button>
+                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4" />
+                                    Add Endpoint
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Add New API Endpoint</DialogTitle>
+                                    <DialogDescription>
+                                        Configure a new API endpoint for your application
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <div className="space-y-4 py-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="endpoint-name">Endpoint Name *</Label>
+                                            <Input
+                                                id="endpoint-name"
+                                                value={newEndpoint.name}
+                                                onChange={(e) => setNewEndpoint({ ...newEndpoint, name: e.target.value })}
+                                                placeholder="e.g., User Management API"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="endpoint-method">HTTP Method *</Label>
+                                            <Select
+                                                value={newEndpoint.method}
+                                                onValueChange={(value) => setNewEndpoint({ ...newEndpoint, method: value })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="GET">GET</SelectItem>
+                                                    <SelectItem value="POST">POST</SelectItem>
+                                                    <SelectItem value="PUT">PUT</SelectItem>
+                                                    <SelectItem value="DELETE">DELETE</SelectItem>
+                                                    <SelectItem value="PATCH">PATCH</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="endpoint-path">API Path *</Label>
+                                        <Input
+                                            id="endpoint-path"
+                                            value={newEndpoint.path}
+                                            onChange={(e) => setNewEndpoint({ ...newEndpoint, path: e.target.value })}
+                                            placeholder="e.g., /api/users"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="endpoint-description">Description</Label>
+                                        <Textarea
+                                            id="endpoint-description"
+                                            value={newEndpoint.description}
+                                            onChange={(e) => setNewEndpoint({ ...newEndpoint, description: e.target.value })}
+                                            placeholder="Brief description of what this endpoint does..."
+                                            rows={3}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                                            <div>
+                                                <Label className="text-sm font-medium">Authentication Required</Label>
+                                                <p className="text-xs text-muted-foreground">Require API key or token</p>
+                                            </div>
+                                            <Switch
+                                                checked={newEndpoint.authentication}
+                                                onCheckedChange={(checked) => setNewEndpoint({ ...newEndpoint, authentication: checked })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="rate-limit">Rate Limit (req/min)</Label>
+                                            <Input
+                                                id="rate-limit"
+                                                type="number"
+                                                value={newEndpoint.rateLimit}
+                                                onChange={(e) => setNewEndpoint({ ...newEndpoint, rateLimit: parseInt(e.target.value) || 100 })}
+                                                placeholder="100"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleAddEndpoint}>
+                                        Add Endpoint
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
 
@@ -201,9 +361,18 @@ export default function APIGatewayPage() {
                                                     </Badge>
                                                 </div>
 
-                                                <Button size="sm" variant="outline">
-                                                    <Settings className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex items-center gap-2">
+                                                    <Button size="sm" variant="outline">
+                                                        <Settings className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => handleDeleteEndpoint(endpoint.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

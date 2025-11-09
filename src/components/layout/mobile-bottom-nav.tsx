@@ -22,7 +22,7 @@ import {
     Users,
     Car,
     Shield,
-    Network as WifiIcon,
+    Globe as WifiIcon,
     Activity,
     Database,
     FileText,

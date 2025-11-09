@@ -160,154 +160,228 @@ export default function VoiceAIAgentsPage() {
                                     Create Agent
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle>Create New Voice AI Agent</DialogTitle>
+                            <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
+                                <DialogHeader className="border-b pb-4 mb-6">
+                                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                        Create New Voice AI Agent
+                                    </DialogTitle>
                                 </DialogHeader>
-                                <div className="space-y-6 py-4">
+                                <div className="space-y-6 overflow-y-auto max-h-[calc(95vh-120px)] pr-2">
                                     <Tabs defaultValue="basic" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-3">
-                                            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                                            <TabsTrigger value="voice">Voice Model</TabsTrigger>
-                                            <TabsTrigger value="training">Training</TabsTrigger>
+                                        <TabsList className="grid w-full grid-cols-3 bg-gray-50 p-1 rounded-lg">
+                                            <TabsTrigger value="basic" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                                                Basic Info
+                                            </TabsTrigger>
+                                            <TabsTrigger value="voice" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                                                Voice Model
+                                            </TabsTrigger>
+                                            <TabsTrigger value="training" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                                                Training
+                                            </TabsTrigger>
                                         </TabsList>
 
-                                        <TabsContent value="basic" className="space-y-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="agentName">Agent Name *</Label>
-                                                <Input
-                                                    id="agentName"
-                                                    value={formData.name}
-                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                    placeholder="e.g., Malayalam Customer Service Agent"
-                                                />
+                                        <TabsContent value="basic" className="space-y-6 mt-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="agentName" className="text-sm font-medium text-gray-700">
+                                                        Agent Name *
+                                                    </Label>
+                                                    <Input
+                                                        id="agentName"
+                                                        value={formData.name}
+                                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                        placeholder="e.g., Malayalam Customer Service Agent"
+                                                        className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="language" className="text-sm font-medium text-gray-700">
+                                                        Primary Language *
+                                                    </Label>
+                                                    <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value, voiceModel: '' })}>
+                                                        <SelectTrigger className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                                                            <SelectValue placeholder="Select language" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="ml">Malayalam</SelectItem>
+                                                            <SelectItem value="en">English</SelectItem>
+                                                            <SelectItem value="hi">Hindi</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="description">Description</Label>
+                                                <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                                                    Description
+                                                </Label>
                                                 <Textarea
                                                     id="description"
                                                     value={formData.description}
                                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                     placeholder="Describe the agent's purpose and capabilities..."
-                                                    rows={3}
+                                                    rows={4}
+                                                    className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 resize-none"
                                                 />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="language">Primary Language *</Label>
-                                                <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value, voiceModel: '' })}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select language" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="ml">Malayalam</SelectItem>
-                                                        <SelectItem value="en">English</SelectItem>
-                                                        <SelectItem value="hi">Hindi</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
                                             </div>
                                         </TabsContent>
 
-                                        <TabsContent value="voice" className="space-y-4">
-                                            <div className="space-y-2">
-                                                <Label>Voice Model Selection *</Label>
-                                                <div className="space-y-3">
+                                        <TabsContent value="voice" className="space-y-6 mt-6">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <Volume2 className="h-5 w-5 text-blue-600" />
+                                                    <Label className="text-lg font-semibold text-gray-800">Voice Model Selection *</Label>
+                                                </div>
+
+                                                <div className="grid gap-4">
                                                     {getAvailableVoiceModels().map((model) => (
-                                                        <div
+                                                        <Card
                                                             key={model.id}
-                                                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${formData.voiceModel === model.id
-                                                                ? 'border-blue-500 bg-blue-50'
+                                                            className={`cursor-pointer transition-all duration-200 hover:shadow-md ${formData.voiceModel === model.id
+                                                                ? 'ring-2 ring-blue-500 border-blue-200 bg-blue-50'
                                                                 : 'border-gray-200 hover:border-gray-300'
                                                                 }`}
                                                             onClick={() => setFormData({ ...formData, voiceModel: model.id })}
                                                         >
-                                                            <div className="flex items-center justify-between">
-                                                                <div>
-                                                                    <p className="font-medium">{model.name}</p>
-                                                                    <p className="text-sm text-muted-foreground">Provider: {model.provider}</p>
+                                                            <CardContent className="p-4">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="space-y-1">
+                                                                        <h4 className="font-semibold text-gray-900">{model.name}</h4>
+                                                                        <p className="text-sm text-gray-600">Provider: {model.provider}</p>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                // Play voice sample
+                                                                            }}
+                                                                            className="h-8 px-3"
+                                                                        >
+                                                                            <Play className="h-3 w-3 mr-1" />
+                                                                            Preview
+                                                                        </Button>
+                                                                        {formData.voiceModel === model.id && (
+                                                                            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                                                                <div className="w-2 h-2 bg-white rounded-full" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        // Play voice sample
-                                                                    }}
-                                                                >
-                                                                    <Play className="h-3 w-3 mr-1" />
-                                                                    Preview
-                                                                </Button>
-                                                            </div>
-                                                        </div>
+                                                            </CardContent>
+                                                        </Card>
                                                     ))}
                                                 </div>
 
                                                 {formData.language && getAvailableVoiceModels().length === 0 && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        No voice models available for the selected language.
-                                                    </p>
+                                                    <div className="text-center py-8">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                            <Volume2 className="h-8 w-8 text-gray-400" />
+                                                        </div>
+                                                        <p className="text-sm text-gray-500">
+                                                            No voice models available for the selected language.
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
                                         </TabsContent>
 
-                                        <TabsContent value="training" className="space-y-6">
-                                            <div className="space-y-3">
-                                                <Label>Fine-Tuning Level: {formData.fineTuningLevel[0].toFixed(1)}</Label>
-                                                <Slider
-                                                    value={formData.fineTuningLevel}
-                                                    onValueChange={(value) => setFormData({ ...formData, fineTuningLevel: value })}
-                                                    max={1}
-                                                    min={0}
-                                                    step={0.1}
-                                                    className="w-full"
-                                                />
-                                                <p className="text-sm text-muted-foreground">
-                                                    Higher values mean more specialized training for your specific use case
-                                                </p>
-                                            </div>
+                                        <TabsContent value="training" className="space-y-6 mt-6">
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <Brain className="h-5 w-5 text-purple-600" />
+                                                    <Label className="text-lg font-semibold text-gray-800">Advanced Configuration</Label>
+                                                </div>
 
-                                            <div className="space-y-3">
-                                                <Label>Response Temperature: {formData.temperature[0].toFixed(1)}</Label>
-                                                <Slider
-                                                    value={formData.temperature}
-                                                    onValueChange={(value) => setFormData({ ...formData, temperature: value })}
-                                                    max={1}
-                                                    min={0}
-                                                    step={0.1}
-                                                    className="w-full"
-                                                />
-                                                <p className="text-sm text-muted-foreground">
-                                                    Controls creativity vs consistency in responses
-                                                </p>
-                                            </div>
+                                                <div className="grid gap-6">
+                                                    <Card>
+                                                        <CardHeader className="pb-3">
+                                                            <CardTitle className="text-lg">Fine-Tuning Level</CardTitle>
+                                                        </CardHeader>
+                                                        <CardContent className="space-y-4">
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <Label className="text-sm font-medium">Specialization: {formData.fineTuningLevel[0].toFixed(1)}</Label>
+                                                                    <Badge variant="outline">{formData.fineTuningLevel[0] < 0.3 ? 'General' : formData.fineTuningLevel[0] < 0.7 ? 'Specialized' : 'Expert'}</Badge>
+                                                                </div>
+                                                                <Slider
+                                                                    value={formData.fineTuningLevel}
+                                                                    onValueChange={(value) => setFormData({ ...formData, fineTuningLevel: value })}
+                                                                    max={1}
+                                                                    min={0}
+                                                                    step={0.1}
+                                                                    className="w-full"
+                                                                />
+                                                                <p className="text-sm text-gray-600">
+                                                                    Higher values mean more specialized training for your specific use case
+                                                                </p>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
 
-                                            <div className="space-y-3">
-                                                <Label>Response Speed: {formData.responseSpeed[0].toFixed(1)}</Label>
-                                                <Slider
-                                                    value={formData.responseSpeed}
-                                                    onValueChange={(value) => setFormData({ ...formData, responseSpeed: value })}
-                                                    max={1}
-                                                    min={0.1}
-                                                    step={0.1}
-                                                    className="w-full"
-                                                />
-                                                <p className="text-sm text-muted-foreground">
-                                                    Balance between response speed and quality
-                                                </p>
+                                                    <Card>
+                                                        <CardHeader className="pb-3">
+                                                            <CardTitle className="text-lg">Response Behavior</CardTitle>
+                                                        </CardHeader>
+                                                        <CardContent className="space-y-6">
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <Label className="text-sm font-medium">Temperature: {formData.temperature[0].toFixed(1)}</Label>
+                                                                    <Badge variant="outline">{formData.temperature[0] < 0.3 ? 'Conservative' : formData.temperature[0] < 0.7 ? 'Balanced' : 'Creative'}</Badge>
+                                                                </div>
+                                                                <Slider
+                                                                    value={formData.temperature}
+                                                                    onValueChange={(value) => setFormData({ ...formData, temperature: value })}
+                                                                    max={1}
+                                                                    min={0}
+                                                                    step={0.1}
+                                                                    className="w-full"
+                                                                />
+                                                                <p className="text-sm text-gray-600">
+                                                                    Controls creativity vs consistency in responses
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <Label className="text-sm font-medium">Response Speed: {formData.responseSpeed[0].toFixed(1)}</Label>
+                                                                    <Badge variant="outline">{formData.responseSpeed[0] < 0.4 ? 'Detailed' : formData.responseSpeed[0] < 0.7 ? 'Balanced' : 'Fast'}</Badge>
+                                                                </div>
+                                                                <Slider
+                                                                    value={formData.responseSpeed}
+                                                                    onValueChange={(value) => setFormData({ ...formData, responseSpeed: value })}
+                                                                    max={1}
+                                                                    min={0.1}
+                                                                    step={0.1}
+                                                                    className="w-full"
+                                                                />
+                                                                <p className="text-sm text-gray-600">
+                                                                    Balance between response speed and quality
+                                                                </p>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                </div>
                                             </div>
                                         </TabsContent>
                                     </Tabs>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-3 pt-6 border-t mt-6">
                                         <Button
                                             onClick={handleCreateAgent}
                                             disabled={!formData.name || !formData.language || !formData.voiceModel}
-                                            className="flex-1"
+                                            className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
                                         >
+                                            <Plus className="h-4 w-4 mr-2" />
                                             Create Agent
                                         </Button>
-                                        <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setIsCreateDialogOpen(false)}
+                                            className="h-11 px-6 border-gray-300 hover:bg-gray-50"
+                                        >
                                             Cancel
                                         </Button>
                                     </div>

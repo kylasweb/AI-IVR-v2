@@ -64,7 +64,7 @@ import {
     Globe as LangIcon,
     FileText as BookIcon,
     Settings as CommandIcon,
-    Network as WifiIcon
+    Globe as WifiIcon
 } from 'lucide-react';
 
 interface ManagementLayoutProps {

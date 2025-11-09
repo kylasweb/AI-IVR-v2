@@ -1316,7 +1316,29 @@ const WorkflowBuilder: React.FC = () => {
     getNodeStatus
   } = useRealTimeWorkflowData();
 
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  // Initialize with mock data to prevent transparent skeleton
+  const [workflows, setWorkflows] = useState<Workflow[]>([
+    {
+      id: 'demo-1',
+      name: 'Customer Support IVR',
+      description: 'Automated customer support workflow with AI routing',
+      category: 'customer-service',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      nodes: []
+    },
+    {
+      id: 'demo-2',
+      name: 'Sales Inquiry Handler',
+      description: 'Process sales inquiries and route to appropriate agents',
+      category: 'sales',
+      isActive: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      nodes: []
+    }
+  ]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -1354,6 +1376,7 @@ const WorkflowBuilder: React.FC = () => {
     if (liveData.workflows.length > 0) {
       setWorkflows(liveData.workflows);
     }
+    // Don't replace initial mock data if real-time data is empty
   }, [liveData.workflows]);
 
   // Update node statuses with real-time data
@@ -1420,10 +1443,14 @@ const WorkflowBuilder: React.FC = () => {
       const response = await fetch('/api/workflows');
       if (response.ok) {
         const data = await response.json();
-        setWorkflows(data);
+        // Only replace mock data if we have real data
+        if (data && data.length > 0) {
+          setWorkflows(data);
+        }
       }
     } catch (error) {
       console.error('Error loading workflows:', error);
+      // Keep mock data on error
     }
   };
 
