@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,9 @@ import {
     RefreshCw,
     Eye,
     Bot
-} from 'lucide-react'; interface IVRConfig {
+} from 'lucide-react';
+
+interface IVRConfig {
     id: string;
     name: string;
     description: string;
@@ -283,71 +286,95 @@ export default function IVRManagement() {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, index) => (
-                        <div key={index} className="border rounded-lg p-4 animate-pulse">
-                            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded mb-4"></div>
-                            <div className="flex gap-2">
-                                <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                                <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                            </div>
-                        </div>
+                        <Card key={index} className="animate-pulse border-gray-200">
+                            <CardContent className="p-6">
+                                <div className="space-y-3">
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                    <div className="flex gap-2 mt-4">
+                                        <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                                        <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {configs.map((config) => (
-                        <Card key={config.id} className="hover:shadow-md transition-shadow">
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-base">{config.name}</CardTitle>
-                                    <div className="flex gap-1">
-                                        <Badge variant={config.is_active ? "default" : "secondary"}>
+                        <Card key={config.id} className="group hover:shadow-lg transition-all duration-300 border-gray-200 hover:border-blue-300 bg-white">
+                            <CardHeader className="pb-3 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <CardTitle className="text-lg font-semibold text-gray-900 truncate">{config.name}</CardTitle>
+                                        <CardDescription className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                            {config.description || 'No description provided'}
+                                        </CardDescription>
+                                    </div>
+                                    <div className="flex flex-col gap-1 ml-3">
+                                        <Badge variant={config.is_active ? "default" : "secondary"} className="text-xs">
                                             {config.is_active ? "Active" : "Inactive"}
                                         </Badge>
                                         {config.cultural_enabled && (
-                                            <Badge variant="outline" className="text-xs">
-                                                Cultural
+                                            <Badge variant="outline" className="text-xs border-green-300 text-green-700 bg-green-50">
+                                                Cultural AI
                                             </Badge>
                                         )}
                                     </div>
                                 </div>
-                                <CardDescription className="text-xs">
-                                    {config.description || 'No description'}
-                                </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <span className="font-medium">Type:</span>
-                                        <p className="text-gray-600 capitalize">{config.flow_type.replace('_', ' ')}</p>
+                            <CardContent className="pt-4 pb-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="space-y-1">
+                                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</span>
+                                        <p className="text-gray-900 font-medium capitalize">{config.flow_type.replace('_', ' ')}</p>
                                     </div>
-                                    <div>
-                                        <span className="font-medium">Language:</span>
-                                        <p className="text-gray-600 uppercase">{config.language}</p>
-                                    </div>
-                                    {config.usage_stats && (
-                                        <div className="col-span-2">
-                                            <span className="font-medium">Usage:</span>
-                                            <p className="text-gray-600">
-                                                {config.usage_stats.total_calls} calls, {config.usage_stats.success_rate}% success
-                                            </p>
+                                    <div className="space-y-1">
+                                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Language</span>
+                                        <div className="flex items-center gap-1">
+                                            <p className="text-gray-900 font-medium uppercase">{config.language}</p>
+                                            {config.language === 'ml' && <Globe className="h-3 w-3 text-green-600" />}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
 
-                                <div className="flex gap-2 pt-2 border-t">
+                                {config.usage_stats && (
+                                    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Usage Statistics</span>
+                                        <div className="grid grid-cols-3 gap-2 text-center">
+                                            <div>
+                                                <p className="text-lg font-bold text-blue-600">{config.usage_stats.total_calls}</p>
+                                                <p className="text-xs text-gray-600">Calls</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-lg font-bold text-green-600">{config.usage_stats.success_rate}%</p>
+                                                <p className="text-xs text-gray-600">Success</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-lg font-bold text-purple-600">{config.usage_stats.avg_duration}s</p>
+                                                <p className="text-xs text-gray-600">Avg Duration</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-2 pt-3 border-t border-gray-100">
                                     <Button
                                         onClick={() => toggleConfigurationStatus(config)}
                                         variant="outline"
                                         size="sm"
-                                        className="flex-1"
+                                        className={`flex-1 ${config.is_active
+                                            ? 'border-red-300 text-red-700 hover:bg-red-50'
+                                            : 'border-green-300 text-green-700 hover:bg-green-50'
+                                            }`}
                                     >
                                         {config.is_active ? (
-                                            <Pause className="h-4 w-4 mr-1" />
+                                            <Pause className="h-3 w-3 mr-1" />
                                         ) : (
-                                            <Play className="h-4 w-4 mr-1" />
+                                            <Play className="h-3 w-3 mr-1" />
                                         )}
                                         {config.is_active ? 'Deactivate' : 'Activate'}
                                     </Button>
@@ -355,23 +382,25 @@ export default function IVRManagement() {
                                         onClick={() => startEditing(config)}
                                         variant="outline"
                                         size="sm"
+                                        className="border-blue-300 text-blue-700 hover:bg-blue-50"
                                     >
-                                        <Edit className="h-4 w-4" />
+                                        <Edit className="h-3 w-3" />
                                     </Button>
                                     <Button
                                         onClick={() => testConfiguration(config.id)}
                                         variant="outline"
                                         size="sm"
+                                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
                                     >
-                                        <TestTube className="h-4 w-4" />
+                                        <TestTube className="h-3 w-3" />
                                     </Button>
                                     <Button
                                         onClick={() => deleteConfiguration(config.id)}
                                         variant="outline"
                                         size="sm"
-                                        className="text-red-600 hover:text-red-700"
+                                        className="border-red-300 text-red-700 hover:bg-red-50"
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="h-3 w-3" />
                                     </Button>
                                 </div>
                             </CardContent>
@@ -383,41 +412,49 @@ export default function IVRManagement() {
     );
 
     const renderTemplatesList = () => (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">IVR Templates</h3>
-                <p className="text-sm text-gray-600">Ready-to-use IVR flow templates</p>
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-900">IVR Templates</h3>
+                    <p className="text-sm text-gray-600 mt-1">Ready-to-use IVR flow templates with cultural intelligence</p>
+                </div>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                    {templates.length} Templates Available
+                </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {templates.map((template) => (
-                    <Card key={template.id} className="hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-base">{template.name}</CardTitle>
-                            <CardDescription className="text-xs">
-                                {template.description}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
+                    <Card key={template.id} className="group hover:shadow-lg transition-all duration-300 border-gray-200 hover:border-blue-300 bg-white">
+                        <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
                             <div className="space-y-2">
-                                <div>
-                                    <Badge variant="outline" className="text-xs mr-2">
+                                <CardTitle className="text-lg font-semibold text-gray-900">{template.name}</CardTitle>
+                                <CardDescription className="text-sm text-gray-600 line-clamp-2">
+                                    {template.description}
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-4 space-y-4">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs font-medium bg-gray-100 text-gray-800">
                                         {template.flow_type.replace('_', ' ').toUpperCase()}
                                     </Badge>
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge variant="secondary" className="text-xs font-medium bg-blue-100 text-blue-800">
                                         {template.language.toUpperCase()}
                                     </Badge>
                                 </div>
+
                                 <div>
-                                    <span className="text-sm font-medium">Features:</span>
-                                    <div className="flex flex-wrap gap-1 mt-1">
+                                    <span className="text-sm font-medium text-gray-700">Cultural Features:</span>
+                                    <div className="flex flex-wrap gap-1 mt-2">
                                         {template.cultural_features.slice(0, 3).map((feature, index) => (
-                                            <Badge key={index} variant="outline" className="text-xs">
+                                            <Badge key={index} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                                                 {feature}
                                             </Badge>
                                         ))}
                                         {template.cultural_features.length > 3 && (
-                                            <Badge variant="outline" className="text-xs">
+                                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600 border-gray-300">
                                                 +{template.cultural_features.length - 3} more
                                             </Badge>
                                         )}
@@ -427,8 +464,8 @@ export default function IVRManagement() {
 
                             <Button
                                 onClick={() => createFromTemplate(template.id)}
-                                className="w-full"
-                                size="sm"
+                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300"
+                                size="lg"
                             >
                                 <Plus className="h-4 w-4 mr-2" />
                                 Use Template
@@ -441,11 +478,16 @@ export default function IVRManagement() {
     );
 
     const renderCreateForm = () => (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">
-                    {editingConfig ? 'Edit Configuration' : 'Create New IVR Configuration'}
-                </h3>
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                        {editingConfig ? 'Edit Configuration' : 'Create New IVR Configuration'}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                        {editingConfig ? 'Modify the configuration settings below' : 'Configure your new IVR flow with Malayalam cultural intelligence'}
+                    </p>
+                </div>
                 <Button
                     onClick={() => {
                         setShowCreateForm(false);
@@ -453,104 +495,183 @@ export default function IVRManagement() {
                         resetForm();
                     }}
                     variant="outline"
+                    className="flex items-center gap-2"
                 >
+                    <XCircle className="h-4 w-4" />
                     Cancel
                 </Button>
             </div>
 
-            <Card>
-                <CardContent className="p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="name">Configuration Name</Label>
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="e.g., Customer Service IVR"
+            <Card className="border-2 border-gray-100 shadow-lg">
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-blue-600" />
+                        Configuration Details
+                    </CardTitle>
+                    <CardDescription>
+                        Basic information and flow configuration settings
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {/* Basic Information Section */}
+                    <div className="space-y-4">
+                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Basic Information</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                                    Configuration Name *
+                                </Label>
+                                <Input
+                                    id="name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="e.g., Customer Service IVR"
+                                    className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="flow_type" className="text-sm font-medium text-gray-700">
+                                    Flow Type *
+                                </Label>
+                                <Select value={formData.flow_type} onValueChange={(value) => setFormData({ ...formData, flow_type: value })}>
+                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                        <SelectValue placeholder="Select flow type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="customer_service">Customer Service</SelectItem>
+                                        <SelectItem value="sales">Sales</SelectItem>
+                                        <SelectItem value="support">Support</SelectItem>
+                                        <SelectItem value="survey">Survey</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                                Description
+                            </Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Describe the purpose of this IVR configuration..."
+                                rows={3}
+                                className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300 resize-none"
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="flow_type">Flow Type</Label>
-                            <Select value={formData.flow_type} onValueChange={(value) => setFormData({ ...formData, flow_type: value })}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="customer_service">Customer Service</SelectItem>
-                                    <SelectItem value="sales">Sales</SelectItem>
-                                    <SelectItem value="support">Support</SelectItem>
-                                    <SelectItem value="survey">Survey</SelectItem>
-                                    <SelectItem value="custom">Custom</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    </div>
+
+                    {/* Language & Cultural Settings */}
+                    <div className="space-y-4">
+                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Language & Cultural Settings</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="language" className="text-sm font-medium text-gray-700">
+                                    Primary Language *
+                                </Label>
+                                <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value })}>
+                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                        <SelectValue placeholder="Select language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ml">
+                                            <div className="flex items-center gap-2">
+                                                <Globe className="h-4 w-4 text-green-600" />
+                                                Malayalam
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="en">English</SelectItem>
+                                        <SelectItem value="hi">Hindi</SelectItem>
+                                        <SelectItem value="ta">Tamil</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dialect" className="text-sm font-medium text-gray-700">
+                                    Dialect (Malayalam only)
+                                </Label>
+                                <Select
+                                    value={formData.dialect}
+                                    onValueChange={(value) => setFormData({ ...formData, dialect: value })}
+                                    disabled={formData.language !== 'ml'}
+                                >
+                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                        <SelectValue placeholder="Select dialect" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="central_kerala">Central Kerala</SelectItem>
+                                        <SelectItem value="northern_kerala">Northern Kerala (Malabar)</SelectItem>
+                                        <SelectItem value="southern_kerala">Southern Kerala (Travancore)</SelectItem>
+                                        <SelectItem value="standard">Standard Malayalam</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {formData.language === 'ml' && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-start gap-2">
+                                    <Globe className="h-5 w-5 text-blue-600 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium text-blue-800">Cultural Intelligence Enabled</p>
+                                        <p className="text-xs text-blue-600 mt-1">
+                                            This configuration will include Malayalam cultural markers, respectful greetings,
+                                            and context-aware responses suitable for Kerala's business environment.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Activation Settings */}
+                    <div className="space-y-4">
+                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Activation Settings</h4>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0">
+                                    <Switch
+                                        id="is_active"
+                                        checked={formData.is_active}
+                                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="is_active" className="text-sm font-medium text-gray-800 cursor-pointer">
+                                        Activate immediately after creation
+                                    </Label>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        When enabled, this configuration will be available for use immediately after creation
+                                    </p>
+                                </div>
+                            </div>
+                            <Badge variant={formData.is_active ? "default" : "secondary"} className="ml-2">
+                                {formData.is_active ? "Active" : "Inactive"}
+                            </Badge>
                         </div>
                     </div>
 
-                    <div>
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="Describe the purpose of this IVR configuration..."
-                            rows={3}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="language">Language</Label>
-                            <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value })}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ml">Malayalam</SelectItem>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="hi">Hindi</SelectItem>
-                                    <SelectItem value="ta">Tamil</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label htmlFor="dialect">Dialect</Label>
-                            <Select value={formData.dialect} onValueChange={(value) => setFormData({ ...formData, dialect: value })}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="central_kerala">Central Kerala</SelectItem>
-                                    <SelectItem value="northern_kerala">Northern Kerala</SelectItem>
-                                    <SelectItem value="southern_kerala">Southern Kerala</SelectItem>
-                                    <SelectItem value="standard">Standard</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id="is_active"
-                            checked={formData.is_active}
-                            onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                        />
-                        <Label htmlFor="is_active">Activate immediately after creation</Label>
-                    </div>
-
-                    <div className="flex gap-2 pt-4 border-t">
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-6 border-t border-gray-200">
                         <Button
                             onClick={() => editingConfig ? updateConfiguration(editingConfig.id) : createConfiguration()}
-                            className="flex-1"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                            size="lg"
                         >
+                            <CheckCircle className="h-4 w-4 mr-2" />
                             {editingConfig ? 'Update Configuration' : 'Create Configuration'}
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => {
                                 // Open workflow builder with this configuration
-                                window.open(`/workflows?config=${formData.name}`, '_blank');
+                                window.open(`/workflows?config=${encodeURIComponent(formData.name)}`, '_blank');
                             }}
+                            className="flex-shrink-0 border-blue-300 text-blue-700 hover:bg-blue-50"
+                            size="lg"
                         >
                             <Workflow className="h-4 w-4 mr-2" />
                             Design Flow
@@ -563,61 +684,74 @@ export default function IVRManagement() {
 
     const renderAnalytics = () => (
         <div className="space-y-6">
-            <h3 className="text-lg font-semibold">IVR Analytics & Performance</h3>
+            <div className="flex justify-between items-center">
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-900">IVR Analytics & Performance</h3>
+                    <p className="text-sm text-gray-600 mt-1">Real-time insights and performance metrics</p>
+                </div>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Refresh Data
+                </Button>
+            </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <Phone className="h-5 w-5 text-blue-600" />
-                            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-2xl font-bold">{configs.length}</p>
-                                <p className="text-sm text-gray-600">Total Configs</p>
+                                <p className="text-2xl font-bold text-blue-900">{configs.length}</p>
+                                <p className="text-sm font-medium text-blue-700">Total Configurations</p>
+                                <p className="text-xs text-blue-600 mt-1">All IVR configs</p>
+                            </div>
+                            <div className="p-3 bg-blue-200 rounded-full">
+                                <Phone className="h-6 w-6 text-blue-700" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-lg">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                            </div>
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-2xl font-bold">{configs.filter(c => c.is_active).length}</p>
-                                <p className="text-sm text-gray-600">Active Configs</p>
+                                <p className="text-2xl font-bold text-green-900">{configs.filter(c => c.is_active).length}</p>
+                                <p className="text-sm font-medium text-green-700">Active Configurations</p>
+                                <p className="text-xs text-green-600 mt-1">Currently running</p>
+                            </div>
+                            <div className="p-3 bg-green-200 rounded-full">
+                                <CheckCircle className="h-6 w-6 text-green-700" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                                <Globe className="h-5 w-5 text-purple-600" />
-                            </div>
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-2xl font-bold">{configs.filter(c => c.cultural_enabled).length}</p>
-                                <p className="text-sm text-gray-600">Cultural Enabled</p>
+                                <p className="text-2xl font-bold text-purple-900">{configs.filter(c => c.cultural_enabled).length}</p>
+                                <p className="text-sm font-medium text-purple-700">Cultural AI Enabled</p>
+                                <p className="text-xs text-purple-600 mt-1">Malayalam intelligence</p>
+                            </div>
+                            <div className="p-3 bg-purple-200 rounded-full">
+                                <Globe className="h-6 w-6 text-purple-700" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-orange-100 rounded-lg">
-                                <TrendingUp className="h-5 w-5 text-orange-600" />
-                            </div>
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                    <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-2xl font-bold">94%</p>
-                                <p className="text-sm text-gray-600">Avg Success Rate</p>
+                                <p className="text-2xl font-bold text-orange-900">94%</p>
+                                <p className="text-sm font-medium text-orange-700">Average Success Rate</p>
+                                <p className="text-xs text-orange-600 mt-1">Last 30 days</p>
+                            </div>
+                            <div className="p-3 bg-orange-200 rounded-full">
+                                <TrendingUp className="h-6 w-6 text-orange-700" />
                             </div>
                         </div>
                     </CardContent>
@@ -625,38 +759,94 @@ export default function IVRManagement() {
             </div>
 
             {/* Detailed Analytics */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Configuration Performance</CardTitle>
-                    <CardDescription>Performance metrics for each IVR configuration</CardDescription>
+            <Card className="border-2 border-gray-100 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        Configuration Performance Dashboard
+                    </CardTitle>
+                    <CardDescription>
+                        Detailed performance metrics and usage statistics for each IVR configuration
+                    </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                     <div className="space-y-4">
-                        {configs.map((config) => (
-                            <div key={config.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-3 h-3 rounded-full ${config.is_active ? 'bg-green-500' : 'bg-gray-400'}`} />
-                                    <div>
-                                        <p className="font-medium">{config.name}</p>
-                                        <p className="text-sm text-gray-600">{config.flow_type.replace('_', ' ')}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6 text-sm">
-                                    <div className="text-center">
-                                        <p className="font-medium">{config.usage_stats?.total_calls || 0}</p>
-                                        <p className="text-gray-600">Calls</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-medium">{config.usage_stats?.success_rate || 0}%</p>
-                                        <p className="text-gray-600">Success</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-medium">{config.usage_stats?.avg_duration || 0}s</p>
-                                        <p className="text-gray-600">Avg Duration</p>
-                                    </div>
-                                </div>
+                        {configs.length === 0 ? (
+                            <div className="text-center py-12">
+                                <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No Configurations Yet</h3>
+                                <p className="text-gray-600 mb-4">Create your first IVR configuration to see analytics here</p>
+                                <Button onClick={() => setShowCreateForm(true)} className="bg-blue-600 hover:bg-blue-700">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create Configuration
+                                </Button>
                             </div>
-                        ))}
+                        ) : (
+                            configs.map((config, index) => (
+                                <div key={config.id} className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all duration-200 hover:border-blue-300 ${config.is_active ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                                    }`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold text-white ${config.is_active ? 'bg-green-500' : 'bg-gray-400'
+                                                }`}>
+                                                {index + 1}
+                                            </div>
+                                            <div className={`w-3 h-3 rounded-full ${config.is_active ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-semibold text-gray-900 truncate">{config.name}</p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="text-xs">
+                                                    {config.flow_type.replace('_', ' ')}
+                                                </Badge>
+                                                <span className="text-xs text-gray-500">•</span>
+                                                <span className="text-xs text-gray-600">{config.language.toUpperCase()}</span>
+                                                {config.cultural_enabled && (
+                                                    <>
+                                                        <span className="text-xs text-gray-500">•</span>
+                                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-300">
+                                                            Cultural AI
+                                                        </Badge>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-8 text-sm">
+                                        <div className="text-center">
+                                            <p className="text-lg font-bold text-blue-600">{config.usage_stats?.total_calls || 0}</p>
+                                            <p className="text-xs text-gray-600">Total Calls</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-lg font-bold text-green-600">{config.usage_stats?.success_rate || 0}%</p>
+                                            <p className="text-xs text-gray-600">Success Rate</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-lg font-bold text-purple-600">{config.usage_stats?.avg_duration || 0}s</p>
+                                            <p className="text-xs text-gray-600">Avg Duration</p>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => startEditing(config)}
+                                                className="h-8 w-8 p-0 border-blue-300 text-blue-700 hover:bg-blue-50"
+                                            >
+                                                <Edit className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => testConfiguration(config.id)}
+                                                className="h-8 w-8 p-0 border-purple-300 text-purple-700 hover:bg-purple-50"
+                                            >
+                                                <TestTube className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -664,54 +854,55 @@ export default function IVRManagement() {
     );
 
     return (
-        <div className="p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <Phone className="h-8 w-8 text-blue-600" />
-                        IVR Management
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Manage Interactive Voice Response configurations and workflows
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => window.open('/workflows', '_blank')}>
+        <ManagementLayout
+            title="IVR Management"
+            subtitle="Manage Interactive Voice Response configurations and intelligent workflows"
+        >
+            <div className="space-y-6">
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3">
+                    <Button
+                        variant="outline"
+                        onClick={() => window.open('/workflows', '_blank')}
+                        className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
                         <Workflow className="h-4 w-4 mr-2" />
                         Workflow Builder
                     </Button>
-                    <Button variant="outline" onClick={() => window.open('/analytics', '_blank')}>
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Analytics
+                    <Button
+                        onClick={() => setShowCreateForm(true)}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                    >
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Configuration
                     </Button>
                 </div>
+
+                {/* Main Content */}
+                {showCreateForm ? (
+                    renderCreateForm()
+                ) : (
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList>
+                            <TabsTrigger value="configurations">Configurations</TabsTrigger>
+                            <TabsTrigger value="templates">Templates</TabsTrigger>
+                            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="configurations" className="space-y-6">
+                            {renderConfigurationsList()}
+                        </TabsContent>
+
+                        <TabsContent value="templates" className="space-y-6">
+                            {renderTemplatesList()}
+                        </TabsContent>
+
+                        <TabsContent value="analytics" className="space-y-6">
+                            {renderAnalytics()}
+                        </TabsContent>
+                    </Tabs>
+                )}
             </div>
-
-            {/* Main Content */}
-            {showCreateForm ? (
-                renderCreateForm()
-            ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList>
-                        <TabsTrigger value="configurations">Configurations</TabsTrigger>
-                        <TabsTrigger value="templates">Templates</TabsTrigger>
-                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="configurations" className="space-y-6">
-                        {renderConfigurationsList()}
-                    </TabsContent>
-
-                    <TabsContent value="templates" className="space-y-6">
-                        {renderTemplatesList()}
-                    </TabsContent>
-
-                    <TabsContent value="analytics" className="space-y-6">
-                        {renderAnalytics()}
-                    </TabsContent>
-                </Tabs>
-            )}
-        </div>
+        </ManagementLayout>
     );
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -474,298 +475,296 @@ export default function AIAgentManagement({ onCreateAgent, onEditAgent }: AIAgen
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">AI Agent Management</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your AI agents and monitor their performance
-          </p>
+    <ManagementLayout
+      title="AI Agent Management"
+      subtitle="Manage your AI agents and monitor their performance"
+    >
+      <div className="space-y-6">
+        {/* Action Button */}
+        <div className="flex justify-end">
+          <Button onClick={handleCreateAgent} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create New Agent
+          </Button>
         </div>
 
-        <Button onClick={handleCreateAgent} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Create New Agent
-        </Button>
-      </div>
-
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Agents</p>
-                <p className="text-3xl font-bold">{totalMetrics.totalAgents}</p>
-              </div>
-              <Bot className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Executions</p>
-                <p className="text-3xl font-bold">{totalMetrics.totalExecutions.toLocaleString()}</p>
-              </div>
-              <Activity className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-3xl font-bold">₹{totalMetrics.totalRevenue.toLocaleString()}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg Rating</p>
-                <p className="text-3xl font-bold">{totalMetrics.averageRating.toFixed(1)}</p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search agents..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="testing">Testing</SelectItem>
-                <SelectItem value="review">Under Review</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="updated">Last Updated</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="status">Status</SelectItem>
-                <SelectItem value="executions">Executions</SelectItem>
-                <SelectItem value="revenue">Revenue</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Agents List */}
-      <div className="grid grid-cols-1 gap-6">
-        {filteredAgents.length === 0 ? (
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
-            <CardContent className="p-12 text-center">
-              <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No agents found</h3>
-              <p className="text-gray-600 mb-4">
-                {searchQuery || statusFilter !== 'all'
-                  ? 'No agents match your current filters.'
-                  : 'Get started by creating your first AI agent.'
-                }
-              </p>
-              {!searchQuery && statusFilter === 'all' && (
-                <Button onClick={handleCreateAgent}>Create Your First Agent</Button>
-              )}
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Agents</p>
+                  <p className="text-3xl font-bold">{totalMetrics.totalAgents}</p>
+                </div>
+                <Bot className="h-8 w-8 text-blue-600" />
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          filteredAgents.map((agent) => (
-            <Card key={agent.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold">{agent.name}</h3>
-                      <Badge className={`${getStatusColor(agent.status)} flex items-center gap-1`}>
-                        {getStatusIcon(agent.status)}
-                        {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
-                      </Badge>
-                      {agent.configuration.malayalamSupport.enabled && (
-                        <Badge variant="outline" className="flex items-center gap-1">
-                          <Globe className="h-3 w-3" />
-                          Malayalam
-                        </Badge>
-                      )}
-                    </div>
 
-                    <p className="text-gray-600 mb-4">{agent.description}</p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500">Executions</p>
-                        <p className="font-semibold">{agent.metrics.totalExecutions.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Success Rate</p>
-                        <p className="font-semibold">{agent.metrics.successRate}%</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Revenue</p>
-                        <p className="font-semibold">₹{agent.metrics.totalRevenue.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Rating</p>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold">{agent.metrics.userRating}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Version</p>
-                        <p className="font-semibold">{agent.version}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
-                      <Clock className="h-3 w-3" />
-                      Updated {new Date(agent.updatedAt).toLocaleDateString()}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditAgent(agent)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Agent Actions</DialogTitle>
-                          <DialogDescription>
-                            Choose an action for {agent.name}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid grid-cols-1 gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleDuplicateAgent(agent)}
-                            className="flex items-center gap-2 justify-start"
-                          >
-                            <Copy className="h-4 w-4" />
-                            Duplicate Agent
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => {/* TODO: Export agent */ }}
-                            className="flex items-center gap-2 justify-start"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleDeleteAgent(agent.id)}
-                            className="flex items-center gap-2 justify-start"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Agent
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Executions</p>
+                  <p className="text-3xl font-bold">{totalMetrics.totalExecutions.toLocaleString()}</p>
                 </div>
+                <Activity className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-3xl font-bold">₹{totalMetrics.totalRevenue.toLocaleString()}</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Avg Rating</p>
+                  <p className="text-3xl font-bold">{totalMetrics.averageRating.toFixed(1)}</p>
+                </div>
+                <Star className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters and Search */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search agents..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="testing">Testing</SelectItem>
+                  <SelectItem value="review">Under Review</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="updated">Last Updated</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                  <SelectItem value="executions">Executions</SelectItem>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Agents List */}
+        <div className="grid grid-cols-1 gap-6">
+          {filteredAgents.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No agents found</h3>
+                <p className="text-gray-600 mb-4">
+                  {searchQuery || statusFilter !== 'all'
+                    ? 'No agents match your current filters.'
+                    : 'Get started by creating your first AI agent.'
+                  }
+                </p>
+                {!searchQuery && statusFilter === 'all' && (
+                  <Button onClick={handleCreateAgent}>Create Your First Agent</Button>
+                )}
               </CardContent>
             </Card>
-          ))
-        )}
-      </div>
+          ) : (
+            filteredAgents.map((agent) => (
+              <Card key={agent.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold">{agent.name}</h3>
+                        <Badge className={`${getStatusColor(agent.status)} flex items-center gap-1`}>
+                          {getStatusIcon(agent.status)}
+                          {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
+                        </Badge>
+                        {agent.configuration.malayalamSupport.enabled && (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Globe className="h-3 w-3" />
+                            Malayalam
+                          </Badge>
+                        )}
+                      </div>
 
-      {/* Create Agent Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Create New AI Agent</DialogTitle>
-            <DialogDescription>
-              Build a new AI agent for the Malayalam AI ecosystem
-            </DialogDescription>
-          </DialogHeader>
-          <AIAgentBuilder
-            mode="create"
-            onSave={(agent) => {
-              setAgents(prev => [agent, ...prev]);
-              setShowCreateDialog(false);
-              toast({
-                title: "Success!",
-                description: "New AI Agent created successfully",
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+                      <p className="text-gray-600 mb-4">{agent.description}</p>
 
-      {/* Edit Agent Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Edit AI Agent</DialogTitle>
-            <DialogDescription>
-              Update your AI agent configuration and settings
-            </DialogDescription>
-          </DialogHeader>
-          {selectedAgent && (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Executions</p>
+                          <p className="font-semibold">{agent.metrics.totalExecutions.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Success Rate</p>
+                          <p className="font-semibold">{agent.metrics.successRate}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Revenue</p>
+                          <p className="font-semibold">₹{agent.metrics.totalRevenue.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Rating</p>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="font-semibold">{agent.metrics.userRating}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Version</p>
+                          <p className="font-semibold">{agent.version}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
+                        <Clock className="h-3 w-3" />
+                        Updated {new Date(agent.updatedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditAgent(agent)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Agent Actions</DialogTitle>
+                            <DialogDescription>
+                              Choose an action for {agent.name}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid grid-cols-1 gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => handleDuplicateAgent(agent)}
+                              className="flex items-center gap-2 justify-start"
+                            >
+                              <Copy className="h-4 w-4" />
+                              Duplicate Agent
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => {/* TODO: Export agent */ }}
+                              className="flex items-center gap-2 justify-start"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Details
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleDeleteAgent(agent.id)}
+                              className="flex items-center gap-2 justify-start"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete Agent
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Create Agent Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Create New AI Agent</DialogTitle>
+              <DialogDescription>
+                Build a new AI agent for the Malayalam AI ecosystem
+              </DialogDescription>
+            </DialogHeader>
             <AIAgentBuilder
-              agentId={selectedAgent.id}
-              mode="edit"
+              mode="create"
               onSave={(agent) => {
-                setAgents(prev => prev.map(a => a.id === agent.id ? agent : a));
-                setShowEditDialog(false);
-                setSelectedAgent(null);
+                setAgents(prev => [agent, ...prev]);
+                setShowCreateDialog(false);
                 toast({
                   title: "Success!",
-                  description: "AI Agent updated successfully",
+                  description: "New AI Agent created successfully",
                 });
               }}
             />
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Agent Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Edit AI Agent</DialogTitle>
+              <DialogDescription>
+                Update your AI agent configuration and settings
+              </DialogDescription>
+            </DialogHeader>
+            {selectedAgent && (
+              <AIAgentBuilder
+                agentId={selectedAgent.id}
+                mode="edit"
+                onSave={(agent) => {
+                  setAgents(prev => prev.map(a => a.id === agent.id ? agent : a));
+                  setShowEditDialog(false);
+                  setSelectedAgent(null);
+                  toast({
+                    title: "Success!",
+                    description: "AI Agent updated successfully",
+                  });
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </div >
+    </ManagementLayout >
   );
 }

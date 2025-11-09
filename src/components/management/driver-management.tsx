@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { 
-  User, 
-  Car, 
-  MapPin, 
-  Phone, 
-  Star, 
+import {
+  User,
+  Car,
+  MapPin,
+  Phone,
+  Star,
   Clock,
   TrendingUp as DollarSign,
   TrendingUp,
@@ -237,8 +238,8 @@ export default function DriverManagement() {
 
   const filteredDrivers = drivers.filter(driver => {
     const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         driver.phone.includes(searchTerm) ||
-                         driver.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      driver.phone.includes(searchTerm) ||
+      driver.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || driver.status === statusFilter;
     const matchesVehicle = vehicleFilter === 'all' || driver.vehicleType === vehicleFilter;
     return matchesSearch && matchesStatus && matchesVehicle;
@@ -355,16 +356,16 @@ export default function DriverManagement() {
 
         {/* Action Buttons */}
         <div className="flex gap-2 mt-4 pt-4 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleCallDriver(driver.phone)}
           >
             <Phone className="h-3 w-3 mr-1" />
             Call
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleSendMessage(driver.phone)}
           >
@@ -389,14 +390,13 @@ export default function DriverManagement() {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Driver Management</h1>
-          <p className="text-gray-600">Manage drivers, vehicles, and performance with AI-powered insights</p>
-        </div>
-        <div className="flex gap-2">
+    <ManagementLayout
+      title="Driver Management"
+      subtitle="Manage drivers, vehicles, and performance with AI-powered insights"
+    >
+      <div className="space-y-6">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
           <Button variant="outline">
             <Shield className="h-4 w-4 mr-2" />
             Verify Documents
@@ -406,151 +406,151 @@ export default function DriverManagement() {
             Add Driver
           </Button>
         </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-700">Total Drivers</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalDrivers}</p>
+                </div>
+                <User className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-700">Online Now</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.onlineDrivers}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-700">Currently Busy</p>
+                  <p className="text-2xl font-bold text-yellow-900">{stats.busyDrivers}</p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700">Avg Rating</p>
+                  <p className="text-2xl font-bold text-purple-900">{stats.avgRating}</p>
+                </div>
+                <Star className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-indigo-700">Total Earnings</p>
+                  <p className="text-2xl font-bold text-indigo-900">₹{(stats.totalEarnings / 1000).toFixed(0)}K</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-indigo-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-700">New Applications</p>
+                  <p className="text-2xl font-bold text-orange-900">{stats.newApplications}</p>
+                </div>
+                <Award className="h-8 w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, phone, or vehicle number..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="offline">Offline</SelectItem>
+                  <SelectItem value="busy">Busy</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={vehicleFilter} onValueChange={setVehicleFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by vehicle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Vehicles</SelectItem>
+                  <SelectItem value="auto">Auto</SelectItem>
+                  <SelectItem value="taxi">Taxi</SelectItem>
+                  <SelectItem value="bike">Bike</SelectItem>
+                  <SelectItem value="luxury">Luxury</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Drivers List */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="active">Active Drivers ({drivers.filter(d => ['online', 'busy'].includes(d.status)).length})</TabsTrigger>
+            <TabsTrigger value="offline">Offline</TabsTrigger>
+            <TabsTrigger value="applications">New Applications</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="all">All Drivers</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-6">
+            <div className="space-y-4">
+              {filteredDrivers.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No drivers found matching your criteria.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredDrivers.map(renderDriverCard)
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-700">Total Drivers</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalDrivers}</p>
-              </div>
-              <User className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-green-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-700">Online Now</p>
-                <p className="text-2xl font-bold text-green-900">{stats.onlineDrivers}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-700">Currently Busy</p>
-                <p className="text-2xl font-bold text-yellow-900">{stats.busyDrivers}</p>
-              </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-700">Avg Rating</p>
-                <p className="text-2xl font-bold text-purple-900">{stats.avgRating}</p>
-              </div>
-              <Star className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-700">Total Earnings</p>
-                <p className="text-2xl font-bold text-indigo-900">₹{(stats.totalEarnings/1000).toFixed(0)}K</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-indigo-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-700">New Applications</p>
-                <p className="text-2xl font-bold text-orange-900">{stats.newApplications}</p>
-              </div>
-              <Award className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by name, phone, or vehicle number..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="online">Online</SelectItem>
-                <SelectItem value="offline">Offline</SelectItem>
-                <SelectItem value="busy">Busy</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={vehicleFilter} onValueChange={setVehicleFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by vehicle" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Vehicles</SelectItem>
-                <SelectItem value="auto">Auto</SelectItem>
-                <SelectItem value="taxi">Taxi</SelectItem>
-                <SelectItem value="bike">Bike</SelectItem>
-                <SelectItem value="luxury">Luxury</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Drivers List */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="active">Active Drivers ({drivers.filter(d => ['online', 'busy'].includes(d.status)).length})</TabsTrigger>
-          <TabsTrigger value="offline">Offline</TabsTrigger>
-          <TabsTrigger value="applications">New Applications</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="all">All Drivers</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-4">
-            {filteredDrivers.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No drivers found matching your criteria.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredDrivers.map(renderDriverCard)
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </ManagementLayout>
   );
 }

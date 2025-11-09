@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Star, 
+import {
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Star,
   Clock,
   TrendingUp as DollarSign,
   TrendingUp,
@@ -253,8 +254,8 @@ export default function CustomerManagement() {
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         customer.phone.includes(searchTerm) ||
-                         customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+      customer.phone.includes(searchTerm) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
     const matchesLocation = locationFilter === 'all' || customer.location.city.toLowerCase() === locationFilter;
     return matchesSearch && matchesStatus && matchesLocation;
@@ -370,7 +371,7 @@ export default function CustomerManagement() {
                 Payment: {customer.paymentMethods.join(', ')}
               </div>
             </div>
-            
+
             <h5 className="font-medium text-gray-900 mb-1 text-sm">Feedback Score</h5>
             <div className="space-y-1">
               <div className="flex justify-between text-sm">
@@ -412,16 +413,16 @@ export default function CustomerManagement() {
 
         {/* Action Buttons */}
         <div className="flex gap-2 mt-4 pt-4 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleCallCustomer(customer.phone)}
           >
             <Phone className="h-3 w-3 mr-1" />
             Call
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleSendMessage(customer.phone)}
           >
@@ -446,14 +447,13 @@ export default function CustomerManagement() {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Customer Management</h1>
-          <p className="text-gray-600">Manage customers, loyalty programs, and personalized experiences</p>
-        </div>
-        <div className="flex gap-2">
+    <ManagementLayout
+      title="Customer Management"
+      subtitle="Manage customers, loyalty programs, and personalized experiences"
+    >
+      <div className="space-y-6">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
           <Button variant="outline">
             <Gift className="h-4 w-4 mr-2" />
             Loyalty Program
@@ -463,151 +463,151 @@ export default function CustomerManagement() {
             Add Customer
           </Button>
         </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-700">Total Customers</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalCustomers.toLocaleString()}</p>
+                </div>
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-700">Active Customers</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.activeCustomers.toLocaleString()}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700">Premium Members</p>
+                  <p className="text-2xl font-bold text-purple-900">{stats.premiumCustomers}</p>
+                </div>
+                <Star className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-700">New This Month</p>
+                  <p className="text-2xl font-bold text-orange-900">{stats.newCustomers}</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-indigo-700">Avg LTV</p>
+                  <p className="text-2xl font-bold text-indigo-900">₹{(stats.avgLifetimeValue / 1000).toFixed(1)}K</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-indigo-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-pink-50 to-pink-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-pink-700">Satisfaction</p>
+                  <p className="text-2xl font-bold text-pink-900">{stats.satisfactionRate}</p>
+                </div>
+                <Heart className="h-8 w-8 text-pink-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, phone, or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="blocked">Blocked</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="kochi">Kochi</SelectItem>
+                  <SelectItem value="kottayam">Kottayam</SelectItem>
+                  <SelectItem value="calicut">Calicut</SelectItem>
+                  <SelectItem value="trivandrum">Trivandrum</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Customers List */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="all">All Customers ({customers.length})</TabsTrigger>
+            <TabsTrigger value="premium">Premium ({customers.filter(c => c.status === 'premium').length})</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="new">New</TabsTrigger>
+            <TabsTrigger value="loyalty">Loyalty Program</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-6">
+            <div className="space-y-4">
+              {filteredCustomers.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No customers found matching your criteria.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredCustomers.map(renderCustomerCard)
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-700">Total Customers</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalCustomers.toLocaleString()}</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-green-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-700">Active Customers</p>
-                <p className="text-2xl font-bold text-green-900">{stats.activeCustomers.toLocaleString()}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-700">Premium Members</p>
-                <p className="text-2xl font-bold text-purple-900">{stats.premiumCustomers}</p>
-              </div>
-              <Star className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-700">New This Month</p>
-                <p className="text-2xl font-bold text-orange-900">{stats.newCustomers}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-700">Avg LTV</p>
-                <p className="text-2xl font-bold text-indigo-900">₹{(stats.avgLifetimeValue/1000).toFixed(1)}K</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-indigo-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-pink-50 to-pink-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-pink-700">Satisfaction</p>
-                <p className="text-2xl font-bold text-pink-900">{stats.satisfactionRate}</p>
-              </div>
-              <Heart className="h-8 w-8 text-pink-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by name, phone, or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="blocked">Blocked</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="kochi">Kochi</SelectItem>
-                <SelectItem value="kottayam">Kottayam</SelectItem>
-                <SelectItem value="calicut">Calicut</SelectItem>
-                <SelectItem value="trivandrum">Trivandrum</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Customers List */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All Customers ({customers.length})</TabsTrigger>
-          <TabsTrigger value="premium">Premium ({customers.filter(c => c.status === 'premium').length})</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="new">New</TabsTrigger>
-          <TabsTrigger value="loyalty">Loyalty Program</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-4">
-            {filteredCustomers.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No customers found matching your criteria.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredCustomers.map(renderCustomerCard)
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </ManagementLayout>
   );
 }

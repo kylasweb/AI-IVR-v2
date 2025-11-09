@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  MapPin, 
-  Car, 
-  Clock, 
-  Users, 
-  TrendingUp, 
+import {
+  MapPin,
+  Car,
+  Clock,
+  Users,
+  TrendingUp,
   Filter,
   Search,
   RefreshCw,
@@ -141,8 +142,8 @@ export default function RideManagement() {
 
   const filteredRides = rides.filter(ride => {
     const matchesSearch = ride.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ride.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ride.id.toLowerCase().includes(searchTerm.toLowerCase());
+      ride.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ride.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ride.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -187,8 +188,8 @@ export default function RideManagement() {
                 <p className="font-medium">{ride.customerName}</p>
                 <p className="text-sm text-gray-600">{ride.customerPhone}</p>
                 <div className="flex gap-2 mt-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleCallCustomer(ride.customerPhone)}
                   >
@@ -209,8 +210,8 @@ export default function RideManagement() {
                 <p className="font-medium">{ride.driverName}</p>
                 <p className="text-sm text-gray-600">{ride.driverPhone}</p>
                 <div className="flex gap-2 mt-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleCallDriver(ride.driverPhone)}
                   >
@@ -289,14 +290,13 @@ export default function RideManagement() {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ride Management</h1>
-          <p className="text-gray-600">Manage rides, drivers, and customer interactions through AI IVR</p>
-        </div>
-        <div className="flex gap-2">
+    <ManagementLayout
+      title="Ride Management"
+      subtitle="Manage rides, drivers, and customer interactions through AI IVR"
+    >
+      <div className="space-y-6">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
           <Button variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -306,143 +306,143 @@ export default function RideManagement() {
             New Ride
           </Button>
         </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-700">Total Rides</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalRides}</p>
+                </div>
+                <Car className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-700">Active Rides</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.activeRides}</p>
+                </div>
+                <Clock className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700">Today's Rides</p>
+                  <p className="text-2xl font-bold text-purple-900">{stats.completedToday}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-700">Revenue</p>
+                  <p className="text-2xl font-bold text-yellow-900">₹{(stats.revenue / 1000).toFixed(0)}K</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-700">Avg Rating</p>
+                  <p className="text-2xl font-bold text-orange-900">{stats.avgRating}</p>
+                </div>
+                <Star className="h-8 w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-indigo-700">Drivers</p>
+                  <p className="text-2xl font-bold text-indigo-900">{stats.availableDrivers}</p>
+                </div>
+                <Users className="h-8 w-8 text-indigo-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters and Search */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by customer, driver, or ride ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="assigned">Assigned</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline">
+                <Filter className="h-4 w-4 mr-2" />
+                More Filters
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Rides List */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="active">Active Rides ({rides.filter(r => ['pending', 'assigned', 'in_progress'].includes(r.status)).length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            <TabsTrigger value="all">All Rides</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-6">
+            <div className="space-y-4">
+              {filteredRides.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No rides found matching your criteria.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredRides.map(renderRideCard)
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-700">Total Rides</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalRides}</p>
-              </div>
-              <Car className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-green-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-700">Active Rides</p>
-                <p className="text-2xl font-bold text-green-900">{stats.activeRides}</p>
-              </div>
-              <Clock className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-700">Today's Rides</p>
-                <p className="text-2xl font-bold text-purple-900">{stats.completedToday}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-700">Revenue</p>
-                <p className="text-2xl font-bold text-yellow-900">₹{(stats.revenue/1000).toFixed(0)}K</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-700">Avg Rating</p>
-                <p className="text-2xl font-bold text-orange-900">{stats.avgRating}</p>
-              </div>
-              <Star className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-700">Drivers</p>
-                <p className="text-2xl font-bold text-indigo-900">{stats.availableDrivers}</p>
-              </div>
-              <Users className="h-8 w-8 text-indigo-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by customer, driver, or ride ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="assigned">Assigned</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              More Filters
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Rides List */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="active">Active Rides ({rides.filter(r => ['pending', 'assigned', 'in_progress'].includes(r.status)).length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          <TabsTrigger value="all">All Rides</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-4">
-            {filteredRides.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Car className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No rides found matching your criteria.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredRides.map(renderRideCard)
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </ManagementLayout>
   );
 }

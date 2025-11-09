@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +14,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Users, 
-  Plus, 
-  Shield, 
-  Settings as EditIcon, 
-  Trash2, 
+import {
+  Users,
+  Plus,
+  Shield,
+  Settings as EditIcon,
+  Trash2,
   Search,
   MoreHorizontal,
   Star,
@@ -86,7 +87,7 @@ export default function UserManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data - replace with actual API calls
       const mockPermissions: Permission[] = [
         { id: '1', name: 'user.read', category: 'User Management', description: 'View user information' },
@@ -199,7 +200,7 @@ export default function UserManagement() {
       }
 
       const selectedRoles = roles.filter(role => newUser.roleIds.includes(role.id));
-      
+
       const user: User = {
         id: Date.now().toString(),
         email: newUser.email,
@@ -264,8 +265,8 @@ export default function UserManagement() {
 
   const toggleUserStatus = async (userId: string) => {
     try {
-      setUsers(prev => prev.map(user => 
-        user.id === userId 
+      setUsers(prev => prev.map(user =>
+        user.id === userId
           ? { ...user, isActive: !user.isActive }
           : user
       ));
@@ -317,7 +318,7 @@ export default function UserManagement() {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    
+
     if (diffHours < 1) return 'Just now';
     if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
@@ -341,19 +342,13 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Users className="h-8 w-8" />
-            User Management
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage users, roles, and permissions for the IVR system
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+    <ManagementLayout
+      title="User Management"
+      subtitle="Manage users, roles, and permissions for the IVR system"
+    >
+      <div className="space-y-6">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
           <Dialog open={showCreateRole} onOpenChange={setShowCreateRole}>
             <DialogTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
@@ -409,8 +404,8 @@ export default function UserManagement() {
                                 }}
                               />
                               <div>
-                                <label 
-                                  htmlFor={permission.id} 
+                                <label
+                                  htmlFor={permission.id}
                                   className="text-sm font-medium cursor-pointer"
                                 >
                                   {permission.name}
@@ -486,8 +481,8 @@ export default function UserManagement() {
                           }}
                         />
                         <div>
-                          <label 
-                            htmlFor={`role-${role.id}`} 
+                          <label
+                            htmlFor={`role-${role.id}`}
                             className="text-sm font-medium cursor-pointer"
                           >
                             {role.name}
@@ -510,168 +505,168 @@ export default function UserManagement() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
 
-      {/* Search and Stats */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
-          />
+        {/* Search and Stats */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-md"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary">
+              {users.filter(u => u.isActive).length} Active
+            </Badge>
+            <Badge variant="outline">
+              {users.length} Total Users
+            </Badge>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <Badge variant="secondary">
-            {users.filter(u => u.isActive).length} Active
-          </Badge>
-          <Badge variant="outline">
-            {users.length} Total Users
-          </Badge>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
-        </TabsList>
+        {/* Main Content */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Accounts</CardTitle>
-              <CardDescription>Manage user accounts and their access</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {filteredUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{user.name}</h3>
-                          {user.isActive ? (
-                            <Badge variant="default" className="text-xs">Active</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                        <div className="flex items-center gap-4 mt-1">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Shield className="h-3 w-3" />
-                            {user.roles.map(role => role.name).join(', ')}
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Accounts</CardTitle>
+                <CardDescription>Manage user accounts and their access</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {filteredUsers.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <Avatar>
+                          <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{user.name}</h3>
+                            {user.isActive ? (
+                              <Badge variant="default" className="text-xs">Active</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="h-3 w-3" />
-                            Last login: {formatLastLogin(user.lastLogin)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleUserStatus(user.id)}
-                      >
-                        {user.isActive ? (
-                          <XCircle className="h-4 w-4 mr-1" />
-                        ) : (
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                        )}
-                        {user.isActive ? 'Deactivate' : 'Activate'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                      >
-                        <EditIcon className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteUser(user.id)}
-                        disabled={user.roles.some(role => role.isSystem)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="roles">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {roles.map((role) => (
-              <Card key={role.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {role.isSystem ? (
-                        <Star className="h-5 w-5 text-yellow-600" />
-                      ) : (
-                        <Shield className="h-5 w-5 text-blue-600" />
-                      )}
-                      {role.name}
-                    </div>
-                    {role.isSystem && (
-                      <Badge variant="secondary">System Role</Badge>
-                    )}
-                  </CardTitle>
-                  {role.description && (
-                    <CardDescription>{role.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Permissions</span>
-                      <Badge variant="outline">{role.permissions.length}</Badge>
-                    </div>
-                    <ScrollArea className="h-32">
-                      <div className="space-y-1">
-                        {role.permissions.map((permId) => {
-                          const permission = permissions.find(p => p.id === permId);
-                          return permission ? (
-                            <div key={permission.id} className="text-xs text-gray-600">
-                              • {permission.name}
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <div className="flex items-center gap-4 mt-1">
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Shield className="h-3 w-3" />
+                              {user.roles.map(role => role.name).join(', ')}
                             </div>
-                          ) : null;
-                        })}
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Clock className="h-3 w-3" />
+                              Last login: {formatLastLogin(user.lastLogin)}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </ScrollArea>
-                    {!role.isSystem && (
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <EditIcon className="h-3 w-3 mr-1" />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleUserStatus(user.id)}
+                        >
+                          {user.isActive ? (
+                            <XCircle className="h-4 w-4 mr-1" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                          )}
+                          {user.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                        >
+                          <EditIcon className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-3 w-3 mr-1" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deleteUser(user.id)}
+                          disabled={user.roles.some(role => role.isSystem)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="roles">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {roles.map((role) => (
+                <Card key={role.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {role.isSystem ? (
+                          <Star className="h-5 w-5 text-yellow-600" />
+                        ) : (
+                          <Shield className="h-5 w-5 text-blue-600" />
+                        )}
+                        {role.name}
+                      </div>
+                      {role.isSystem && (
+                        <Badge variant="secondary">System Role</Badge>
+                      )}
+                    </CardTitle>
+                    {role.description && (
+                      <CardDescription>{role.description}</CardDescription>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Permissions</span>
+                        <Badge variant="outline">{role.permissions.length}</Badge>
+                      </div>
+                      <ScrollArea className="h-32">
+                        <div className="space-y-1">
+                          {role.permissions.map((permId) => {
+                            const permission = permissions.find(p => p.id === permId);
+                            return permission ? (
+                              <div key={permission.id} className="text-xs text-gray-600">
+                                • {permission.name}
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </ScrollArea>
+                      {!role.isSystem && (
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm">
+                            <EditIcon className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ManagementLayout >
   );
 }

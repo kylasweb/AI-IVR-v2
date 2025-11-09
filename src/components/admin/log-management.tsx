@@ -10,12 +10,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  Download, 
-  Trash2, 
+import {
+  FileText,
+  Search,
+  Filter,
+  Download,
+  Trash2,
   RefreshCw,
   AlertCircle,
   Info,
@@ -59,7 +59,7 @@ export default function LogManagement() {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [showLogDetails, setShowLogDetails] = useState(false);
-  
+
   const [filters, setFilters] = useState<LogFilter>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [pageSize, setPageSize] = useState(50);
@@ -103,7 +103,7 @@ export default function LogManagement() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data - replace with actual API calls
       const mockLogs: LogEntry[] = [
         {
@@ -219,7 +219,7 @@ export default function LogManagement() {
         duration: Math.floor(Math.random() * 2000) + 100
       }));
 
-      const allLogs = [...mockLogs, ...additionalLogs].sort((a, b) => 
+      const allLogs = [...mockLogs, ...additionalLogs].sort((a, b) =>
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
@@ -259,7 +259,7 @@ export default function LogManagement() {
 
     // Apply search filter
     if (searchTerm) {
-      filtered = filtered.filter(log => 
+      filtered = filtered.filter(log =>
         log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (log.userId && log.userId.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -451,7 +451,7 @@ export default function LogManagement() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Log Level</Label>
               <Select
@@ -540,11 +540,10 @@ export default function LogManagement() {
               {paginatedLogs.map((log) => (
                 <div
                   key={log.id}
-                  className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                    log.level === 'error' ? 'border-red-200 bg-red-50' :
+                  className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${log.level === 'error' ? 'border-red-200 bg-red-50' :
                     log.level === 'warn' ? 'border-yellow-200 bg-yellow-50' :
-                    ''
-                  }`}
+                      ''
+                    }`}
                   onClick={() => {
                     setSelectedLog(log);
                     setShowLogDetails(true);
@@ -681,7 +680,7 @@ export default function LogManagement() {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Message</Label>
                 <div className="p-3 bg-gray-100 rounded text-sm">
