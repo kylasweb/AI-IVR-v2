@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import {
     Phone,
     PhoneCall,
@@ -95,7 +96,67 @@ export default function IVRManagement() {
         dialect: 'central_kerala',
         is_active: true,
         cultural_settings: {},
-        flow_data: { nodes: [], connections: [] }
+        flow_data: { nodes: [], connections: [] },
+        // Advanced Configuration Settings
+        advanced_settings: {
+            max_call_duration: 1800, // 30 minutes
+            call_timeout: 30,
+            retry_attempts: 3,
+            silence_detection: true,
+            dtmf_timeout: 5,
+            speech_recognition: true,
+            voice_biometrics: false,
+            call_recording: true,
+            sentiment_analysis: true,
+            real_time_analytics: true,
+            ai_powered_routing: true,
+            cultural_adaptation: true,
+            multilingual_support: false,
+            background_music: true,
+            hold_music_url: '',
+            escalation_rules: {
+                max_transfers: 3,
+                escalation_timeout: 300,
+                priority_routing: false
+            },
+            security_settings: {
+                pci_compliance: false,
+                data_encryption: true,
+                audit_logging: true,
+                access_control: 'standard'
+            },
+            integration_settings: {
+                crm_integration: false,
+                crm_provider: '',
+                webhook_url: '',
+                api_key: '',
+                callback_urls: []
+            },
+            ai_configuration: {
+                llm_provider: 'openai',
+                model_version: 'gpt-4',
+                temperature: 0.7,
+                max_tokens: 2000,
+                cultural_context: true,
+                learning_enabled: true,
+                personalization: true
+            },
+            voice_settings: {
+                voice_provider: 'azure',
+                voice_model: 'neural',
+                voice_speed: 1.0,
+                voice_pitch: 0.0,
+                voice_volume: 1.0,
+                ssml_support: true
+            },
+            analytics_config: {
+                real_time_dashboard: true,
+                performance_monitoring: true,
+                cost_tracking: true,
+                usage_alerts: true,
+                custom_metrics: []
+            }
+        }
     });
 
     useEffect(() => {
@@ -250,7 +311,67 @@ export default function IVRManagement() {
             dialect: 'central_kerala',
             is_active: true,
             cultural_settings: {},
-            flow_data: { nodes: [], connections: [] }
+            flow_data: { nodes: [], connections: [] },
+            // Reset advanced settings to defaults
+            advanced_settings: {
+                max_call_duration: 1800,
+                call_timeout: 30,
+                retry_attempts: 3,
+                silence_detection: true,
+                dtmf_timeout: 5,
+                speech_recognition: true,
+                voice_biometrics: false,
+                call_recording: true,
+                sentiment_analysis: true,
+                real_time_analytics: true,
+                ai_powered_routing: true,
+                cultural_adaptation: true,
+                multilingual_support: false,
+                background_music: true,
+                hold_music_url: '',
+                escalation_rules: {
+                    max_transfers: 3,
+                    escalation_timeout: 300,
+                    priority_routing: false
+                },
+                security_settings: {
+                    pci_compliance: false,
+                    data_encryption: true,
+                    audit_logging: true,
+                    access_control: 'standard'
+                },
+                integration_settings: {
+                    crm_integration: false,
+                    crm_provider: '',
+                    webhook_url: '',
+                    api_key: '',
+                    callback_urls: []
+                },
+                ai_configuration: {
+                    llm_provider: 'openai',
+                    model_version: 'gpt-4',
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                    cultural_context: true,
+                    learning_enabled: true,
+                    personalization: true
+                },
+                voice_settings: {
+                    voice_provider: 'azure',
+                    voice_model: 'neural',
+                    voice_speed: 1.0,
+                    voice_pitch: 0.0,
+                    voice_volume: 1.0,
+                    ssml_support: true
+                },
+                analytics_config: {
+                    real_time_dashboard: true,
+                    performance_monitoring: true,
+                    cost_tracking: true,
+                    usage_alerts: true,
+                    custom_metrics: []
+                }
+            }
         });
     };
 
@@ -264,7 +385,67 @@ export default function IVRManagement() {
             dialect: config.dialect || 'central_kerala',
             is_active: config.is_active,
             cultural_settings: {},
-            flow_data: { nodes: [], connections: [] }
+            flow_data: { nodes: [], connections: [] },
+            // Load or default advanced settings
+            advanced_settings: {
+                max_call_duration: 1800,
+                call_timeout: 30,
+                retry_attempts: 3,
+                silence_detection: true,
+                dtmf_timeout: 5,
+                speech_recognition: true,
+                voice_biometrics: false,
+                call_recording: true,
+                sentiment_analysis: true,
+                real_time_analytics: true,
+                ai_powered_routing: true,
+                cultural_adaptation: true,
+                multilingual_support: false,
+                background_music: true,
+                hold_music_url: '',
+                escalation_rules: {
+                    max_transfers: 3,
+                    escalation_timeout: 300,
+                    priority_routing: false
+                },
+                security_settings: {
+                    pci_compliance: false,
+                    data_encryption: true,
+                    audit_logging: true,
+                    access_control: 'standard'
+                },
+                integration_settings: {
+                    crm_integration: false,
+                    crm_provider: '',
+                    webhook_url: '',
+                    api_key: '',
+                    callback_urls: []
+                },
+                ai_configuration: {
+                    llm_provider: 'openai',
+                    model_version: 'gpt-4',
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                    cultural_context: true,
+                    learning_enabled: true,
+                    personalization: true
+                },
+                voice_settings: {
+                    voice_provider: 'azure',
+                    voice_model: 'neural',
+                    voice_speed: 1.0,
+                    voice_pitch: 0.0,
+                    voice_volume: 1.0,
+                    ssml_support: true
+                },
+                analytics_config: {
+                    real_time_dashboard: true,
+                    performance_monitoring: true,
+                    cost_tracking: true,
+                    usage_alerts: true,
+                    custom_metrics: []
+                }
+            }
         });
         setShowCreateForm(true);
     };
@@ -506,153 +687,589 @@ export default function IVRManagement() {
                 <CardHeader className="pb-4">
                     <CardTitle className="text-lg flex items-center gap-2">
                         <Settings className="h-5 w-5 text-blue-600" />
-                        Configuration Details
+                        Advanced IVR Configuration
                     </CardTitle>
                     <CardDescription>
-                        Basic information and flow configuration settings
+                        Comprehensive configuration with AI-powered features and cultural intelligence
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Basic Information Section */}
-                    <div className="space-y-4">
-                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Basic Information</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                                    Configuration Name *
-                                </Label>
-                                <Input
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="e.g., Customer Service IVR"
-                                    className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300"
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="flow_type" className="text-sm font-medium text-gray-700">
-                                    Flow Type *
-                                </Label>
-                                <Select value={formData.flow_type} onValueChange={(value) => setFormData({ ...formData, flow_type: value })}>
-                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
-                                        <SelectValue placeholder="Select flow type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="customer_service">Customer Service</SelectItem>
-                                        <SelectItem value="sales">Sales</SelectItem>
-                                        <SelectItem value="support">Support</SelectItem>
-                                        <SelectItem value="survey">Survey</SelectItem>
-                                        <SelectItem value="custom">Custom</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
+                    <Tabs defaultValue="basic" className="w-full">
+                        <TabsList className="grid w-full grid-cols-6">
+                            <TabsTrigger value="basic">Basic</TabsTrigger>
+                            <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                            <TabsTrigger value="ai">AI & NLP</TabsTrigger>
+                            <TabsTrigger value="voice">Voice</TabsTrigger>
+                            <TabsTrigger value="security">Security</TabsTrigger>
+                            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                        </TabsList>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description" className="text-sm font-medium text-gray-700">
-                                Description
-                            </Label>
-                            <Textarea
-                                id="description"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Describe the purpose of this IVR configuration..."
-                                rows={3}
-                                className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300 resize-none"
-                            />
-                        </div>
-                    </div>
+                        {/* Basic Configuration Tab */}
+                        <TabsContent value="basic" className="space-y-6 mt-6">
+                            {/* Basic Information Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Basic Information</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                                            Configuration Name *
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="e.g., Customer Service IVR"
+                                            className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="flow_type" className="text-sm font-medium text-gray-700">
+                                            Flow Type *
+                                        </Label>
+                                        <Select value={formData.flow_type} onValueChange={(value) => setFormData({ ...formData, flow_type: value })}>
+                                            <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                                <SelectValue placeholder="Select flow type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="customer_service">Customer Service</SelectItem>
+                                                <SelectItem value="sales">Sales & Lead Generation</SelectItem>
+                                                <SelectItem value="support">Technical Support</SelectItem>
+                                                <SelectItem value="survey">Survey & Feedback</SelectItem>
+                                                <SelectItem value="appointment">Appointment Booking</SelectItem>
+                                                <SelectItem value="payment">Payment Processing</SelectItem>
+                                                <SelectItem value="emergency">Emergency Response</SelectItem>
+                                                <SelectItem value="custom">Custom Workflow</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
 
-                    {/* Language & Cultural Settings */}
-                    <div className="space-y-4">
-                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Language & Cultural Settings</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="language" className="text-sm font-medium text-gray-700">
-                                    Primary Language *
-                                </Label>
-                                <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value })}>
-                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
-                                        <SelectValue placeholder="Select language" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ml">
-                                            <div className="flex items-center gap-2">
-                                                <Globe className="h-4 w-4 text-green-600" />
-                                                Malayalam
+                                <div className="space-y-2">
+                                    <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                                        Description
+                                    </Label>
+                                    <Textarea
+                                        id="description"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        placeholder="Describe the purpose of this IVR configuration..."
+                                        rows={3}
+                                        className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300 resize-none"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Language & Cultural Settings */}
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Language & Cultural Settings</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="language" className="text-sm font-medium text-gray-700">
+                                            Primary Language *
+                                        </Label>
+                                        <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value })}>
+                                            <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                                <SelectValue placeholder="Select language" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="ml">
+                                                    <div className="flex items-center gap-2">
+                                                        <Globe className="h-4 w-4 text-green-600" />
+                                                        Malayalam
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem value="en">English</SelectItem>
+                                                <SelectItem value="hi">Hindi</SelectItem>
+                                                <SelectItem value="ta">Tamil</SelectItem>
+                                                <SelectItem value="te">Telugu</SelectItem>
+                                                <SelectItem value="kn">Kannada</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="dialect" className="text-sm font-medium text-gray-700">
+                                            Dialect (Malayalam only)
+                                        </Label>
+                                        <Select
+                                            value={formData.dialect}
+                                            onValueChange={(value) => setFormData({ ...formData, dialect: value })}
+                                            disabled={formData.language !== 'ml'}
+                                        >
+                                            <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
+                                                <SelectValue placeholder="Select dialect" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="central_kerala">Central Kerala</SelectItem>
+                                                <SelectItem value="northern_kerala">Northern Kerala (Malabar)</SelectItem>
+                                                <SelectItem value="southern_kerala">Southern Kerala (Travancore)</SelectItem>
+                                                <SelectItem value="kochi_urban">Kochi Urban</SelectItem>
+                                                <SelectItem value="rural_kerala">Rural Kerala</SelectItem>
+                                                <SelectItem value="standard">Standard Malayalam</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Multilingual Support */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-shrink-0">
+                                                <Switch
+                                                    id="multilingual_support"
+                                                    checked={formData.advanced_settings.multilingual_support}
+                                                    onCheckedChange={(checked) => setFormData({
+                                                        ...formData,
+                                                        advanced_settings: {
+                                                            ...formData.advanced_settings,
+                                                            multilingual_support: checked
+                                                        }
+                                                    })}
+                                                />
                                             </div>
-                                        </SelectItem>
-                                        <SelectItem value="en">English</SelectItem>
-                                        <SelectItem value="hi">Hindi</SelectItem>
-                                        <SelectItem value="ta">Tamil</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="dialect" className="text-sm font-medium text-gray-700">
-                                    Dialect (Malayalam only)
-                                </Label>
-                                <Select
-                                    value={formData.dialect}
-                                    onValueChange={(value) => setFormData({ ...formData, dialect: value })}
-                                    disabled={formData.language !== 'ml'}
-                                >
-                                    <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 border-gray-300">
-                                        <SelectValue placeholder="Select dialect" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="central_kerala">Central Kerala</SelectItem>
-                                        <SelectItem value="northern_kerala">Northern Kerala (Malabar)</SelectItem>
-                                        <SelectItem value="southern_kerala">Southern Kerala (Travancore)</SelectItem>
-                                        <SelectItem value="standard">Standard Malayalam</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
+                                            <div>
+                                                <Label htmlFor="multilingual_support" className="text-sm font-medium text-gray-800 cursor-pointer">
+                                                    Enable Multilingual Support
+                                                </Label>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    Allow callers to switch between languages during the call
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        {formData.language === 'ml' && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-start gap-2">
-                                    <Globe className="h-5 w-5 text-blue-600 mt-0.5" />
-                                    <div>
-                                        <p className="text-sm font-medium text-blue-800">Cultural Intelligence Enabled</p>
-                                        <p className="text-xs text-blue-600 mt-1">
-                                            This configuration will include Malayalam cultural markers, respectful greetings,
-                                            and context-aware responses suitable for Kerala's business environment.
-                                        </p>
+                                {formData.language === 'ml' && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div className="flex items-start gap-2">
+                                            <Globe className="h-5 w-5 text-blue-600 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-medium text-blue-800">Cultural Intelligence Enabled</p>
+                                                <p className="text-xs text-blue-600 mt-1">
+                                                    This configuration will include Malayalam cultural markers, respectful greetings,
+                                                    and context-aware responses suitable for Kerala's business environment.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Activation Settings */}
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Activation Settings</h4>
+                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0">
+                                            <Switch
+                                                id="is_active"
+                                                checked={formData.is_active}
+                                                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="is_active" className="text-sm font-medium text-gray-800 cursor-pointer">
+                                                Activate immediately after creation
+                                            </Label>
+                                            <p className="text-xs text-gray-600 mt-1">
+                                                When enabled, this configuration will be available for use immediately after creation
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Badge variant={formData.is_active ? "default" : "secondary"} className="ml-2">
+                                        {formData.is_active ? "Active" : "Inactive"}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* Advanced Configuration Tab */}
+                        <TabsContent value="advanced" className="space-y-6 mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Call Management</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>Maximum Call Duration (seconds)</Label>
+                                        <Slider
+                                            value={[formData.advanced_settings.max_call_duration]}
+                                            onValueChange={([value]) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    max_call_duration: value
+                                                }
+                                            })}
+                                            max={3600}
+                                            min={60}
+                                            step={30}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-gray-500">{formData.advanced_settings.max_call_duration} seconds ({Math.floor(formData.advanced_settings.max_call_duration / 60)} minutes)</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Call Timeout (seconds)</Label>
+                                        <Slider
+                                            value={[formData.advanced_settings.call_timeout]}
+                                            onValueChange={([value]) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    call_timeout: value
+                                                }
+                                            })}
+                                            max={120}
+                                            min={10}
+                                            step={5}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-gray-500">{formData.advanced_settings.call_timeout} seconds</p>
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Activation Settings */}
-                    <div className="space-y-4">
-                        <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Activation Settings</h4>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div className="flex items-start gap-3">
-                                <div className="flex-shrink-0">
-                                    <Switch
-                                        id="is_active"
-                                        checked={formData.is_active}
-                                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="is_active" className="text-sm font-medium text-gray-800 cursor-pointer">
-                                        Activate immediately after creation
-                                    </Label>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        When enabled, this configuration will be available for use immediately after creation
-                                    </p>
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Advanced Features</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Call Recording</Label>
+                                            <p className="text-xs text-gray-600">Record calls for quality assurance</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.call_recording}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    call_recording: checked
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Real-time Analytics</Label>
+                                            <p className="text-xs text-gray-600">Live performance monitoring</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.real_time_analytics}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    real_time_analytics: checked
+                                                }
+                                            })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <Badge variant={formData.is_active ? "default" : "secondary"} className="ml-2">
-                                {formData.is_active ? "Active" : "Inactive"}
-                            </Badge>
-                        </div>
-                    </div>
+                        </TabsContent>
+
+                        {/* AI & NLP Tab */}
+                        <TabsContent value="ai" className="space-y-6 mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">AI Configuration</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>LLM Provider</Label>
+                                        <Select
+                                            value={formData.advanced_settings.ai_configuration.llm_provider}
+                                            onValueChange={(value) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    ai_configuration: {
+                                                        ...formData.advanced_settings.ai_configuration,
+                                                        llm_provider: value
+                                                    }
+                                                }
+                                            })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="openai">OpenAI</SelectItem>
+                                                <SelectItem value="azure">Azure OpenAI</SelectItem>
+                                                <SelectItem value="anthropic">Anthropic</SelectItem>
+                                                <SelectItem value="google">Google Gemini</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Model Version</Label>
+                                        <Select
+                                            value={formData.advanced_settings.ai_configuration.model_version}
+                                            onValueChange={(value) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    ai_configuration: {
+                                                        ...formData.advanced_settings.ai_configuration,
+                                                        model_version: value
+                                                    }
+                                                }
+                                            })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="gpt-4">GPT-4</SelectItem>
+                                                <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                                                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>Temperature</Label>
+                                        <Slider
+                                            value={[formData.advanced_settings.ai_configuration.temperature]}
+                                            onValueChange={([value]) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    ai_configuration: {
+                                                        ...formData.advanced_settings.ai_configuration,
+                                                        temperature: value
+                                                    }
+                                                }
+                                            })}
+                                            max={2}
+                                            min={0}
+                                            step={0.1}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-gray-500">{formData.advanced_settings.ai_configuration.temperature}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Intelligence Features</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Speech Recognition</Label>
+                                            <p className="text-xs text-gray-600">Convert speech to text</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.speech_recognition}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    speech_recognition: checked
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Sentiment Analysis</Label>
+                                            <p className="text-xs text-gray-600">Analyze caller emotions</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.sentiment_analysis}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    sentiment_analysis: checked
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* Voice Settings Tab */}
+                        <TabsContent value="voice" className="space-y-6 mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Voice Configuration</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>Voice Provider</Label>
+                                        <Select
+                                            value={formData.advanced_settings.voice_settings.voice_provider}
+                                            onValueChange={(value) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    voice_settings: {
+                                                        ...formData.advanced_settings.voice_settings,
+                                                        voice_provider: value
+                                                    }
+                                                }
+                                            })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="azure">Azure Cognitive Services</SelectItem>
+                                                <SelectItem value="google">Google Cloud TTS</SelectItem>
+                                                <SelectItem value="amazon">Amazon Polly</SelectItem>
+                                                <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Voice Model</Label>
+                                        <Select
+                                            value={formData.advanced_settings.voice_settings.voice_model}
+                                            onValueChange={(value) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    voice_settings: {
+                                                        ...formData.advanced_settings.voice_settings,
+                                                        voice_model: value
+                                                    }
+                                                }
+                                            })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="neural">Neural Voice</SelectItem>
+                                                <SelectItem value="standard">Standard Voice</SelectItem>
+                                                <SelectItem value="premium">Premium Voice</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* Security Tab */}
+                        <TabsContent value="security" className="space-y-6 mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">Security & Compliance</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Data Encryption</Label>
+                                            <p className="text-xs text-gray-600">Encrypt call data and recordings</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.security_settings.data_encryption}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    security_settings: {
+                                                        ...formData.advanced_settings.security_settings,
+                                                        data_encryption: checked
+                                                    }
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <Label className="text-sm font-medium">Audit Logging</Label>
+                                            <p className="text-xs text-gray-600">Comprehensive activity logs</p>
+                                        </div>
+                                        <Switch
+                                            checked={formData.advanced_settings.security_settings.audit_logging}
+                                            onCheckedChange={(checked) => setFormData({
+                                                ...formData,
+                                                advanced_settings: {
+                                                    ...formData.advanced_settings,
+                                                    security_settings: {
+                                                        ...formData.advanced_settings.security_settings,
+                                                        audit_logging: checked
+                                                    }
+                                                }
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* Integrations Tab */}
+                        <TabsContent value="integrations" className="space-y-6 mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">CRM Integration</h4>
+                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <Label className="text-sm font-medium">Enable CRM Integration</Label>
+                                        <p className="text-xs text-gray-600">Connect with customer management systems</p>
+                                    </div>
+                                    <Switch
+                                        checked={formData.advanced_settings.integration_settings.crm_integration}
+                                        onCheckedChange={(checked) => setFormData({
+                                            ...formData,
+                                            advanced_settings: {
+                                                ...formData.advanced_settings,
+                                                integration_settings: {
+                                                    ...formData.advanced_settings.integration_settings,
+                                                    crm_integration: checked
+                                                }
+                                            }
+                                        })}
+                                    />
+                                </div>
+
+                                {formData.advanced_settings.integration_settings.crm_integration && (
+                                    <div className="space-y-4 pl-4 border-l-2 border-blue-200">
+                                        <div className="space-y-2">
+                                            <Label>CRM Provider</Label>
+                                            <Select
+                                                value={formData.advanced_settings.integration_settings.crm_provider}
+                                                onValueChange={(value) => setFormData({
+                                                    ...formData,
+                                                    advanced_settings: {
+                                                        ...formData.advanced_settings,
+                                                        integration_settings: {
+                                                            ...formData.advanced_settings.integration_settings,
+                                                            crm_provider: value
+                                                        }
+                                                    }
+                                                })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select CRM provider" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="salesforce">Salesforce</SelectItem>
+                                                    <SelectItem value="hubspot">HubSpot</SelectItem>
+                                                    <SelectItem value="zoho">Zoho CRM</SelectItem>
+                                                    <SelectItem value="custom">Custom Integration</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Webhook URL</Label>
+                                            <Input
+                                                value={formData.advanced_settings.integration_settings.webhook_url}
+                                                onChange={(e) => setFormData({
+                                                    ...formData,
+                                                    advanced_settings: {
+                                                        ...formData.advanced_settings,
+                                                        integration_settings: {
+                                                            ...formData.advanced_settings.integration_settings,
+                                                            webhook_url: e.target.value
+                                                        }
+                                                    }
+                                                })}
+                                                placeholder="https://your-crm.com/webhook"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
 
                     {/* Action Buttons */}
                     <div className="flex gap-3 pt-6 border-t border-gray-200">
