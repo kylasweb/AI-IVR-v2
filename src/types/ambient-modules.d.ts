@@ -558,6 +558,21 @@ declare module 'lucide-react' {
     export const ArrowLeft: any
     export const ArrowRight: any
 
+    // Missing icons used in components
+    export const Edit: any
+    export const Pause: any
+    export const Camera: any
+    export const Monitor: any
+    export const Circle: any
+    export const Share2: any
+    export const VolumeOff: any
+    export const Paintbrush: any
+    export const Terminal: any
+    export const PanelTop: any
+    export const Calendar: any
+    export const Pencil: any
+    export const Sliders: any
+
     // Icon variants (some UI components use *Icon suffix)
     export const ChevronDownIcon: any
     export const ChevronLeftIcon: any

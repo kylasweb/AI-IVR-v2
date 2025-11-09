@@ -29,14 +29,14 @@ import {
     CheckCircle,
     Plus,
     Trash2,
-    Edit3,
+    Edit,
     Upload,
     FileText,
     Database,
     Zap,
     Target,
     Clock,
-    SlidersHorizontal as Sliders
+    Sliders
 } from 'lucide-react';
 
 export default function CulturalAIPage() {
@@ -276,7 +276,7 @@ export default function CulturalAIPage() {
                                         </div>
                                         <div className="flex gap-2">
                                             <Button variant="outline" size="sm" className="flex-1">
-                                                <Edit3 className="h-4 w-4 mr-1" />
+                                                <Edit className="h-4 w-4 mr-1" />
                                                 Edit
                                             </Button>
                                             <Button variant="outline" size="sm" onClick={() => setIsTrainingDialogOpen(true)}>

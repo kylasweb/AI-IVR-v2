@@ -26,7 +26,7 @@ import {
     Database,
     Users,
     Trash2,
-    Edit3 as Edit
+    Edit
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 

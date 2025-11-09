@@ -17,31 +17,31 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import {
     Play as Video,
-    Square as VideoOff,
+    Pause as VideoOff,
     Mic,
     MicOff,
     Phone,
     PhoneOff,
-    Camera as Camera,
+    Camera,
     X as CameraOff,
-    MonitorSpeaker as Monitor,
+    Monitor,
     Users,
     Settings,
     Play,
-    Square,
-    Dot as Circle,
+    Pause,
+    Circle,
     Download,
     Upload,
-    Share2 as Share2,
+    Share2,
     Maximize2,
     Minimize2,
     Volume2,
-    VolumeX as VolumeX,
+    VolumeOff,
     RotateCcw,
     Save,
     Plus,
     Eye,
-    Edit3 as Edit3,
+    Edit,
     Clock,
     CheckCircle,
     AlertTriangle,
@@ -53,15 +53,15 @@ import {
     Activity,
     FileText as FileVideo,
     Layers,
-    Brush as Palette,
+    Paintbrush as Palette,
     Terminal as Code,
-    PanelTopOpen as Layout,
+    PanelTop as Layout,
     GitBranch as Workflow,
     Bot,
     MessageSquare,
     User,
     PhoneCall,
-    Calendar as Calendar,
+    Calendar,
     BarChart3
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -796,7 +796,7 @@ const VideoIVR: React.FC = () => {
                                                     <Play className="h-4 w-4" />
                                                 </Button>
                                                 <Button size="sm" variant="outline">
-                                                    <Edit3 className="h-4 w-4" />
+                                                    <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button size="sm" variant="outline">
                                                     <BarChart3 className="h-4 w-4" />

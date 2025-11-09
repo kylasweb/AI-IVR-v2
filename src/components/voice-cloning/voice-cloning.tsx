@@ -18,7 +18,7 @@ import { Slider } from '@/components/ui/slider';
 import {
     Mic,
     Play,
-    Square,
+    Pause,
     RotateCcw,
     Download,
     Upload,
@@ -27,12 +27,12 @@ import {
     User,
     Activity,
     Volume2,
-    VolumeX,
+    VolumeOff,
     Save,
     Plus,
     Eye,
-    Edit3,
-    Edit2,
+    Edit,
+    Pencil as Edit2,
     Clock,
     CheckCircle,
     AlertTriangle,
@@ -44,7 +44,7 @@ import {
     TrendingUp,
     FileText as FileAudio,
     Layers,
-    Brush as Palette
+    Paintbrush as Palette
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -623,7 +623,7 @@ const VoiceCloning: React.FC = () => {
                                                     variant="outline"
                                                     disabled={model.status !== 'ready'}
                                                 >
-                                                    <Edit3 className="h-4 w-4" />
+                                                    <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     size="sm"
@@ -816,7 +816,7 @@ const VoiceCloning: React.FC = () => {
                                                 </Button>
                                             ) : (
                                                 <Button onClick={stopRecording} variant="outline">
-                                                    <Square className="mr-2 h-4 w-4" />
+                                                    <Pause className="mr-2 h-4 w-4" />
                                                     Stop Recording
                                                 </Button>
                                             )}
