@@ -39,6 +39,7 @@ import {
 
 // Import feature components
 import WorkflowBuilder from '@/components/ivr/workflow-builder';
+import IVRManagement from '@/components/ivr/ivr-management';
 import DispatcherDashboard from '@/components/dispatcher/dispatcher-dashboard';
 import AdvancedAnalyticsDashboard from '@/components/advanced-dashboard/advanced-analytics-dashboard';
 import MalayalamIVRAnalytics from '@/components/analytics/malayalam-ivr-analytics';
@@ -176,6 +177,18 @@ export default function MainDashboard() {
       description: 'System overview and key metrics'
     },
     {
+      id: 'ivr',
+      name: 'IVR Management',
+      icon: PhoneCall,
+      description: 'Interactive Voice Response configuration and management'
+    },
+    {
+      id: 'workflows',
+      name: 'Workflow Builder',
+      icon: Workflow,
+      description: 'Visual AI workflow management'
+    },
+    {
       id: 'rides',
       name: 'Ride Management',
       icon: Car,
@@ -192,12 +205,6 @@ export default function MainDashboard() {
       name: 'Customer Management',
       icon: Phone,
       description: 'Manage customers and loyalty'
-    },
-    {
-      id: 'workflows',
-      name: 'Workflow Builder',
-      icon: Workflow,
-      description: 'Visual AI workflow management'
     },
     {
       id: 'agents',
@@ -582,6 +589,14 @@ export default function MainDashboard() {
             <Button
               variant="outline"
               className="h-20 flex-col gap-2"
+              onClick={() => setActiveTab('ivr')}
+            >
+              <PhoneCall className="h-6 w-6" />
+              Manage IVR
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex-col gap-2"
               onClick={() => setActiveTab('rides')}
             >
               <Car className="h-6 w-6" />
@@ -651,6 +666,8 @@ export default function MainDashboard() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'ivr':
+        return <IVRManagement />;
       case 'rides':
         return <RideManagement />;
       case 'drivers':
