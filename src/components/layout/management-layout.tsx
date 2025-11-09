@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import MobileBottomNav from './mobile-bottom-nav';
 import {
     SidebarProvider,
     Sidebar,
@@ -55,7 +56,15 @@ import {
     X as LogOut,
     User,
     ChevronDown as ChevronUp,
-    BarChart3 as Home
+    BarChart3 as Home,
+    Activity as TestIcon,
+    Zap,
+    Bot as RobotIcon,
+    Volume2 as VoiceIcon,
+    Globe as LangIcon,
+    FileText as BookIcon,
+    Settings as CommandIcon,
+    Network as WifiIcon
 } from 'lucide-react';
 
 interface ManagementLayoutProps {
@@ -172,6 +181,13 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/voice')
                 },
                 {
+                    title: 'Voice AI Agents',
+                    url: '/voice-ai-agents',
+                    icon: RobotIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/voice-ai-agent')
+                },
+                {
                     title: 'Voice Biometrics',
                     url: '/voice-biometrics',
                     icon: Headphones,
@@ -190,6 +206,70 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     icon: Globe,
                     badge: 'ML',
                     isActive: pathname.includes('/cultural')
+                }
+            ]
+        },
+        {
+            title: 'Testing & QA',
+            items: [
+                {
+                    title: 'AI Testing Suite',
+                    url: '/testing/ai',
+                    icon: TestIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/testing/ai')
+                },
+                {
+                    title: 'Automation Tests',
+                    url: '/testing/automation',
+                    icon: Bot,
+                    isActive: pathname.includes('/testing/automation')
+                },
+                {
+                    title: 'Voice AI Agent Tests',
+                    url: '/testing/voice-ai',
+                    icon: VoiceIcon,
+                    badge: 'Beta',
+                    isActive: pathname.includes('/testing/voice-ai')
+                },
+                {
+                    title: 'Performance Testing',
+                    url: '/testing/performance',
+                    icon: Activity,
+                    isActive: pathname.includes('/testing/performance')
+                }
+            ]
+        },
+        {
+            title: 'Configuration',
+            items: [
+                {
+                    title: 'Language Settings',
+                    url: '/config/languages',
+                    icon: LangIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/config/language')
+                },
+                {
+                    title: 'AI Knowledge Base',
+                    url: '/ai-kb',
+                    icon: BookIcon,
+                    badge: 'AI',
+                    isActive: pathname.includes('/ai-kb')
+                },
+                {
+                    title: 'Command Centre',
+                    url: '/command-centre',
+                    icon: CommandIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/command-centre')
+                },
+                {
+                    title: 'API Gateway',
+                    url: '/api-gateway',
+                    icon: WifiIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/api-gateway')
                 }
             ]
         },
@@ -404,6 +484,9 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                         </div>
                     </main>
                 </SidebarInset>
+
+                {/* Mobile Bottom Navigation */}
+                <MobileBottomNav />
             </div>
         </SidebarProvider>
     );
