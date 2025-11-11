@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import ManagementLayout from '@/components/layout/management-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -976,18 +977,17 @@ export default function VerificationPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-            <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">🔒 System Verification</h1>
-                            <p className="text-gray-600 mt-2">
-                                Comprehensive real-time testing of all system modules and features
-                            </p>
+        <ManagementLayout title="System Verification" subtitle="Comprehensive real-time testing of all system modules and features">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    {/* Overall Progress */}
+                    <div className="bg-white rounded-lg shadow-sm border p-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+                            <span className="text-sm text-gray-500">{Math.round(overallProgress)}%</span>
                         </div>
-                        <div className="flex items-center space-x-4">
+                        <Progress value={overallProgress} className="h-2" />
+                        <div className="flex items-center space-x-4 mt-4">
                             <Badge variant={wsConnected ? "default" : "destructive"}>
                                 {wsConnected ? "🟢 Connected" : "🔴 Disconnected"}
                             </Badge>
@@ -1011,232 +1011,223 @@ export default function VerificationPage() {
                         </div>
                     </div>
 
-                    {/* Overall Progress */}
-                    <div className="mt-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-                            <span className="text-sm text-gray-500">{Math.round(overallProgress)}%</span>
-                        </div>
-                        <Progress value={overallProgress} className="h-2" />
-                    </div>
-                </div>
-
-                {/* Test Configuration */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                    <h2 className="text-xl font-semibold mb-4">Test Configuration</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Test Phone Number</Label>
-                            <Input
-                                id="phone"
-                                value={testPhoneNumber}
-                                onChange={(e) => setTestPhoneNumber(e.target.value)}
-                                placeholder="+918888888888"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="language">Test Language</Label>
-                            <Select value={testLanguage} onValueChange={setTestLanguage}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="malayalam">മലയാളം (Malayalam)</SelectItem>
-                                    <SelectItem value="english">English</SelectItem>
-                                    <SelectItem value="mixed">Mixed (Manglish)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="audio">Test Audio File (Optional)</Label>
-                            <Input
-                                id="audio"
-                                type="file"
-                                accept="audio/*"
-                                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                            />
+                    {/* Test Configuration */}
+                    <div className="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 className="text-xl font-semibold mb-4">Test Configuration</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Test Phone Number</Label>
+                                <Input
+                                    id="phone"
+                                    value={testPhoneNumber}
+                                    onChange={(e) => setTestPhoneNumber(e.target.value)}
+                                    placeholder="+918888888888"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="language">Test Language</Label>
+                                <Select value={testLanguage} onValueChange={setTestLanguage}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="malayalam">മലയാളം (Malayalam)</SelectItem>
+                                        <SelectItem value="english">English</SelectItem>
+                                        <SelectItem value="mixed">Mixed (Manglish)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="audio">Test Audio File (Optional)</Label>
+                                <Input
+                                    id="audio"
+                                    type="file"
+                                    accept="audio/*"
+                                    onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Test Suites */}
-                <Tabs value={selectedSuite} onValueChange={setSelectedSuite} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-6">
-                        {testSuites.map((suite, index) => (
-                            <TabsTrigger key={index} value={suite.name.toLowerCase().replace(/\s+/g, '-')}>
-                                {suite.icon}
-                                <span className="ml-2 hidden sm:inline">{suite.name}</span>
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                    {/* Test Suites */}
+                    <Tabs value={selectedSuite} onValueChange={setSelectedSuite} className="space-y-6">
+                        <TabsList className="grid w-full grid-cols-6">
+                            {testSuites.map((suite, index) => (
+                                <TabsTrigger key={index} value={suite.name.toLowerCase().replace(/\s+/g, '-')}>
+                                    {suite.icon}
+                                    <span className="ml-2 hidden sm:inline">{suite.name}</span>
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
 
-                    {testSuites.map((suite, suiteIndex) => (
-                        <TabsContent
-                            key={suiteIndex}
-                            value={suite.name.toLowerCase().replace(/\s+/g, '-')}
-                            className="space-y-4"
-                        >
-                            <Card>
-                                <CardHeader>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            {suite.icon}
-                                            <div>
-                                                <CardTitle>{suite.name}</CardTitle>
-                                                <CardDescription>{suite.description}</CardDescription>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            onClick={() => runTestSuite(suite.name)}
-                                            disabled={isRunningAll}
-                                            variant="outline"
-                                        >
-                                            {isRunningAll ? "Running..." : "Run Suite"}
-                                        </Button>
-                                    </div>
-                                    <Progress value={suite.progress} className="h-2 mt-4" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-3">
-                                        {suite.tests.map((test) => {
-                                            const result = testResults.get(test.id);
-                                            const status = result?.status || test.status;
-
-                                            return (
-                                                <div
-                                                    key={test.id}
-                                                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <div className="flex items-center space-x-3">
-                                                        {getStatusIcon(status)}
-                                                        <div>
-                                                            <h3 className="font-medium text-gray-900">{test.name}</h3>
-                                                            {result?.error && (
-                                                                <p className="text-sm text-red-600 mt-1">{result.error}</p>
-                                                            )}
-                                                            {result?.duration && (
-                                                                <p className="text-sm text-gray-500 mt-1">
-                                                                    Completed in {result.duration}ms
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center space-x-3">
-                                                        <Badge className={getStatusColor(status)}>
-                                                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                                                        </Badge>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => runTest(test.id, test.name)}
-                                                            disabled={currentTest === test.id || isRunningAll}
-                                                        >
-                                                            {currentTest === test.id ? "Running..." : "Run"}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Test Results Details */}
-                            {suite.tests.some(test => testResults.has(test.id)) && (
+                        {testSuites.map((suite, suiteIndex) => (
+                            <TabsContent
+                                key={suiteIndex}
+                                value={suite.name.toLowerCase().replace(/\s+/g, '-')}
+                                className="space-y-4"
+                            >
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Test Results Details</CardTitle>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                {suite.icon}
+                                                <div>
+                                                    <CardTitle>{suite.name}</CardTitle>
+                                                    <CardDescription>{suite.description}</CardDescription>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                onClick={() => runTestSuite(suite.name)}
+                                                disabled={isRunningAll}
+                                                variant="outline"
+                                            >
+                                                {isRunningAll ? "Running..." : "Run Suite"}
+                                            </Button>
+                                        </div>
+                                        <Progress value={suite.progress} className="h-2 mt-4" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="space-y-4">
-                                            {suite.tests
-                                                .filter(test => testResults.has(test.id))
-                                                .map(test => {
-                                                    const result = testResults.get(test.id)!;
-                                                    return (
-                                                        <div key={test.id} className="border rounded-lg p-4">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                                <h4 className="font-medium">{test.name}</h4>
-                                                                <Badge className={getStatusColor(result.status)}>
-                                                                    {result.status}
-                                                                </Badge>
+                                        <div className="space-y-3">
+                                            {suite.tests.map((test) => {
+                                                const result = testResults.get(test.id);
+                                                const status = result?.status || test.status;
+
+                                                return (
+                                                    <div
+                                                        key={test.id}
+                                                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        <div className="flex items-center space-x-3">
+                                                            {getStatusIcon(status)}
+                                                            <div>
+                                                                <h3 className="font-medium text-gray-900">{test.name}</h3>
+                                                                {result?.error && (
+                                                                    <p className="text-sm text-red-600 mt-1">{result.error}</p>
+                                                                )}
+                                                                {result?.duration && (
+                                                                    <p className="text-sm text-gray-500 mt-1">
+                                                                        Completed in {result.duration}ms
+                                                                    </p>
+                                                                )}
                                                             </div>
-                                                            {result.details && (
-                                                                <pre className="bg-gray-50 p-3 rounded text-sm overflow-x-auto">
-                                                                    {JSON.stringify(result.details, null, 2)}
-                                                                </pre>
-                                                            )}
-                                                            {result.timestamp && (
-                                                                <p className="text-xs text-gray-500 mt-2">
-                                                                    {result.timestamp.toLocaleString()}
-                                                                </p>
-                                                            )}
                                                         </div>
-                                                    );
-                                                })}
+                                                        <div className="flex items-center space-x-3">
+                                                            <Badge className={getStatusColor(status)}>
+                                                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                            </Badge>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => runTest(test.id, test.name)}
+                                                                disabled={currentTest === test.id || isRunningAll}
+                                                            >
+                                                                {currentTest === test.id ? "Running..." : "Run"}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </CardContent>
                                 </Card>
-                            )}
-                        </TabsContent>
-                    ))}
-                </Tabs>
 
-                {/* Real-time System Status */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium">WebSocket Status</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center space-x-2">
-                                <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                                <span className="text-sm">{wsConnected ? 'Connected' : 'Disconnected'}</span>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Active Workflows: {data.systemMetrics?.activeWorkflows || 0}
-                            </p>
-                        </CardContent>
-                    </Card>
+                                {/* Test Results Details */}
+                                {suite.tests.some(test => testResults.has(test.id)) && (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Test Results Details</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="space-y-4">
+                                                {suite.tests
+                                                    .filter(test => testResults.has(test.id))
+                                                    .map(test => {
+                                                        const result = testResults.get(test.id)!;
+                                                        return (
+                                                            <div key={test.id} className="border rounded-lg p-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <h4 className="font-medium">{test.name}</h4>
+                                                                    <Badge className={getStatusColor(result.status)}>
+                                                                        {result.status}
+                                                                    </Badge>
+                                                                </div>
+                                                                {result.details && (
+                                                                    <pre className="bg-gray-50 p-3 rounded text-sm overflow-x-auto">
+                                                                        {JSON.stringify(result.details, null, 2)}
+                                                                    </pre>
+                                                                )}
+                                                                {result.timestamp && (
+                                                                    <p className="text-xs text-gray-500 mt-2">
+                                                                        {result.timestamp.toLocaleString()}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </TabsContent>
+                        ))}
+                    </Tabs>
 
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium">System Metrics</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-1">
-                                <p className="text-xs">System Load: {data.systemMetrics?.systemLoad || 0}%</p>
-                                <p className="text-xs">Memory: {data.systemMetrics?.memoryUsage || 0}%</p>
-                                <p className="text-xs">Queued: {data.systemMetrics?.queuedExecutions || 0}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Real-time System Status */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">WebSocket Status</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center space-x-2">
+                                    <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                                    <span className="text-sm">{wsConnected ? 'Connected' : 'Disconnected'}</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Active Workflows: {data.systemMetrics?.activeWorkflows || 0}
+                                </p>
+                            </CardContent>
+                        </Card>
 
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium">Test Summary</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-1">
-                                {(() => {
-                                    const allTests = testSuites.flatMap(suite => suite.tests);
-                                    const passed = allTests.filter(test => testResults.get(test.id)?.status === 'passed').length;
-                                    const failed = allTests.filter(test => testResults.get(test.id)?.status === 'failed').length;
-                                    const total = allTests.length;
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">System Metrics</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-1">
+                                    <p className="text-xs">System Load: {data.systemMetrics?.systemLoad || 0}%</p>
+                                    <p className="text-xs">Memory: {data.systemMetrics?.memoryUsage || 0}%</p>
+                                    <p className="text-xs">Queued: {data.systemMetrics?.queuedExecutions || 0}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                                    return (
-                                        <>
-                                            <p className="text-xs text-green-600">Passed: {passed}</p>
-                                            <p className="text-xs text-red-600">Failed: {failed}</p>
-                                            <p className="text-xs text-gray-500">Total: {total}</p>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </CardContent>
-                    </Card>
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-medium">Test Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-1">
+                                    {(() => {
+                                        const allTests = testSuites.flatMap(suite => suite.tests);
+                                        const passed = allTests.filter(test => testResults.get(test.id)?.status === 'passed').length;
+                                        const failed = allTests.filter(test => testResults.get(test.id)?.status === 'failed').length;
+                                        const total = allTests.length;
+
+                                        return (
+                                            <>
+                                                <p className="text-xs text-green-600">Passed: {passed}</p>
+                                                <p className="text-xs text-red-600">Failed: {failed}</p>
+                                                <p className="text-xs text-gray-500">Total: {total}</p>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
-        </div>
+        </ManagementLayout>
     );
 }

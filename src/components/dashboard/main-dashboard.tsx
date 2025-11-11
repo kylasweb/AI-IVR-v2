@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Activity,
   Users,
@@ -34,7 +35,13 @@ import {
   AlertTriangle,
   Car,
   FileText,
-  Mic
+  Mic,
+  CreditCard,
+  Receipt,
+  UserCheck,
+  Server,
+  Network,
+  Router
 } from 'lucide-react';
 
 // Import feature components
@@ -52,6 +59,7 @@ import AITaskBuilder from '@/components/ai-agent/ai-task-builder';
 import VoiceCloning from '@/components/voice-cloning/voice-cloning';
 import VideoIVR from '@/components/video-ivr/video-ivr';
 import { useMockData, mockDataGenerators } from '@/hooks/use-mock-data';
+import { useUser, UserRole } from '@/hooks/use-user';
 
 interface DashboardStats {
   totalCalls: number;
@@ -75,6 +83,7 @@ interface SystemHealth {
 
 export default function MainDashboard() {
   const router = useRouter();
+  const { user } = useUser();
   const { isDemoMode } = useMockData();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
@@ -94,240 +103,105 @@ export default function MainDashboard() {
     services: []
   });
 
-  // Fetch real-time or mock dashboard data
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
+  // Get role-specific navigation tabs
+  const getNavigationTabs = (role: UserRole) => {
+    const baseTabs = [
+      {
+        id: 'overview',
+        name: 'Overview',
+        icon: BarChart3,
+        description: 'System overview and key metrics'
+      }
+    ];
 
-        if (isDemoMode) {
-          // Use mock data in demo mode
-          const mockStats = mockDataGenerators.generateDashboardStats();
-          const mockHealth = mockDataGenerators.generateSystemHealth();
-
-          setStats(mockStats);
-          setHealth(mockHealth);
-
-          // Simulate loading delay for demo
-          setTimeout(() => setLoading(false), 1000);
-        } else {
-          // Fetch real data in realtime mode
-          const analyticsResponse = await fetch('/api/analytics/dashboard');
-          const analyticsData = await analyticsResponse.json();
-
-          // Fetch IVR stats
-          const statsResponse = await fetch('/api/ivr/stats');
-          const statsData = await statsResponse.json();
-
-          if (analyticsData.success && analyticsData.analytics) {
-            const analytics = analyticsData.analytics;
-
-            setStats({
-              totalCalls: analytics.totalCalls || statsData.total_calls || 0,
-              activeCalls: analytics.realTimeStats?.currentActiveCalls || statsData.active_calls || 0,
-              totalAgents: analytics.driverMetrics?.totalDrivers || 12,
-              activeAgents: analytics.driverMetrics?.activeDrivers || 9,
-              workflows: analytics.activeWorkflows || 8,
-              uptime: 99.9, // This would come from system health API
-              satisfaction: analytics.driverMetrics?.averageRating || 4.8,
-              revenue: Math.floor(analytics.totalCalls * 22.5) || 0 // Estimated revenue
-            });
-
-            // Update system health based on real data
-            setHealth({
-              overall: analytics.realTimeStats?.systemLoad > 80 ? 'critical' :
-                analytics.realTimeStats?.systemLoad > 60 ? 'warning' : 'healthy',
-              services: [
-                {
-                  name: 'Voice Processing',
-                  status: analytics.realTimeStats?.responseTime < 500 ? 'online' : 'degraded',
-                  uptime: 99.9
-                },
-                {
-                  name: 'AI Engine',
-                  status: analytics.amdDetection?.accuracyRate > 0.9 ? 'online' : 'degraded',
-                  uptime: analytics.amdDetection?.accuracyRate * 100 || 98.7
-                },
-                {
-                  name: 'Malayalam TTS',
-                  status: analytics.culturalIntelligence?.malayalamInteractions > 1000 ? 'online' : 'degraded',
-                  uptime: 99.5
-                },
-                {
-                  name: 'Manglish STT',
-                  status: analytics.culturalIntelligence?.manglishInteractions > 300 ? 'online' : 'degraded',
-                  uptime: 95.2
-                },
-                {
-                  name: 'Analytics',
-                  status: 'online',
-                  uptime: 99.8
-                }
-              ]
-            });
+    switch (role) {
+      case 'client_admin':
+        return [
+          ...baseTabs,
+          {
+            id: 'billing',
+            name: 'Billing & Usage',
+            icon: CreditCard,
+            description: 'Subscription management and billing'
+          },
+          {
+            id: 'ivr',
+            name: 'IVR Management',
+            icon: PhoneCall,
+            description: 'Interactive Voice Response configuration'
+          },
+          {
+            id: 'analytics',
+            name: 'Analytics',
+            icon: TrendingUp,
+            description: 'Usage analytics and insights'
           }
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        // Keep default/fallback values on error
-      } finally {
-        setLoading(false);
-      }
-    };
+        ];
 
-    fetchDashboardData();
+      case 'fairgo_admin':
+        return [
+          ...baseTabs,
+          {
+            id: 'training',
+            name: 'Training Hub',
+            icon: UserCheck,
+            description: 'Operator training and SOP management'
+          },
+          {
+            id: 'clients',
+            name: 'Client Management',
+            icon: Users,
+            description: 'Manage client accounts and subscriptions'
+          },
+          {
+            id: 'operations',
+            name: 'Operations',
+            icon: Settings,
+            description: 'Operational oversight and management'
+          },
+          {
+            id: 'analytics',
+            name: 'Analytics',
+            icon: TrendingUp,
+            description: 'Advanced analytics and insights'
+          }
+        ];
 
-    // Set up real-time updates every 30 seconds (only in realtime mode)
-    const interval = !isDemoMode ? setInterval(fetchDashboardData, 30000) : null;
+      case 'sysadmin':
+        return [
+          ...baseTabs,
+          {
+            id: 'telephony',
+            name: 'Telephony Gateway',
+            icon: Router,
+            description: 'SIP trunk and call routing management'
+          },
+          {
+            id: 'infrastructure',
+            name: 'Infrastructure',
+            icon: Server,
+            description: 'System infrastructure monitoring'
+          },
+          {
+            id: 'tenants',
+            name: 'Tenant Billing',
+            icon: Database,
+            description: 'Multi-tenant billing management'
+          },
+          {
+            id: 'monitoring',
+            name: 'System Monitor',
+            icon: Activity,
+            description: 'Real-time system health'
+          }
+        ];
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isDemoMode]);
-
-  // Listen for mock data refresh events
-  useEffect(() => {
-    const handleMockDataRefresh = () => {
-      if (isDemoMode) {
-        const mockStats = mockDataGenerators.generateDashboardStats();
-        const mockHealth = mockDataGenerators.generateSystemHealth();
-        setStats(mockStats);
-        setHealth(mockHealth);
-      }
-    };
-
-    const handleCustomStatUpdate = (event: Event) => {
-      if (isDemoMode) {
-        const customEvent = event as CustomEvent;
-        const { field, value } = customEvent.detail;
-        setStats(prev => ({ ...prev, [field]: value }));
-      }
-    };
-
-    const handleMockDataReset = () => {
-      if (isDemoMode) {
-        const mockStats = mockDataGenerators.generateDashboardStats();
-        const mockHealth = mockDataGenerators.generateSystemHealth();
-        setStats(mockStats);
-        setHealth(mockHealth);
-      }
-    };
-
-    window.addEventListener('mock-data-refresh', handleMockDataRefresh);
-    window.addEventListener('mock-custom-stat-update', handleCustomStatUpdate);
-    window.addEventListener('mock-data-reset', handleMockDataReset);
-
-    return () => {
-      window.removeEventListener('mock-data-refresh', handleMockDataRefresh);
-      window.removeEventListener('mock-custom-stat-update', handleCustomStatUpdate);
-      window.removeEventListener('mock-data-reset', handleMockDataReset);
-    };
-  }, [isDemoMode]);
-
-  const navigationTabs = [
-    {
-      id: 'overview',
-      name: 'Overview',
-      icon: BarChart3,
-      description: 'System overview and key metrics'
-    },
-    {
-      id: 'ivr',
-      name: 'IVR Management',
-      icon: PhoneCall,
-      description: 'Interactive Voice Response configuration and management'
-    },
-    {
-      id: 'workflows',
-      name: 'Workflow Builder',
-      icon: Workflow,
-      description: 'Visual AI workflow management'
-    },
-    {
-      id: 'rides',
-      name: 'Ride Management',
-      icon: Car,
-      description: 'Manage rides and bookings'
-    },
-    {
-      id: 'drivers',
-      name: 'Driver Management',
-      icon: Users,
-      description: 'Manage drivers and vehicles'
-    },
-    {
-      id: 'customers',
-      name: 'Customer Management',
-      icon: Phone,
-      description: 'Manage customers and loyalty'
-    },
-    {
-      id: 'agents',
-      name: 'AI Agents',
-      icon: Bot,
-      description: 'AI agent management and training'
-    },
-    {
-      id: 'agent-templates',
-      name: 'Agent Templates',
-      icon: FileText,
-      description: 'Pre-built AI agent templates'
-    },
-    {
-      id: 'task-builder',
-      name: 'AI Task Builder',
-      icon: Zap,
-      description: 'Autonomous AI task automation'
-    },
-    {
-      id: 'voice-cloning',
-      name: 'Voice Cloning',
-      icon: Mic,
-      description: 'AI voice synthesis and cloning'
-    },
-    {
-      id: 'video-ivr',
-      name: 'Video IVR',
-      icon: Video,
-      description: 'Video-based IVR management'
-    },
-    {
-      id: 'dispatcher',
-      name: 'Dispatcher',
-      icon: AudioLines,
-      description: 'Real-time call management'
-    },
-    {
-      id: 'call-management',
-      name: 'Live Calls',
-      icon: PhoneCall,
-      description: 'Live call monitoring & control'
-    },
-    {
-      id: 'amd',
-      name: 'AMD System',
-      icon: Brain,
-      description: 'Answering Machine Detection with cultural intelligence'
-    },
-    {
-      id: 'analytics',
-      name: 'Analytics',
-      icon: TrendingUp,
-      description: 'Advanced analytics and insights'
-    },
-    {
-      id: 'admin',
-      name: 'Administration',
-      icon: Settings,
-      description: 'System administration'
-    },
-    {
-      id: 'monitoring',
-      name: 'System Monitor',
-      icon: Activity,
-      description: 'Real-time system health'
+      default:
+        return baseTabs;
     }
-  ];
+  };
+
+  const navigationTabs = user ? getNavigationTabs(user.role) : [];
 
   const featureCards = [
     {
@@ -374,27 +248,24 @@ export default function MainDashboard() {
     }
   ];
 
-  const renderOverview = () => (
+  const renderClientAdminOverview = () => (
     <div className="space-y-6">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white rounded-lg p-8">
         <div className="max-w-4xl">
-          <h1 className="text-4xl font-bold mb-4">World's First Malayalam-Native AI IVR Platform</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to FairGo AI IVR</h1>
           <p className="text-xl mb-6 opacity-90">
-            Enterprise-grade Vertical SaaS Platform designed for world's mobile-first, voice-first economy with advanced AI automation
+            Manage your AI-powered dispatch operations with advanced voice automation and real-time insights
           </p>
           <div className="flex flex-wrap gap-3 items-center">
             <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
-              മലയാളം Native
+              Professional Plan
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
-              Manglish Support
+              Active
             </Badge>
             <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
-              69+ Features
-            </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
-              Enterprise Ready
+              99.9% Uptime
             </Badge>
             <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
               <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'}`}></div>
@@ -410,7 +281,7 @@ export default function MainDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-700">Total Calls Today</p>
+                <p className="text-sm font-medium text-blue-700">Calls This Month</p>
                 {loading ? (
                   <div className="h-9 w-20 bg-blue-200 animate-pulse rounded mt-1"></div>
                 ) : (
@@ -418,7 +289,7 @@ export default function MainDashboard() {
                 )}
                 <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
                   <TrendingUp className="h-3 w-3" />
-                  {loading ? 'Loading...' : '+12% from yesterday'}
+                  {loading ? 'Loading...' : '+12% from last month'}
                 </p>
               </div>
               <Phone className="h-10 w-10 text-blue-600" />
@@ -430,17 +301,17 @@ export default function MainDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-700">Active AI Agents</p>
+                <p className="text-sm font-medium text-green-700">Active Operators</p>
                 {loading ? (
                   <div className="h-9 w-16 bg-green-200 animate-pulse rounded mt-1"></div>
                 ) : (
-                  <p className="text-3xl font-bold text-green-900">{stats.activeAgents}/{stats.totalAgents}</p>
+                  <p className="text-3xl font-bold text-green-900">{stats.activeAgents}</p>
                 )}
                 <p className="text-xs text-green-600">
-                  {loading ? 'Loading...' : 'All systems operational'}
+                  {loading ? 'Loading...' : 'Out of 25 licensed'}
                 </p>
               </div>
-              <Bot className="h-10 w-10 text-green-600" />
+              <Users className="h-10 w-10 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -466,13 +337,185 @@ export default function MainDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-700">Revenue (₹)</p>
+                <p className="text-sm font-medium text-orange-700">Monthly Cost</p>
                 {loading ? (
                   <div className="h-9 w-20 bg-orange-200 animate-pulse rounded mt-1"></div>
                 ) : (
-                  <p className="text-3xl font-bold text-orange-900">₹{(stats.revenue / 1000).toFixed(0)}K</p>
+                  <p className="text-3xl font-bold text-orange-900">₹9,999</p>
                 )}
-                <p className="text-xs text-orange-600">Monthly target: ₹500K</p>
+                <p className="text-xs text-orange-600">Next billing: Dec 15</p>
+              </div>
+              <CreditCard className="h-10 w-10 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Billing & Usage Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-6 w-6" />
+              Current Plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Professional Plan</span>
+                <Badge variant="default">Active</Badge>
+              </div>
+              <div className="text-2xl font-bold">₹9,999/month</div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Operators</span>
+                  <span>18 / 25</span>
+                </div>
+                <Progress value={72} className="h-2" />
+                <div className="flex justify-between text-sm">
+                  <span>Monthly Calls</span>
+                  <span>7,250 / 10,000</span>
+                </div>
+                <Progress value={72.5} className="h-2" />
+              </div>
+              <Button className="w-full" variant="outline">
+                Upgrade Plan
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="h-6 w-6" />
+              Recent Invoices
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-3 border rounded">
+                <div>
+                  <div className="font-medium">Nov 15, 2024</div>
+                  <div className="text-sm text-gray-600">Professional Plan</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">₹9,999</div>
+                  <Button size="sm" variant="ghost">Download</Button>
+                </div>
+              </div>
+              <div className="flex justify-between items-center p-3 border rounded">
+                <div>
+                  <div className="font-medium">Oct 15, 2024</div>
+                  <div className="text-sm text-gray-600">Professional Plan</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">₹9,999</div>
+                  <Button size="sm" variant="ghost">Download</Button>
+                </div>
+              </div>
+            </div>
+            <Button className="w-full mt-4" variant="outline">
+              View All Invoices
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderFairGoAdminOverview = () => (
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-green-600 via-teal-600 to-cyan-600 text-white rounded-lg p-8">
+        <div className="max-w-4xl">
+          <h1 className="text-4xl font-bold mb-4">FairGo Operations Hub</h1>
+          <p className="text-xl mb-6 opacity-90">
+            Manage client operations, operator training, and system performance across all tenants
+          </p>
+          <div className="flex flex-wrap gap-3 items-center">
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              Operations Manager
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              50+ Active Clients
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              Training Hub
+            </Badge>
+            <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
+              <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'}`}></div>
+              <span>{loading ? 'Loading data...' : 'Live data • Updates every 30s'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Total Clients</p>
+                {loading ? (
+                  <div className="h-9 w-16 bg-blue-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-900">52</p>
+                )}
+                <p className="text-xs text-blue-600">+3 this month</p>
+              </div>
+              <Users className="h-10 w-10 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700">Active Operators</p>
+                {loading ? (
+                  <div className="h-9 w-20 bg-green-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-green-900">1,247</p>
+                )}
+                <p className="text-xs text-green-600">Across all clients</p>
+              </div>
+              <UserCheck className="h-10 w-10 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700">Training Sessions</p>
+                {loading ? (
+                  <div className="h-9 w-16 bg-purple-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-purple-900">89</p>
+                )}
+                <p className="text-xs text-purple-600">This week</p>
+              </div>
+              <FileText className="h-10 w-10 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-700">Monthly Revenue</p>
+                {loading ? (
+                  <div className="h-9 w-24 bg-orange-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-orange-900">₹4.2L</p>
+                )}
+                <p className="text-xs text-orange-600">+15% from last month</p>
               </div>
               <TrendingUp className="h-10 w-10 text-orange-600" />
             </div>
@@ -480,244 +523,248 @@ export default function MainDashboard() {
         </Card>
       </div>
 
-      {/* System Health */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-6 w-6" />
-            System Health Overview
-          </CardTitle>
-          <CardDescription>Real-time status of all system components</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-5 w-5 bg-gray-200 animate-pulse rounded-full"></div>
-                    <div>
-                      <div className="h-4 w-24 bg-gray-200 animate-pulse rounded mb-1"></div>
-                      <div className="h-3 w-16 bg-gray-200 animate-pulse rounded"></div>
-                    </div>
-                  </div>
-                  <div className="h-4 w-12 bg-gray-200 animate-pulse rounded"></div>
-                </div>
-              ))}
+      {/* Training Hub & Client Management */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="h-6 w-6" />
+              Training Hub Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Active Trainees</span>
+                <span className="font-medium">23</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Completed Sessions</span>
+                <span className="font-medium">156</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Average Score</span>
+                <span className="font-medium">87%</span>
+              </div>
+              <Button className="w-full">
+                Access Training Hub
+              </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {health.services.map((service, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {service.status === 'online' ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : service.status === 'degraded' ? (
-                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
-                    )}
-                    <div>
-                      <p className="font-medium">{service.name}</p>
-                      <p className="text-sm text-gray-600">{service.uptime}% uptime</p>
-                    </div>
-                  </div>
-                  <Badge variant={
-                    service.status === 'online' ? 'default' :
-                      service.status === 'degraded' ? 'secondary' : 'destructive'
-                  }>
-                    {service.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* AI Agents Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-blue-600" />
-            AI Agents Overview
-          </CardTitle>
-          <CardDescription>Malayalam-enabled AI agents and their performance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalAgents}</div>
-              <div className="text-sm text-gray-600">Total Agents</div>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{stats.activeAgents}</div>
-              <div className="text-sm text-gray-600">Active Agents</div>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">1.2K</div>
-              <div className="text-sm text-gray-600">Daily Executions</div>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">94%</div>
-              <div className="text-sm text-gray-600">Success Rate</div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Globe className="h-4 w-4 text-green-600" />
-                <span className="font-medium">Malayalam Support</span>
-              </div>
-              <p className="text-sm text-gray-600">8 agents with native Malayalam capabilities</p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="h-4 w-4 text-purple-600" />
-                <span className="font-medium">AI Models</span>
-              </div>
-              <p className="text-sm text-gray-600">GPT-4, Claude, and local models integrated</p>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-blue-600" />
-                <span className="font-medium">Performance</span>
-              </div>
-              <p className="text-sm text-gray-600">Average 1.8s response time</p>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-center">
-            <Button onClick={() => setActiveTab('agents')} className="flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              Manage AI Agents
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Feature Grid */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-6 w-6" />
-            Advanced Features & Capabilities
-          </CardTitle>
-          <CardDescription>Enterprise-grade features powering your AI IVR platform</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featureCards.map((card, index) => (
-              <div key={index} className="p-6 border rounded-lg hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${card.color} text-white`}>
-                    <card.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{card.title}</h3>
-                    <Badge variant="outline" className="text-xs">
-                      {card.status}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {card.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-3 w-3 text-green-600" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and system management</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('ivr')}
-            >
-              <PhoneCall className="h-6 w-6" />
-              Manage IVR
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('rides')}
-            >
-              <Car className="h-6 w-6" />
-              Manage Rides
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('drivers')}
-            >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <Users className="h-6 w-6" />
-              Manage Drivers
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('customers')}
-            >
-              <Phone className="h-6 w-6" />
-              Manage Customers
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('workflows')}
-            >
-              <Workflow className="h-6 w-6" />
-              Create Workflow
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('agents')}
-            >
-              <Bot className="h-6 w-6" />
-              AI Agents
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('analytics')}
-            >
-              <BarChart3 className="h-6 w-6" />
-              Analytics
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('dispatcher')}
-            >
-              <AudioLines className="h-6 w-6" />
-              Dispatcher
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-2"
-              onClick={() => setActiveTab('admin')}
-            >
-              <Settings className="h-6 w-6" />
-              Settings
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              Client Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Active Subscriptions</span>
+                <span className="font-medium">48</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Pending Onboarding</span>
+                <span className="font-medium">4</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Support Tickets</span>
+                <span className="font-medium">12</span>
+              </div>
+              <Button className="w-full" variant="outline">
+                Manage Clients
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
+
+  const renderSysAdminOverview = () => (
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 text-white rounded-lg p-8">
+        <div className="max-w-4xl">
+          <h1 className="text-4xl font-bold mb-4">System Administration</h1>
+          <p className="text-xl mb-6 opacity-90">
+            Monitor infrastructure, manage telephony gateway, and oversee system operations
+          </p>
+          <div className="flex flex-wrap gap-3 items-center">
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              SysAdmin
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              Infrastructure
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
+              Telephony Gateway
+            </Badge>
+            <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
+              <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'}`}></div>
+              <span>{loading ? 'Loading data...' : 'Live data • Updates every 30s'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Active Calls</p>
+                {loading ? (
+                  <div className="h-9 w-16 bg-blue-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-900">{stats.activeCalls}</p>
+                )}
+                <p className="text-xs text-blue-600">Across all trunks</p>
+              </div>
+              <PhoneCall className="h-10 w-10 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700">SIP Trunks</p>
+                {loading ? (
+                  <div className="h-9 w-12 bg-green-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-green-900">8/8</p>
+                )}
+                <p className="text-xs text-green-600">All operational</p>
+              </div>
+              <Router className="h-10 w-10 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700">System Load</p>
+                {loading ? (
+                  <div className="h-9 w-12 bg-purple-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-purple-900">67%</p>
+                )}
+                <p className="text-xs text-purple-600">Normal range</p>
+              </div>
+              <Server className="h-10 w-10 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-700">Revenue</p>
+                {loading ? (
+                  <div className="h-9 w-20 bg-orange-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-orange-900">₹4.2L</p>
+                )}
+                <p className="text-xs text-orange-600">Monthly recurring</p>
+              </div>
+              <TrendingUp className="h-10 w-10 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Telephony Gateway & Infrastructure */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Router className="h-6 w-6" />
+              Telephony Gateway Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Jio SIP Trunk 1</span>
+                <Badge variant="default">Online</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Jio SIP Trunk 2</span>
+                <Badge variant="default">Online</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>FreeSWITCH Cluster</span>
+                <Badge variant="default">Healthy</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Call Routing Engine</span>
+                <Badge variant="default">Active</Badge>
+              </div>
+              <Button className="w-full">
+                Telephony Dashboard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Server className="h-6 w-6" />
+              Infrastructure Health
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Application Servers</span>
+                <Badge variant="default">3/3 Online</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Database Cluster</span>
+                <Badge variant="default">Healthy</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Load Balancers</span>
+                <Badge variant="default">Active</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>CDN Status</span>
+                <Badge variant="default">Optimal</Badge>
+              </div>
+              <Button className="w-full" variant="outline">
+                Infrastructure Monitor
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderOverview = () => {
+    if (!user) return null;
+
+    switch (user.role) {
+      case 'client_admin':
+        return renderClientAdminOverview();
+      case 'fairgo_admin':
+        return renderFairGoAdminOverview();
+      case 'sysadmin':
+        return renderSysAdminOverview();
+      default:
+        return renderClientAdminOverview();
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -764,6 +811,40 @@ export default function MainDashboard() {
               <h1 className="text-lg font-bold text-gray-900">FairGo IMOS</h1>
               <p className="text-xs text-gray-600">Malayalam AI IVR</p>
             </div>
+          </div>
+        </div>
+
+        {/* Role Switcher (Demo) */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Demo Role Switcher
+            </label>
+            <Select
+              value={user?.role || 'client_admin'}
+              onValueChange={(value: UserRole) => {
+                if (user) {
+                  // Use the switchRole function from useUser hook
+                  // Since we can't access it directly here, we'll dispatch a custom event
+                  const event = new CustomEvent('switch-user-role', { detail: { role: value } });
+                  window.dispatchEvent(event);
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="client_admin">Client Admin</SelectItem>
+                <SelectItem value="fairgo_admin">FairGo Admin</SelectItem>
+                <SelectItem value="sysadmin">System Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            {user && (
+              <div className="text-xs text-gray-500">
+                Logged in as: <span className="font-medium">{user.name}</span>
+              </div>
+            )}
           </div>
         </div>
 

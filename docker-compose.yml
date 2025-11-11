@@ -31,11 +31,194 @@ services:
     networks:
       - ai-ivr-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:10000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # ============================================================================
+  # PROJECT SAKSHAM: New Microservices for National Scale-Up
+  # ============================================================================
+
+  # Billing Service Database
+  billing-db:
+    image: postgres:15-alpine
+    container_name: fairgo-billing-db
+    environment:
+      POSTGRES_DB: billing_dev
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - billing_db_data:/var/lib/postgresql/data
+      - ./docker/init/billing-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - ai-ivr-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U billing_user -d billing_dev" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Telephony Configuration Database
+  telephony-db:
+    image: postgres:15-alpine
+    container_name: fairgo-telephony-db
+    environment:
+      POSTGRES_DB: telephony_dev
+      POSTGRES_USER: telephony_user
+      POSTGRES_PASSWORD: telephony_pass
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    volumes:
+      - telephony_db_data:/var/lib/postgresql/data
+      - ./docker/init/telephony-init.sql:/docker-entrypoint-initdb.d/02-init.sql
+    networks:
+      - ai-ivr-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U telephony_user -d telephony_dev" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    container_name: fairgo-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-ivr-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FreeSWITCH for telephony processing
+  freeswitch:
+    build:
+      context: ./docker/freeswitch
+      dockerfile: Dockerfile
+    container_name: fairgo-freeswitch
+    ports:
+      - "5060:5060/udp" # SIP port
+      - "5080:5080/udp" # Alternative SIP port
+      - "8021:8021" # ESL port
+      - "16384-32768:16384-32768/udp" # RTP ports
+    volumes:
+      - freeswitch_config:/etc/freeswitch
+      - freeswitch_logs:/var/log/freeswitch
+      - ./docker/freeswitch/conf:/etc/freeswitch/conf.d
+    environment:
+      - FREESWITCH_DOMAIN=fairgo.local
+    networks:
+      - ai-ivr-network
+    depends_on:
+      - telephony-db
+    healthcheck:
+      test: [ "CMD-SHELL", "fs_cli -x 'status' | grep -q 'FreeSWITCH'" ]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+
+  # Billing Service (Node.js/Express)
+  billing-service:
+    build:
+      context: ./services/billing-service
+      dockerfile: Dockerfile
+    container_name: fairgo-billing-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://billing_user:billing_pass@billing-db:5432/billing_dev
+      - REDIS_URL=redis://redis:6379
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      billing-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ai-ivr-network
+    volumes:
+      - ./services/billing-service:/app
+      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Telephony Gateway Service (Node.js/Fastify)
+  telephony-gateway-service:
+    build:
+      context: ./services/telephony-gateway-service
+      dockerfile: Dockerfile
+    container_name: fairgo-telephony-gateway
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DATABASE_URL=postgresql://telephony_user:telephony_pass@telephony-db:5432/telephony_dev
+      - REDIS_URL=redis://redis:6379
+      - FREESWITCH_ESL_HOST=freeswitch
+      - FREESWITCH_ESL_PORT=8021
+      - FREESWITCH_ESL_PASSWORD=${FREESWITCH_ESL_PASSWORD}
+    depends_on:
+      telephony-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      freeswitch:
+        condition: service_healthy
+    networks:
+      - ai-ivr-network
+    volumes:
+      - ./services/telephony-gateway-service:/app
+      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3002/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Stripe CLI for webhook testing
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: fairgo-stripe-cli
+    profiles: [ "testing" ]
+    command: tail -f /dev/null # Keep container running
+    volumes:
+      - stripe_config:/root/.config/stripe
+    networks:
+      - ai-ivr-network
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fairgo-pgadmin
+    profiles: [ "dev-tools" ]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fairgo.ai
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - ai-ivr-network
 
 networks:
   ai-ivr-network:
@@ -44,3 +227,10 @@ networks:
 volumes:
   node_modules:
   python_packages:
+  billing_db_data:
+  telephony_db_data:
+  redis_data:
+  freeswitch_config:
+  freeswitch_logs:
+  stripe_config:
+  pgadmin_data:

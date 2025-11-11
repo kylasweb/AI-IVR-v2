@@ -1,0 +1,80 @@
+// Prisma schema for FairGo Telephony Configuration Database
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model SipTrunk {
+    id              Int       @id @default(autoincrement())
+    name            String
+    host            String
+    port            Int       @default(5060)
+    credentials     String? // Encrypted
+    isActive        Boolean   @default(true)
+    healthStatus    String    @default("unknown")
+    lastHealthCheck DateTime?
+    createdAt       DateTime  @default(now())
+
+    // Relations
+    callLogs CallLog[]
+
+    @@map("sip_trunks")
+}
+
+model RoutingRule {
+    id         Int      @id @default(autoincrement())
+    name       String
+    priority   Int      @default(0)
+    conditions Json // Match criteria (e.g., {"caller_id": "emergency", "time_range": "24/7"})
+    actions    Json // Routing actions (e.g., {"queue": "emergency", "priority": "high"})
+    isActive   Boolean  @default(true)
+    createdBy  Int? // User ID who created the rule
+    createdAt  DateTime @default(now())
+
+    @@map("routing_rules")
+}
+
+model CallLog {
+    id          Int       @id @default(autoincrement())
+    callId      String    @unique // FreeSWITCH call ID
+    trunkId     Int
+    direction   String // inbound, outbound
+    status      String // completed, failed, busy, no_answer
+    duration    Int? // Duration in seconds
+    callerId    String? // Caller ID
+    destination String? // Destination number
+    startedAt   DateTime?
+    endedAt     DateTime?
+    metadata    Json? // Additional call data
+
+    // Relations
+    trunk SipTrunk @relation(fields: [trunkId], references: [id], onDelete: Cascade)
+
+    @@map("call_logs")
+}
+
+model TelephonyMetric {
+    id         Int      @id @default(autoincrement())
+    metricType String // active_calls, call_setup_time, failure_rate
+    value      Float
+    timestamp  DateTime @default(now())
+    metadata   Json? // Additional context
+
+    @@map("telephony_metrics")
+}
+
+// Health check log for monitoring
+model HealthCheck {
+    id        Int      @id @default(autoincrement())
+    service   String // freeswitch, sip_trunk_1, sip_trunk_2
+    status    String // healthy, degraded, unhealthy
+    latency   Int? // Response time in ms
+    error     String?
+    checkedAt DateTime @default(now())
+
+    @@map("health_checks")
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,10 @@ import {
   Clock,
   Activity as Gauge,
   Database as HardDrive,
-  Database as Memory
+  Database as Memory,
+  PanelLeftIcon as PanelLeftClose,
+  PanelLeftIcon as PanelLeftOpen,
+  MoreHorizontalIcon as Menu
 } from 'lucide-react';
 
 // Import admin components
@@ -50,6 +53,27 @@ type AdminTab = 'overview' | 'settings' | 'users' | 'integrations' | 'monitoring
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Auto-collapse sidebar on smaller screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) { // lg breakpoint
+        setSidebarCollapsed(true);
+      } else {
+        setSidebarCollapsed(false);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [stats] = useState<DashboardStats>({
     totalUsers: 1247,
     activeSessions: 34,
@@ -401,10 +425,28 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
         {/* Sidebar Navigation */}
-        <div className="w-64 bg-white shadow-lg">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
-            <p className="text-sm text-gray-600">FairGo IMOS System</p>
+        <div className={`bg-white shadow-lg transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-16' : 'w-64'
+          }`}>
+          <div className={`p-6 ${sidebarCollapsed ? 'px-3' : ''}`}>
+            <div className="flex items-center justify-between">
+              {!sidebarCollapsed && (
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
+                  <p className="text-sm text-gray-600">FairGo IMOS System</p>
+                </div>
+              )}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                {sidebarCollapsed ? (
+                  <PanelLeftOpen className="h-5 w-5 text-gray-600" />
+                ) : (
+                  <PanelLeftClose className="h-5 w-5 text-gray-600" />
+                )}
+              </button>
+            </div>
           </div>
           <nav className="mt-6">
             {navigationItems.map((item) => {
@@ -416,10 +458,13 @@ export default function AdminDashboard() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-3 px-6 py-3 text-left hover:bg-gray-100 transition-colors ${isActive ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-600' : 'text-gray-700'
-                    }`}
+                    } ${sidebarCollapsed ? 'px-3 justify-center' : ''}`}
+                  title={sidebarCollapsed ? item.name : undefined}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.name}</span>
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {!sidebarCollapsed && (
+                    <span className="font-medium truncate">{item.name}</span>
+                  )}
                 </button>
               );
             })}
@@ -429,6 +474,17 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
           <div className="p-8">
+            {/* Mobile sidebar toggle */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Menu className="h-5 w-5" />
+                <span>{sidebarCollapsed ? 'Show' : 'Hide'} Menu</span>
+              </button>
+            </div>
+
             {renderTabContent()}
           </div>
         </div>

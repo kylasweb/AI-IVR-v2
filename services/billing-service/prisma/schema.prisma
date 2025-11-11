@@ -1,0 +1,104 @@
+// Prisma schema for FairGo Billing Database
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Tenant {
+    id                 Int      @id @default(autoincrement())
+    fairgoTenantId     String   @unique // Foreign key to main FairGo system
+    stripeCustomerId   String?  @unique
+    subscriptionId     String?  @unique
+    planId             String // Reference to Plan.id
+    subscriptionStatus String   @default("trialing") // trialing, active, past_due, canceled
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+
+    // Relations
+    invoices         Invoice[]
+    webhooks         WebhookEvent[]
+    subscriptionLogs SubscriptionLog[]
+
+    @@map("tenants")
+}
+
+model Plan {
+    id          String  @id // e.g., 'plan_pilot', 'plan_professional', 'plan_enterprise'
+    name        String
+    description String?
+    priceId     String // Stripe Price ID
+    amount      Int // Amount in paisa (₹1 = 100)
+    currency    String  @default("INR")
+    interval    String  @default("month") // month, year
+    isActive    Boolean @default(true)
+
+    @@map("plans")
+}
+
+model Invoice {
+    id              Int       @id @default(autoincrement())
+    tenantId        Int
+    stripeInvoiceId String?   @unique
+    amount          Int // Amount in paisa
+    currency        String    @default("INR")
+    status          String    @default("draft") // draft, open, paid, void, uncollectible
+    dueDate         DateTime?
+    paidAt          DateTime?
+    createdAt       DateTime  @default(now())
+
+    // Relations
+    tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+    @@map("invoices")
+}
+
+model WebhookEvent {
+    id            Int       @id @default(autoincrement())
+    stripeEventId String    @unique
+    eventType     String // e.g., 'invoice.payment_failed', 'customer.subscription.created'
+    eventData     Json // Full Stripe webhook payload
+    processedAt   DateTime?
+    status        String    @default("pending") // pending, processed, failed
+    error         String?
+
+    // Relations
+    tenantId Int?
+    tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+    @@map("webhook_events")
+}
+
+// Subscription change log for audit
+model SubscriptionLog {
+    id            Int      @id @default(autoincrement())
+    tenantId      Int
+    action        String // 'created', 'updated', 'canceled', 'reactivated'
+    oldPlanId     String?
+    newPlanId     String
+    stripeEventId String?
+    metadata      Json? // Additional context
+    createdAt     DateTime @default(now())
+
+    // Relations
+    tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+    @@map("subscription_logs")
+}
+
+// Admin settings for feature toggles and configuration
+model AdminSetting {
+    id          Int      @id @default(autoincrement())
+    key         String   @unique // e.g., 'enable_freeswitch_esl', 'enable_jio_sip_trunk'
+    value       Json // Can store boolean, string, number, or object
+    description String?
+    category    String   @default("features") // features, system, billing, etc.
+    isEnabled   Boolean  @default(false) // Quick boolean access
+    updatedAt   DateTime @updatedAt
+    updatedBy   String? // User or system that last updated
+
+    @@map("admin_settings")
+}
