@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 nodemon --exec \"npx tsx server.ts\" --watch server.ts --watch src --ext ts,tsx,js,jsx",
     "dev:next": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "build:analyze": "cross-env NODE_OPTIONS=--max-old-space-size=4096 ANALYZE=true next build",
     "start": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=4096 tsx server.ts",
     "lint": "next lint",
