@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
 
   // Memory optimization settings
   experimental: {
-    // Reduce memory usage during compilation
+    // Disable webpack build worker to prevent chunk loading issues
     webpackBuildWorker: false,
   },
 
@@ -84,6 +84,9 @@ const nextConfig: NextConfig = {
 
     return config;
   },
+
+  // Output configuration for custom server
+  output: 'standalone',
 
   // Performance optimizations
   images: {
