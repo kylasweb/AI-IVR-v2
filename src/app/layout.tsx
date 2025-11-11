@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { MockDataProvider } from "@/hooks/use-mock-data";
+import { UserProvider } from "@/hooks/use-user";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,10 +44,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <MockDataProvider>
-          {children}
-          <Toaster />
-        </MockDataProvider>
+        <UserProvider>
+          <MockDataProvider>
+            {children}
+            <Toaster />
+          </MockDataProvider>
+        </UserProvider>
       </body>
     </html>
   );

@@ -5,7 +5,7 @@ import IVRManagement from '@/components/ivr/ivr-management';
 
 export default function IVRManagementPage() {
     return (
-        <ManagementLayout title="IVR Management" subtitle="Interactive Voice Response System">
+        <ManagementLayout title="IVR Management" subtitle="Manage Interactive Voice Response configurations and intelligent workflows">
             <IVRManagement />
         </ManagementLayout>
     );

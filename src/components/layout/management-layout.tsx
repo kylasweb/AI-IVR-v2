@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import MobileBottomNav from './mobile-bottom-nav';
 import {
@@ -97,6 +97,25 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         email: 'admin@fairgo.com',
         avatar: 'AU'
     });
+
+    // Responsive sidebar state
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+
+    // Handle responsive behavior
+    useEffect(() => {
+        const handleResize = () => {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile && sidebarOpen) {
+                setSidebarOpen(false);
+            } else if (!isMobile && !sidebarOpen) {
+                setSidebarOpen(true);
+            }
+        };
+
+        handleResize(); // Check initial size
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [sidebarOpen]);
 
     const navigationSections: NavigationSection[] = [
         {
@@ -268,12 +287,12 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/command-centre')
                 },
                 {
-                    title: 'API Gateway',
-                    url: '/api-gateway',
-                    icon: WifiIcon,
-                    badge: 'New',
-                    isActive: pathname.includes('/api-gateway')
-                }
+                    title: 'Sentinel Dashboard',
+                    url: '/sentinel-dashboard',
+                    icon: Shield,
+                    badge: 'Security',
+                    isActive: pathname.includes('/sentinel-dashboard')
+                },
             ]
         },
         {
@@ -335,9 +354,9 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     };
 
     return (
-        <SidebarProvider>
-            <div className="min-h-screen flex w-full bg-gray-50">
-                <Sidebar variant="inset" className="border-r border-gray-200">
+        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
+                <Sidebar variant="inset" collapsible="offcanvas" className="border-r border-gray-200">
                     <SidebarHeader className="border-b border-gray-200 bg-white">
                         <div className="flex items-center gap-2 px-4 py-3">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -461,7 +480,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     </SidebarFooter>
                 </Sidebar>
 
-                <SidebarInset className="flex-1">
+                <SidebarInset className="flex-1 overflow-hidden">
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex flex-1 items-center gap-2">
@@ -489,8 +508,8 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             </Badge>
                         </div>
                     </header>
-                    <main className="flex-1 overflow-auto">
-                        <div className="p-6">
+                    <main className="flex-1 overflow-auto bg-gray-50">
+                        <div className="p-6 min-h-full">
                             {children}
                         </div>
                     </main>

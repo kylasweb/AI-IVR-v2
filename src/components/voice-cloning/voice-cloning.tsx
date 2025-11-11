@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -198,7 +197,7 @@ const mockModels: VoiceModel[] = [
     }
 ];
 
-const VoiceCloning: React.FC = () => {
+function VoiceCloning() {
     const [models, setModels] = useState<VoiceModel[]>(mockModels);
     const [generations, setGenerations] = useState<VoiceGeneration[]>([]);
     const [stats, setStats] = useState<VoiceStats>({
@@ -425,552 +424,365 @@ const VoiceCloning: React.FC = () => {
         return matchesType && matchesStatus;
     });
 
+    // return (
+    //     <div className="space-y-6">
+    //         {/* Header */}
+    //         <div className="flex items-center justify-between">
+    //             <div>
+    //                 <h1 className="text-3xl font-bold">Voice Cloning Studio</h1>
+    //                 <p className="text-gray-600 mt-2">
+    //                     Create, train, and manage AI-powered voice models for your IVR systems
+    //                 </p>
+    //             </div>
+    //             <div className="flex gap-3">
+    //                 <Button variant="outline" onClick={() => loadVoiceModels()}>
+    //                     <RotateCcw className="mr-2 h-4 w-4" />
+    //                     Refresh
+    //                 </Button>
+    //                 <Button onClick={() => setIsDialogOpen(true)}>
+    //                     <Plus className="mr-2 h-4 w-4" />
+    //                     New Voice Model
+    //                 </Button>
+    //             </div>
+    //         </div>
+    //     </div>
+    // );
     return (
-        <ManagementLayout>
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold">Voice Cloning Studio</h1>
-                        <p className="text-gray-600 mt-2">
-                            Create, train, and manage AI-powered voice models for your IVR systems
+        <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Models</CardTitle>
+                        <Brain className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalModels}</div>
+                        <p className="text-xs text-muted-foreground">
+                            +2 from last month
                         </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Active Models</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-green-600">{stats.activeModels}</div>
+                        <p className="text-xs text-muted-foreground">
+                            Currently in use
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Generations</CardTitle>
+                        <Activity className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalGenerations.toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">
+                            This month
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Duration</CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{Math.floor(stats.totalDuration / 3600)}h {Math.floor((stats.totalDuration % 3600) / 60)}m</div>
+                        <p className="text-xs text-muted-foreground">
+                            Generated audio
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">${stats.totalCost.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">
+                            +12% from last month
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Avg Quality</CardTitle>
+                        <Star className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.avgQuality.toFixed(1)}%</div>
+                        <p className="text-xs text-muted-foreground">
+                            Accuracy score
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Voice Models Table */}
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Voice Models</CardTitle>
+                            <CardDescription>
+                                Manage your AI voice models and their training status
+                            </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                            <Select value={filterType} onValueChange={setFilterType}>
+                                <SelectTrigger className="w-[140px]">
+                                    <SelectValue placeholder="Filter by type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Types</SelectItem>
+                                    <SelectItem value="neural">Neural</SelectItem>
+                                    <SelectItem value="concatenative">Concatenative</SelectItem>
+                                    <SelectItem value="parametric">Parametric</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select value={filterStatus} onValueChange={setFilterStatus}>
+                                <SelectTrigger className="w-[140px]">
+                                    <SelectValue placeholder="Filter by status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="ready">Ready</SelectItem>
+                                    <SelectItem value="training">Training</SelectItem>
+                                    <SelectItem value="failed">Failed</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button onClick={() => setIsDialogOpen(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                New Voice Model
+                            </Button>
+                        </div>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => loadVoiceModels()}>
-                            <RotateCcw className="mr-2 h-4 w-4" />
-                            Refresh
-                        </Button>
-                        <Button onClick={() => setIsDialogOpen(true)}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Voice Model
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Models</CardTitle>
-                            <Brain className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.totalModels}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Models</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-green-600">{stats.activeModels}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Generations</CardTitle>
-                            <Activity className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.totalGenerations.toLocaleString()}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Duration</CardTitle>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{formatDuration(stats.totalDuration)}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">${stats.totalCost.toFixed(2)}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Avg Quality</CardTitle>
-                            <Star className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.avgQuality.toFixed(1)}%</div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <Tabs defaultValue="models" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="models">Voice Models</TabsTrigger>
-                        <TabsTrigger value="generate">Generate Voice</TabsTrigger>
-                        <TabsTrigger value="studio">Recording Studio</TabsTrigger>
-                    </TabsList>
-
-                    {/* Voice Models Tab */}
-                    <TabsContent value="models" className="space-y-4">
-                        {/* Filters */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">Filters</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex gap-4">
-                                    <Select value={filterType} onValueChange={setFilterType}>
-                                        <SelectTrigger className="w-40">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Types</SelectItem>
-                                            <SelectItem value="neural">Neural</SelectItem>
-                                            <SelectItem value="concatenative">Concatenative</SelectItem>
-                                            <SelectItem value="parametric">Parametric</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                        <SelectTrigger className="w-40">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Status</SelectItem>
-                                            <SelectItem value="ready">Ready</SelectItem>
-                                            <SelectItem value="training">Training</SelectItem>
-                                            <SelectItem value="failed">Failed</SelectItem>
-                                            <SelectItem value="archived">Archived</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Models Grid */}
-                        <div className="grid gap-4">
-                            {filteredModels.map((model) => (
-                                <Card key={model.id}>
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-start space-x-4 flex-1">
-                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                                    <User className="h-6 w-6 text-white" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <h3 className="text-lg font-semibold">{model.name}</h3>
-                                                        <Badge variant="outline">
-                                                            {getStatusIcon(model.status)}
-                                                            <span className="ml-1 capitalize">{model.status}</span>
-                                                        </Badge>
-                                                        <Badge variant="secondary" className={getQualityColor(model.quality)}>
-                                                            {model.quality.toUpperCase()}
-                                                        </Badge>
-                                                    </div>
-
-                                                    <p className="text-gray-600 mb-4">{model.description}</p>
-
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Language</p>
-                                                            <p className="font-medium">{model.language}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Accuracy</p>
-                                                            <p className="font-medium">{model.accuracy}%</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Samples</p>
-                                                            <p className="font-medium">{model.audioSamples}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Size</p>
-                                                            <p className="font-medium">{model.size}MB</p>
-                                                        </div>
-                                                    </div>
-
-                                                    {model.status === 'training' && (
-                                                        <div className="mb-4">
-                                                            <div className="flex justify-between text-sm mb-1">
-                                                                <span>Training Progress</span>
-                                                                <span>{model.trainingProgress}%</span>
-                                                            </div>
-                                                            <Progress value={model.trainingProgress} className="w-full" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setSelectedModel(model)}
-                                                    disabled={model.status !== 'ready'}
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    disabled={model.status !== 'ready'}
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    disabled={model.status !== 'ready'}
-                                                >
-                                                    <Download className="h-4 w-4" />
-                                                </Button>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {models
+                            .filter(model => filterType === 'all' || model.type === filterType)
+                            .filter(model => filterStatus === 'all' || model.status === filterStatus)
+                            .map((model) => (
+                                <div key={model.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${model.gender === 'male' ? 'bg-blue-500' : 'bg-pink-500'
+                                            }`}>
+                                            {model.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">{model.name}</h3>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="text-xs">
+                                                    {model.type}
+                                                </Badge>
+                                                <Badge variant="outline" className={`text-xs ${model.status === 'ready' ? 'text-green-600' :
+                                                    model.status === 'training' ? 'text-yellow-600' : 'text-red-600'
+                                                    }`}>
+                                                    {model.status}
+                                                </Badge>
+                                                <span className="text-xs text-gray-500">•</span>
+                                                <span className="text-xs text-gray-600">{model.language}</span>
+                                                <span className="text-xs text-gray-500">•</span>
+                                                <span className={`text-xs font-medium ${model.quality === 'ultra' ? 'text-purple-600' :
+                                                    model.quality === 'premium' ? 'text-blue-600' : 'text-gray-600'
+                                                    }`}>
+                                                    {model.quality}
+                                                </span>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-right">
+                                            <div className="text-sm font-medium text-gray-900">{model.usage.totalGenerations}</div>
+                                            <div className="text-xs text-gray-500">Uses</div>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setSelectedModel(model)}
+                                                className="h-8 w-8 p-0"
+                                                title="Test Voice"
+                                            >
+                                                <Play className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setSelectedModel(model)}
+                                                className="h-8 w-8 p-0"
+                                                title="Edit Model"
+                                            >
+                                                <Edit2 className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setModels(models.filter(m => m.id !== model.id));
+                                                    toast({
+                                                        title: "Model Deleted",
+                                                        description: `${model.name} has been removed.`,
+                                                    });
+                                                }}
+                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                title="Delete Model"
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
-                        </div>
-                    </TabsContent>
+                    </div>
+                </CardContent>
+            </Card>
 
-                    {/* Generate Voice Tab */}
-                    <TabsContent value="generate" className="space-y-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Text to Speech Generation</CardTitle>
-                                    <CardDescription>
-                                        Convert text to natural-sounding speech using your trained voice models
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
+            {/* Voice Generation Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>New Voice Model</DialogTitle>
+                        <DialogDescription>
+                            Create a new AI voice model by uploading sample audio or selecting from templates.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                        <Tabs defaultValue="upload" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="upload">Upload Audio</TabsTrigger>
+                                <TabsTrigger value="template">Use Template</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="upload" className="space-y-4">
+                                <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="voice-model">Select Voice Model</Label>
-                                        <Select onValueChange={(value) => setSelectedModel(models.find(m => m.id === value) || null)}>
+                                        <Label htmlFor="model-name">Model Name</Label>
+                                        <Input
+                                            id="model-name"
+                                            placeholder="Enter model name"
+                                            value={generationText}
+                                            onChange={(e) => setGenerationText(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="model-type">Voice Type</Label>
+                                        <Select>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Choose a voice model" />
+                                                <SelectValue placeholder="Select voice type" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {models.filter(m => m.status === 'ready').map((model) => (
-                                                    <SelectItem key={model.id} value={model.id}>
-                                                        {model.name} ({model.language})
-                                                    </SelectItem>
-                                                ))}
+                                                <SelectItem value="male">Male</SelectItem>
+                                                <SelectItem value="female">Female</SelectItem>
+                                                <SelectItem value="neutral">Neutral</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
-
                                     <div>
-                                        <Label htmlFor="generation-text">Text to Generate</Label>
-                                        <Textarea
-                                            id="generation-text"
-                                            placeholder="Enter the text you want to convert to speech..."
-                                            value={generationText}
-                                            onChange={(e) => setGenerationText(e.target.value)}
-                                            rows={6}
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {generationText.length} characters, {generationText.split(' ').length} words
-                                        </p>
+                                        <Label htmlFor="model-language">Language</Label>
+                                        <Select>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select language" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="en">English</SelectItem>
+                                                <SelectItem value="es">Spanish</SelectItem>
+                                                <SelectItem value="fr">French</SelectItem>
+                                                <SelectItem value="de">German</SelectItem>
+                                                <SelectItem value="it">Italian</SelectItem>
+                                                <SelectItem value="pt">Portuguese</SelectItem>
+                                                <SelectItem value="ru">Russian</SelectItem>
+                                                <SelectItem value="ja">Japanese</SelectItem>
+                                                <SelectItem value="ko">Korean</SelectItem>
+                                                <SelectItem value="zh">Chinese</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
-
-                                    {selectedModel && (
-                                        <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                                            <h4 className="font-medium">Voice Settings</h4>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label>Pitch: {selectedModel.settings.pitch}</Label>
-                                                    <Slider
-                                                        value={[selectedModel.settings.pitch]}
-                                                        min={-10}
-                                                        max={10}
-                                                        step={1}
-                                                        className="mt-2"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label>Speed: {selectedModel.settings.speed}x</Label>
-                                                    <Slider
-                                                        value={[selectedModel.settings.speed]}
-                                                        min={0.5}
-                                                        max={2.0}
-                                                        step={0.1}
-                                                        className="mt-2"
-                                                    />
-                                                </div>
+                                    <div>
+                                        <Label htmlFor="audio-upload">Sample Audio</Label>
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                            <div className="mt-4">
+                                                <label htmlFor="audio-upload" className="cursor-pointer">
+                                                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                                                        Upload audio file
+                                                    </span>
+                                                    <span className="mt-1 block text-xs text-gray-500">
+                                                        MP3, WAV, FLAC up to 50MB
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    id="audio-upload"
+                                                    name="audio-upload"
+                                                    type="file"
+                                                    className="sr-only"
+                                                    accept="audio/*"
+                                                />
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                </div>
+                            </TabsContent>
 
-                                    <Button
-                                        className="w-full"
-                                        onClick={() => generateVoice(generationText, selectedModel?.id || '')}
-                                        disabled={!selectedModel || !generationText.trim() || isTraining}
-                                    >
-                                        {isTraining ? (
-                                            <>
-                                                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                                                Generating...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Activity className="mr-2 h-4 w-4" />
-                                                Generate Voice
-                                            </>
-                                        )}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Recent Generations</CardTitle>
-                                    <CardDescription>
-                                        Your recently generated voice samples
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ScrollArea className="h-80">
-                                        <div className="space-y-4">
-                                            {generations.length === 0 ? (
-                                                <div className="text-center py-8 text-gray-500">
-                                                    <FileAudio className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                                    <p>No generations yet</p>
-                                                    <p className="text-sm">Generate your first voice sample to get started</p>
+                            <TabsContent value="template" className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[
+                                        { id: '1', name: 'Professional Male', type: 'male', language: 'English' },
+                                        { id: '2', name: 'Friendly Female', type: 'female', language: 'English' },
+                                        { id: '3', name: 'Calm Assistant', type: 'neutral', language: 'English' }
+                                    ].map((template) => (
+                                        <Card
+                                            key={template.id}
+                                            className={`cursor-pointer transition-all hover:shadow-md`}
+                                            onClick={() => setSelectedModel(template as any)}
+                                        >
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="text-sm">{template.name}</CardTitle>
+                                                <CardDescription className="text-xs">{template.language} voice template</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="pt-0">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="text-xs">{template.type}</Badge>
+                                                    <Badge variant="outline" className="text-xs">{template.language}</Badge>
                                                 </div>
-                                            ) : (
-                                                generations.map((generation) => (
-                                                    <div key={generation.id} className="p-4 border rounded-lg space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <p className="font-medium truncate flex-1 mr-2">
-                                                                {generation.text.substring(0, 50)}...
-                                                            </p>
-                                                            <div className="flex gap-1">
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={() => playAudio(generation.audioUrl)}
-                                                                >
-                                                                    <Play className="h-3 w-3" />
-                                                                </Button>
-                                                                <Button size="sm" variant="outline">
-                                                                    <Download className="h-3 w-3" />
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex justify-between text-xs text-gray-500">
-                                                            <span>{generation.metadata.wordCount} words</span>
-                                                            <span>{generation.duration.toFixed(1)}s</span>
-                                                            <span>${generation.metadata.estimatedCost.toFixed(4)}</span>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-
-                    {/* Recording Studio Tab */}
-                    <TabsContent value="studio" className="space-y-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Voice Recording Studio</CardTitle>
-                                    <CardDescription>
-                                        Record voice samples to train new models or improve existing ones
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {/* Recording Controls */}
-                                    <div className="text-center space-y-4">
-                                        <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center">
-                                            <Mic className={`h-12 w-12 text-white ${isRecording ? 'animate-pulse' : ''}`} />
-                                        </div>
-
-                                        <div>
-                                            {isRecording ? (
-                                                <div className="space-y-2">
-                                                    <p className="text-lg font-medium text-red-600">Recording...</p>
-                                                    <p className="text-2xl font-bold">{Math.floor(recordingDuration / 60)}:{(recordingDuration % 60).toString().padStart(2, '0')}</p>
-                                                </div>
-                                            ) : (
-                                                <p className="text-lg font-medium">Ready to record</p>
-                                            )}
-                                        </div>
-
-                                        <div className="flex gap-4 justify-center">
-                                            {!isRecording ? (
-                                                <Button onClick={startRecording} className="bg-red-500 hover:bg-red-600">
-                                                    <Mic className="mr-2 h-4 w-4" />
-                                                    Start Recording
-                                                </Button>
-                                            ) : (
-                                                <Button onClick={stopRecording} variant="outline">
-                                                    <Pause className="mr-2 h-4 w-4" />
-                                                    Stop Recording
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Recording Guidelines */}
-                                    <Alert>
-                                        <Volume2 className="h-4 w-4" />
-                                        <AlertTitle>Recording Tips</AlertTitle>
-                                        <AlertDescription className="mt-2 space-y-2">
-                                            <p>• Use a quiet environment with minimal background noise</p>
-                                            <p>• Speak clearly and at a consistent pace</p>
-                                            <p>• Record at least 10 minutes of varied content</p>
-                                            <p>• Include different emotions and tones</p>
-                                        </AlertDescription>
-                                    </Alert>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Training Data Management</CardTitle>
-                                    <CardDescription>
-                                        Upload and manage voice samples for model training
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                        <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                                        <p className="text-lg font-medium mb-2">Upload Audio Files</p>
-                                        <p className="text-gray-500 mb-4">
-                                            Drag and drop audio files or click to browse
-                                        </p>
-                                        <Button variant="outline">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            Choose Files
-                                        </Button>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Supported formats</Label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {['MP3', 'WAV', 'FLAC', 'M4A'].map((format) => (
-                                                <Badge key={format} variant="secondary">{format}</Badge>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <Button
-                                        className="w-full"
-                                        onClick={handleTrainModel}
-                                        disabled={isTraining}
-                                    >
-                                        {isTraining ? (
-                                            <>
-                                                <Activity className="mr-2 h-4 w-4 animate-spin" />
-                                                Training Model...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Brain className="mr-2 h-4 w-4" />
-                                                Start Training New Model
-                                            </>
-                                        )}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-                </Tabs>
-
-                {/* New Model Dialog */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle>Create New Voice Model</DialogTitle>
-                            <DialogDescription>
-                                Configure and train a new AI voice model for your applications
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="model-name">Model Name</Label>
-                                    <Input id="model-name" placeholder="Enter model name" />
+                                            </CardContent>
+                                        </Card>
+                                    ))}
                                 </div>
-                                <div>
-                                    <Label htmlFor="model-type">Model Type</Label>
-                                    <Select>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="neural">Neural (Recommended)</SelectItem>
-                                            <SelectItem value="concatenative">Concatenative</SelectItem>
-                                            <SelectItem value="parametric">Parametric</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="language">Language</Label>
-                                    <Select>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select language" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="english">English</SelectItem>
-                                            <SelectItem value="hindi">Hindi</SelectItem>
-                                            <SelectItem value="spanish">Spanish</SelectItem>
-                                            <SelectItem value="french">French</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <Label htmlFor="accent">Accent</Label>
-                                    <Select>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select accent" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="american">American</SelectItem>
-                                            <SelectItem value="british">British</SelectItem>
-                                            <SelectItem value="indian">Indian</SelectItem>
-                                            <SelectItem value="australian">Australian</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" placeholder="Describe the voice characteristics and intended use..." />
-                            </div>
-                        </div>
-
-                        <DialogFooter className="flex gap-2">
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={() => setIsDialogOpen(false)}>
-                                <Brain className="mr-2 h-4 w-4" />
-                                Create Model
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </ManagementLayout>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={() => {
+                            setIsDialogOpen(false);
+                            toast({
+                                title: "Model Created",
+                                description: "New voice model has been created successfully.",
+                            });
+                        }}>
+                            Create Model
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
     );
-};
+}
 
 export default VoiceCloning;

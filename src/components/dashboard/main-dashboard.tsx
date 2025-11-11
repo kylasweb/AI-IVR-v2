@@ -201,7 +201,7 @@ export default function MainDashboard() {
     }
   };
 
-  const navigationTabs = user ? getNavigationTabs(user.role) : [];
+  const navigationTabs = getNavigationTabs(user?.role || 'client_admin');
 
   const featureCards = [
     {
@@ -823,16 +823,18 @@ export default function MainDashboard() {
             <Select
               value={user?.role || 'client_admin'}
               onValueChange={(value: UserRole) => {
-                if (user) {
-                  // Use the switchRole function from useUser hook
-                  // Since we can't access it directly here, we'll dispatch a custom event
-                  const event = new CustomEvent('switch-user-role', { detail: { role: value } });
-                  window.dispatchEvent(event);
-                }
+                // Dispatch custom event to switch role
+                const event = new CustomEvent('switch-user-role', { detail: { role: value } });
+                window.dispatchEvent(event);
               }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select role" />
+                <SelectValue>
+                  {user?.role === 'client_admin' && 'Client Admin'}
+                  {user?.role === 'fairgo_admin' && 'FairGo Admin'}
+                  {user?.role === 'sysadmin' && 'System Admin'}
+                  {!user?.role && 'Client Admin'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="client_admin">Client Admin</SelectItem>
@@ -866,6 +868,18 @@ export default function MainDashboard() {
                   } else if (tab.id === 'agents') {
                     router.push('/ai-agents');
                   } else if (tab.id === 'monitoring') {
+                    router.push('/monitoring');
+                  } else if (tab.id === 'ivr') {
+                    router.push('/ivr-management');
+                  } else if (tab.id === 'training') {
+                    router.push('/strategic-engines-demo');
+                  } else if (tab.id === 'clients') {
+                    router.push('/customers');
+                  } else if (tab.id === 'operations') {
+                    router.push('/workflows');
+                  } else if (tab.id === 'telephony') {
+                    router.push('/cpaas');
+                  } else if (tab.id === 'infrastructure') {
                     router.push('/monitoring');
                   } else {
                     setActiveTab(tab.id);

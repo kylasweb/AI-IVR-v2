@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -432,605 +431,603 @@ const VideoIVR: React.FC = () => {
     };
 
     return (
-        <ManagementLayout>
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold">Video IVR Management</h1>
-                        <p className="text-gray-600 mt-2">
-                            Manage video-based interactive voice response systems with AI assistance
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => loadData()}>
-                            <RotateCcw className="mr-2 h-4 w-4" />
-                            Refresh
-                        </Button>
-                        <Button onClick={() => startCall()}>
-                            <Video className="mr-2 h-4 w-4" />
-                            Test Call
-                        </Button>
-                        <Button onClick={createWorkflow}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Workflow
-                        </Button>
-                    </div>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold">Video IVR Management</h1>
+                    <p className="text-gray-600 mt-2">
+                        Manage video-based interactive voice response systems with AI assistance
+                    </p>
                 </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Calls</CardTitle>
-                            <Video className="h-4 w-4 text-green-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-green-600">{stats.activeCalls}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Calls</CardTitle>
-                            <PhoneCall className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.totalCalls}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Avg Duration</CardTitle>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{formatDuration(stats.avgDuration)}</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.completionRate.toFixed(1)}%</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
-                            <Star className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.satisfactionScore.toFixed(1)}/5</div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
-                            <FileVideo className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stats.recordingStorage.toFixed(1)}GB</div>
-                        </CardContent>
-                    </Card>
+                <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => loadData()}>
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Refresh
+                    </Button>
+                    <Button onClick={() => startCall()}>
+                        <Video className="mr-2 h-4 w-4" />
+                        Test Call
+                    </Button>
+                    <Button onClick={createWorkflow}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Workflow
+                    </Button>
                 </div>
+            </div>
 
-                <Tabs defaultValue="dashboard" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="dashboard">Live Dashboard</TabsTrigger>
-                        <TabsTrigger value="workflows">Workflows</TabsTrigger>
-                        <TabsTrigger value="calls">Call History</TabsTrigger>
-                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                    </TabsList>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Active Calls</CardTitle>
+                        <Video className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-green-600">{stats.activeCalls}</div>
+                    </CardContent>
+                </Card>
 
-                    {/* Live Dashboard Tab */}
-                    <TabsContent value="dashboard" className="space-y-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Video Preview */}
-                            <Card className="lg:col-span-2">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Monitor className="h-5 w-5" />
-                                        Video Preview
-                                        {isCallActive && (
-                                            <Badge variant="default" className="bg-red-500">
-                                                <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
-                                                LIVE
-                                            </Badge>
-                                        )}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
-                                        <video
-                                            ref={videoRef}
-                                            autoPlay
-                                            muted
-                                            className="w-full h-full object-cover"
-                                        />
-                                        {!isVideoEnabled && (
-                                            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                                                <CameraOff className="h-16 w-16 text-gray-400" />
-                                            </div>
-                                        )}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Calls</CardTitle>
+                        <PhoneCall className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalCalls}</div>
+                    </CardContent>
+                </Card>
 
-                                        {/* Video Controls Overlay */}
-                                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
-                                            <Button
-                                                size="sm"
-                                                variant={isMuted ? "destructive" : "secondary"}
-                                                onClick={toggleMute}
-                                            >
-                                                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                                            </Button>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Avg Duration</CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{formatDuration(stats.avgDuration)}</div>
+                    </CardContent>
+                </Card>
 
-                                            <Button
-                                                size="sm"
-                                                variant={!isVideoEnabled ? "destructive" : "secondary"}
-                                                onClick={toggleVideo}
-                                            >
-                                                {isVideoEnabled ? <Camera className="h-4 w-4" /> : <CameraOff className="h-4 w-4" />}
-                                            </Button>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.completionRate.toFixed(1)}%</div>
+                    </CardContent>
+                </Card>
 
-                                            <Button
-                                                size="sm"
-                                                variant={isRecording ? "destructive" : "secondary"}
-                                                onClick={toggleRecording}
-                                            >
-                                                <Circle className="h-4 w-4" />
-                                            </Button>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Satisfaction</CardTitle>
+                        <Star className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.satisfactionScore.toFixed(1)}/5</div>
+                    </CardContent>
+                </Card>
 
-                                            {isCallActive ? (
-                                                <Button size="sm" variant="destructive" onClick={endCall}>
-                                                    <PhoneOff className="h-4 w-4" />
-                                                </Button>
-                                            ) : (
-                                                <Button size="sm" variant="default" onClick={() => startCall()}>
-                                                    <Phone className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
+                        <FileVideo className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.recordingStorage.toFixed(1)}GB</div>
+                    </CardContent>
+                </Card>
+            </div>
 
-                                    {/* Call Information */}
-                                    {selectedCall && (
-                                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Caller</p>
-                                                    <p className="font-medium">{selectedCall.callerName}</p>
-                                                    <p className="text-sm text-gray-600">{selectedCall.callerNumber}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Duration</p>
-                                                    <p className="font-medium">{formatDuration(selectedCall.duration)}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Resolution</p>
-                                                    <p className="font-medium">{selectedCall.metadata.resolution}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Device</p>
-                                                    <p className="font-medium">{selectedCall.metadata.device}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+            <Tabs defaultValue="dashboard" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="dashboard">Live Dashboard</TabsTrigger>
+                    <TabsTrigger value="workflows">Workflows</TabsTrigger>
+                    <TabsTrigger value="calls">Call History</TabsTrigger>
+                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
 
-                            {/* Active Calls */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Users className="h-5 w-5" />
-                                        Active Calls
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <ScrollArea className="h-80">
-                                        <div className="space-y-3">
-                                            {calls.length === 0 ? (
-                                                <div className="text-center py-8 text-gray-500">
-                                                    <PhoneOff className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                                    <p>No active calls</p>
-                                                </div>
-                                            ) : (
-                                                calls.map((call) => (
-                                                    <div
-                                                        key={call.id}
-                                                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedCall?.id === call.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
-                                                            }`}
-                                                        onClick={() => setSelectedCall(call)}
-                                                    >
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <div className="flex items-center gap-2">
-                                                                {getStatusIcon(call.status)}
-                                                                <Badge className={call.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                                                                    {call.status}
-                                                                </Badge>
-                                                            </div>
-                                                            <p className="text-xs text-gray-500">
-                                                                {formatDuration(call.duration)}
-                                                            </p>
-                                                        </div>
-
-                                                        <p className="font-medium">{call.callerName}</p>
-                                                        <p className="text-sm text-gray-600">{call.callerNumber}</p>
-
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            {call.recordingEnabled && (
-                                                                <Badge variant="secondary" className="text-xs">
-                                                                    <Circle className="h-3 w-3 mr-1" />
-                                                                    Recording
-                                                                </Badge>
-                                                            )}
-                                                            {call.aiAssistantActive && (
-                                                                <Badge variant="secondary" className="text-xs">
-                                                                    <Bot className="h-3 w-3 mr-1" />
-                                                                    AI Active
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* AI Assistant Panel */}
-                        <Card>
+                {/* Live Dashboard Tab */}
+                <TabsContent value="dashboard" className="space-y-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Video Preview */}
+                        <Card className="lg:col-span-2">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Bot className="h-5 w-5" />
-                                    AI Assistant
-                                    <Badge variant="outline" className="text-green-600">
-                                        Active
-                                    </Badge>
+                                    <Monitor className="h-5 w-5" />
+                                    Video Preview
+                                    {isCallActive && (
+                                        <Badge variant="default" className="bg-red-500">
+                                            <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
+                                            LIVE
+                                        </Badge>
+                                    )}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-4">
-                                    <Alert>
-                                        <MessageSquare className="h-4 w-4" />
-                                        <AlertTitle>Real-time Assistance</AlertTitle>
-                                        <AlertDescription>
-                                            AI is actively listening and ready to provide suggestions for call handling,
-                                            customer information, and workflow navigation.
-                                        </AlertDescription>
-                                    </Alert>
+                                <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        muted
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {!isVideoEnabled && (
+                                        <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                                            <CameraOff className="h-16 w-16 text-gray-400" />
+                                        </div>
+                                    )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="p-4 border rounded-lg">
-                                            <h4 className="font-medium mb-2">Suggested Actions</h4>
-                                            <ul className="text-sm space-y-1 text-gray-600">
-                                                <li>• Offer screen sharing</li>
-                                                <li>• Schedule follow-up</li>
-                                                <li>• Transfer to specialist</li>
-                                            </ul>
-                                        </div>
-                                        <div className="p-4 border rounded-lg">
-                                            <h4 className="font-medium mb-2">Customer Insights</h4>
-                                            <ul className="text-sm space-y-1 text-gray-600">
-                                                <li>• Premium customer</li>
-                                                <li>• Previous contact: 2 days ago</li>
-                                                <li>• Satisfaction score: 4.8/5</li>
-                                            </ul>
-                                        </div>
-                                        <div className="p-4 border rounded-lg">
-                                            <h4 className="font-medium mb-2">Quick Responses</h4>
-                                            <div className="space-y-1">
-                                                <Button size="sm" variant="outline" className="w-full text-xs">
-                                                    "Let me check that for you"
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="w-full text-xs">
-                                                    "I'll escalate this issue"
-                                                </Button>
+                                    {/* Video Controls Overlay */}
+                                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
+                                        <Button
+                                            size="sm"
+                                            variant={isMuted ? "destructive" : "secondary"}
+                                            onClick={toggleMute}
+                                        >
+                                            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant={!isVideoEnabled ? "destructive" : "secondary"}
+                                            onClick={toggleVideo}
+                                        >
+                                            {isVideoEnabled ? <Camera className="h-4 w-4" /> : <CameraOff className="h-4 w-4" />}
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant={isRecording ? "destructive" : "secondary"}
+                                            onClick={toggleRecording}
+                                        >
+                                            <Circle className="h-4 w-4" />
+                                        </Button>
+
+                                        {isCallActive ? (
+                                            <Button size="sm" variant="destructive" onClick={endCall}>
+                                                <PhoneOff className="h-4 w-4" />
+                                            </Button>
+                                        ) : (
+                                            <Button size="sm" variant="default" onClick={() => startCall()}>
+                                                <Phone className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Call Information */}
+                                {selectedCall && (
+                                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <p className="text-sm text-gray-500">Caller</p>
+                                                <p className="font-medium">{selectedCall.callerName}</p>
+                                                <p className="text-sm text-gray-600">{selectedCall.callerNumber}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Duration</p>
+                                                <p className="font-medium">{formatDuration(selectedCall.duration)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Resolution</p>
+                                                <p className="font-medium">{selectedCall.metadata.resolution}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Device</p>
+                                                <p className="font-medium">{selectedCall.metadata.device}</p>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
-                    </TabsContent>
 
-                    {/* Workflows Tab */}
-                    <TabsContent value="workflows" className="space-y-4">
-                        <div className="grid gap-6">
-                            {workflows.map((workflow) => (
-                                <Card key={workflow.id}>
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-start space-x-4 flex-1">
-                                                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center">
-                                                    <Workflow className="h-6 w-6 text-white" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <h3 className="text-lg font-semibold">{workflow.name}</h3>
-                                                        <Badge className={getWorkflowStatusColor(workflow.status)}>
-                                                            {workflow.status}
-                                                        </Badge>
-                                                    </div>
-
-                                                    <p className="text-gray-600 mb-4">{workflow.description}</p>
-
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Total Calls</p>
-                                                            <p className="font-medium">{workflow.analytics.totalCalls.toLocaleString()}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Avg Duration</p>
-                                                            <p className="font-medium">{formatDuration(workflow.analytics.avgDuration)}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Completion Rate</p>
-                                                            <p className="font-medium">{workflow.analytics.completionRate}%</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-gray-500">Satisfaction</p>
-                                                            <p className="font-medium">{workflow.analytics.satisfactionScore}/5</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {workflow.triggers.map((trigger, index) => (
-                                                            <Badge key={index} variant="secondary">{trigger}</Badge>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" onClick={() => startCall(workflow.id)}>
-                                                    <Play className="h-4 w-4" />
-                                                </Button>
-                                                <Button size="sm" variant="outline">
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button size="sm" variant="outline">
-                                                    <BarChart3 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </TabsContent>
-
-                    {/* Call History Tab */}
-                    <TabsContent value="calls" className="space-y-4">
+                        {/* Active Calls */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Recent Video Calls</CardTitle>
-                                <CardDescription>Complete history of video IVR sessions</CardDescription>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Users className="h-5 w-5" />
+                                    Active Calls
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ScrollArea className="h-80">
+                                    <div className="space-y-3">
+                                        {calls.length === 0 ? (
+                                            <div className="text-center py-8 text-gray-500">
+                                                <PhoneOff className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                                <p>No active calls</p>
+                                            </div>
+                                        ) : (
+                                            calls.map((call) => (
+                                                <div
+                                                    key={call.id}
+                                                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedCall?.id === call.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                                                        }`}
+                                                    onClick={() => setSelectedCall(call)}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            {getStatusIcon(call.status)}
+                                                            <Badge className={call.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                                                {call.status}
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-xs text-gray-500">
+                                                            {formatDuration(call.duration)}
+                                                        </p>
+                                                    </div>
+
+                                                    <p className="font-medium">{call.callerName}</p>
+                                                    <p className="text-sm text-gray-600">{call.callerNumber}</p>
+
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        {call.recordingEnabled && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                <Circle className="h-3 w-3 mr-1" />
+                                                                Recording
+                                                            </Badge>
+                                                        )}
+                                                        {call.aiAssistantActive && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                <Bot className="h-3 w-3 mr-1" />
+                                                                AI Active
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </ScrollArea>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* AI Assistant Panel */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Bot className="h-5 w-5" />
+                                AI Assistant
+                                <Badge variant="outline" className="text-green-600">
+                                    Active
+                                </Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <Alert>
+                                    <MessageSquare className="h-4 w-4" />
+                                    <AlertTitle>Real-time Assistance</AlertTitle>
+                                    <AlertDescription>
+                                        AI is actively listening and ready to provide suggestions for call handling,
+                                        customer information, and workflow navigation.
+                                    </AlertDescription>
+                                </Alert>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="p-4 border rounded-lg">
+                                        <h4 className="font-medium mb-2">Suggested Actions</h4>
+                                        <ul className="text-sm space-y-1 text-gray-600">
+                                            <li>• Offer screen sharing</li>
+                                            <li>• Schedule follow-up</li>
+                                            <li>• Transfer to specialist</li>
+                                        </ul>
+                                    </div>
+                                    <div className="p-4 border rounded-lg">
+                                        <h4 className="font-medium mb-2">Customer Insights</h4>
+                                        <ul className="text-sm space-y-1 text-gray-600">
+                                            <li>• Premium customer</li>
+                                            <li>• Previous contact: 2 days ago</li>
+                                            <li>• Satisfaction score: 4.8/5</li>
+                                        </ul>
+                                    </div>
+                                    <div className="p-4 border rounded-lg">
+                                        <h4 className="font-medium mb-2">Quick Responses</h4>
+                                        <div className="space-y-1">
+                                            <Button size="sm" variant="outline" className="w-full text-xs">
+                                                "Let me check that for you"
+                                            </Button>
+                                            <Button size="sm" variant="outline" className="w-full text-xs">
+                                                "I'll escalate this issue"
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Workflows Tab */}
+                <TabsContent value="workflows" className="space-y-4">
+                    <div className="grid gap-6">
+                        {workflows.map((workflow) => (
+                            <Card key={workflow.id}>
+                                <CardContent className="p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-start space-x-4 flex-1">
+                                            <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center">
+                                                <Workflow className="h-6 w-6 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <h3 className="text-lg font-semibold">{workflow.name}</h3>
+                                                    <Badge className={getWorkflowStatusColor(workflow.status)}>
+                                                        {workflow.status}
+                                                    </Badge>
+                                                </div>
+
+                                                <p className="text-gray-600 mb-4">{workflow.description}</p>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                                    <div>
+                                                        <p className="text-sm text-gray-500">Total Calls</p>
+                                                        <p className="font-medium">{workflow.analytics.totalCalls.toLocaleString()}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-500">Avg Duration</p>
+                                                        <p className="font-medium">{formatDuration(workflow.analytics.avgDuration)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-500">Completion Rate</p>
+                                                        <p className="font-medium">{workflow.analytics.completionRate}%</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-500">Satisfaction</p>
+                                                        <p className="font-medium">{workflow.analytics.satisfactionScore}/5</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2">
+                                                    {workflow.triggers.map((trigger, index) => (
+                                                        <Badge key={index} variant="secondary">{trigger}</Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <Button size="sm" variant="outline" onClick={() => startCall(workflow.id)}>
+                                                <Play className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="sm" variant="outline">
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="sm" variant="outline">
+                                                <BarChart3 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </TabsContent>
+
+                {/* Call History Tab */}
+                <TabsContent value="calls" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Video Calls</CardTitle>
+                            <CardDescription>Complete history of video IVR sessions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {calls.map((call) => (
+                                    <div key={call.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                        <div className="flex items-center space-x-4">
+                                            {getStatusIcon(call.status)}
+                                            <div>
+                                                <p className="font-medium">{call.callerName}</p>
+                                                <p className="text-sm text-gray-600">{call.callerNumber}</p>
+                                                <p className="text-xs text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <p className="font-medium">{formatDuration(call.duration)}</p>
+                                            <div className="flex gap-1 mt-1">
+                                                {call.recordingEnabled && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        <FileVideo className="h-3 w-3 mr-1" />
+                                                        Recorded
+                                                    </Badge>
+                                                )}
+                                                {call.transcriptAvailable && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        <MessageSquare className="h-3 w-3 mr-1" />
+                                                        Transcript
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <Button size="sm" variant="outline" disabled={!call.recordingUrl}>
+                                                <Play className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="sm" variant="outline" disabled={!call.recordingUrl}>
+                                                <Download className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Analytics Tab */}
+                <TabsContent value="analytics" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Performance Metrics</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {calls.map((call) => (
-                                        <div key={call.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                            <div className="flex items-center space-x-4">
-                                                {getStatusIcon(call.status)}
-                                                <div>
-                                                    <p className="font-medium">{call.callerName}</p>
-                                                    <p className="text-sm text-gray-600">{call.callerNumber}</p>
-                                                    <p className="text-xs text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="text-right">
-                                                <p className="font-medium">{formatDuration(call.duration)}</p>
-                                                <div className="flex gap-1 mt-1">
-                                                    {call.recordingEnabled && (
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            <FileVideo className="h-3 w-3 mr-1" />
-                                                            Recorded
-                                                        </Badge>
-                                                    )}
-                                                    {call.transcriptAvailable && (
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            <MessageSquare className="h-3 w-3 mr-1" />
-                                                            Transcript
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <Button size="sm" variant="outline" disabled={!call.recordingUrl}>
-                                                    <Play className="h-4 w-4" />
-                                                </Button>
-                                                <Button size="sm" variant="outline" disabled={!call.recordingUrl}>
-                                                    <Download className="h-4 w-4" />
-                                                </Button>
-                                            </div>
+                                    <div>
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-sm font-medium">Call Completion Rate</span>
+                                            <span className="text-sm text-gray-600">{stats.completionRate.toFixed(1)}%</span>
                                         </div>
-                                    ))}
+                                        <Progress value={stats.completionRate} className="h-2" />
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-sm font-medium">Customer Satisfaction</span>
+                                            <span className="text-sm text-gray-600">{stats.satisfactionScore.toFixed(1)}/5</span>
+                                        </div>
+                                        <Progress value={(stats.satisfactionScore / 5) * 100} className="h-2" />
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between mb-2">
+                                            <span className="text-sm font-medium">AI Accuracy</span>
+                                            <span className="text-sm text-gray-600">94.2%</span>
+                                        </div>
+                                        <Progress value={94.2} className="h-2" />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
-                    </TabsContent>
 
-                    {/* Analytics Tab */}
-                    <TabsContent value="analytics" className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Performance Metrics</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-sm font-medium">Call Completion Rate</span>
-                                                <span className="text-sm text-gray-600">{stats.completionRate.toFixed(1)}%</span>
-                                            </div>
-                                            <Progress value={stats.completionRate} className="h-2" />
-                                        </div>
-
-                                        <div>
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-sm font-medium">Customer Satisfaction</span>
-                                                <span className="text-sm text-gray-600">{stats.satisfactionScore.toFixed(1)}/5</span>
-                                            </div>
-                                            <Progress value={(stats.satisfactionScore / 5) * 100} className="h-2" />
-                                        </div>
-
-                                        <div>
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-sm font-medium">AI Accuracy</span>
-                                                <span className="text-sm text-gray-600">94.2%</span>
-                                            </div>
-                                            <Progress value={94.2} className="h-2" />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Usage Statistics</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium">Peak Hours</span>
-                                            <span className="text-sm text-gray-600">9AM - 11AM</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium">Avg Resolution Time</span>
-                                            <span className="text-sm text-gray-600">4.2 minutes</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium">First Call Resolution</span>
-                                            <span className="text-sm text-gray-600">78.5%</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium">Transfer Rate</span>
-                                            <span className="text-sm text-gray-600">12.8%</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-                </Tabs>
-
-                {/* Create Workflow Dialog */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="max-w-3xl">
-                        <DialogHeader>
-                            <DialogTitle>
-                                {dialogType === 'workflow' ? 'Create Video Workflow' : 'Start Video Call'}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {dialogType === 'workflow'
-                                    ? 'Configure a new interactive video workflow for your IVR system'
-                                    : 'Initiate a new video call session with AI assistance'
-                                }
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {dialogType === 'workflow' && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="workflow-name">Workflow Name</Label>
-                                        <Input id="workflow-name" placeholder="Enter workflow name" />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="workflow-type">Workflow Type</Label>
-                                        <Select>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="support">Customer Support</SelectItem>
-                                                <SelectItem value="sales">Sales Demo</SelectItem>
-                                                <SelectItem value="onboarding">User Onboarding</SelectItem>
-                                                <SelectItem value="training">Training Session</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="workflow-description">Description</Label>
-                                    <Textarea
-                                        id="workflow-description"
-                                        placeholder="Describe the workflow's purpose and target audience..."
-                                        rows={3}
-                                    />
-                                </div>
-
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Usage Statistics</CardTitle>
+                            </CardHeader>
+                            <CardContent>
                                 <div className="space-y-4">
-                                    <Label>AI Features</Label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex items-center space-x-2">
-                                            <Switch id="ai-assistant" defaultChecked />
-                                            <Label htmlFor="ai-assistant">AI Assistant</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Switch id="transcription" defaultChecked />
-                                            <Label htmlFor="transcription">Live Transcription</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Switch id="recording" />
-                                            <Label htmlFor="recording">Auto Recording</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Switch id="sentiment" defaultChecked />
-                                            <Label htmlFor="sentiment">Sentiment Analysis</Label>
-                                        </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm font-medium">Peak Hours</span>
+                                        <span className="text-sm text-gray-600">9AM - 11AM</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm font-medium">Avg Resolution Time</span>
+                                        <span className="text-sm text-gray-600">4.2 minutes</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm font-medium">First Call Resolution</span>
+                                        <span className="text-sm text-gray-600">78.5%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm font-medium">Transfer Rate</span>
+                                        <span className="text-sm text-gray-600">12.8%</span>
                                     </div>
                                 </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+            </Tabs>
 
+            {/* Create Workflow Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {dialogType === 'workflow' ? 'Create Video Workflow' : 'Start Video Call'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {dialogType === 'workflow'
+                                ? 'Configure a new interactive video workflow for your IVR system'
+                                : 'Initiate a new video call session with AI assistance'
+                            }
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {dialogType === 'workflow' && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="triggers">Trigger Keywords</Label>
-                                    <Input
-                                        id="triggers"
-                                        placeholder="support, help, assistance, technical..."
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Comma-separated keywords that activate this workflow
-                                    </p>
+                                    <Label htmlFor="workflow-name">Workflow Name</Label>
+                                    <Input id="workflow-name" placeholder="Enter workflow name" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="workflow-type">Workflow Type</Label>
+                                    <Select>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="support">Customer Support</SelectItem>
+                                            <SelectItem value="sales">Sales Demo</SelectItem>
+                                            <SelectItem value="onboarding">User Onboarding</SelectItem>
+                                            <SelectItem value="training">Training Session</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
-                        )}
 
-                        <DialogFooter className="flex gap-2">
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={() => setIsDialogOpen(false)}>
-                                {dialogType === 'workflow' ? (
-                                    <>
-                                        <Workflow className="mr-2 h-4 w-4" />
-                                        Create Workflow
-                                    </>
-                                ) : (
-                                    <>
-                                        <Video className="mr-2 h-4 w-4" />
-                                        Start Call
-                                    </>
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </ManagementLayout>
+                            <div>
+                                <Label htmlFor="workflow-description">Description</Label>
+                                <Textarea
+                                    id="workflow-description"
+                                    placeholder="Describe the workflow's purpose and target audience..."
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <Label>AI Features</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="ai-assistant" defaultChecked />
+                                        <Label htmlFor="ai-assistant">AI Assistant</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="transcription" defaultChecked />
+                                        <Label htmlFor="transcription">Live Transcription</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="recording" />
+                                        <Label htmlFor="recording">Auto Recording</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="sentiment" defaultChecked />
+                                        <Label htmlFor="sentiment">Sentiment Analysis</Label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="triggers">Trigger Keywords</Label>
+                                <Input
+                                    id="triggers"
+                                    placeholder="support, help, assistance, technical..."
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Comma-separated keywords that activate this workflow
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter className="flex gap-2">
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={() => setIsDialogOpen(false)}>
+                            {dialogType === 'workflow' ? (
+                                <>
+                                    <Workflow className="mr-2 h-4 w-4" />
+                                    Create Workflow
+                                </>
+                            ) : (
+                                <>
+                                    <Video className="mr-2 h-4 w-4" />
+                                    Start Call
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
     );
 };
 

@@ -128,8 +128,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     };
 
     const switchRole = (role: UserRole) => {
-        if (!user) return;
-
         const demoUsers: Record<UserRole, User> = {
             client_admin: {
                 id: 'client-001',

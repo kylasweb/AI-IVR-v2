@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1471,55 +1470,50 @@ export default function IVRManagement() {
     );
 
     return (
-        <ManagementLayout
-            title="IVR Management"
-            subtitle="Manage Interactive Voice Response configurations and intelligent workflows"
-        >
-            <div className="space-y-6">
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-3">
-                    <Button
-                        variant="outline"
-                        onClick={() => window.open('/workflows', '_blank')}
-                        className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                    >
-                        <Workflow className="h-4 w-4 mr-2" />
-                        Workflow Builder
-                    </Button>
-                    <Button
-                        onClick={() => setShowCreateForm(true)}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
-                    >
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Configuration
-                    </Button>
-                </div>
-
-                {/* Main Content */}
-                {showCreateForm ? (
-                    renderCreateForm()
-                ) : (
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList>
-                            <TabsTrigger value="configurations">Configurations</TabsTrigger>
-                            <TabsTrigger value="templates">Templates</TabsTrigger>
-                            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="configurations" className="space-y-6">
-                            {renderConfigurationsList()}
-                        </TabsContent>
-
-                        <TabsContent value="templates" className="space-y-6">
-                            {renderTemplatesList()}
-                        </TabsContent>
-
-                        <TabsContent value="analytics" className="space-y-6">
-                            {renderAnalytics()}
-                        </TabsContent>
-                    </Tabs>
-                )}
+        <div className="space-y-6">
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+                <Button
+                    variant="outline"
+                    onClick={() => window.open('/workflows', '_blank')}
+                    className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                >
+                    <Workflow className="h-4 w-4 mr-2" />
+                    Workflow Builder
+                </Button>
+                <Button
+                    onClick={() => setShowCreateForm(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                >
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Configuration
+                </Button>
             </div>
-        </ManagementLayout>
+
+            {/* Main Content */}
+            {showCreateForm ? (
+                renderCreateForm()
+            ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList>
+                        <TabsTrigger value="configurations">Configurations</TabsTrigger>
+                        <TabsTrigger value="templates">Templates</TabsTrigger>
+                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="configurations" className="space-y-6">
+                        {renderConfigurationsList()}
+                    </TabsContent>
+
+                    <TabsContent value="templates" className="space-y-6">
+                        {renderTemplatesList()}
+                    </TabsContent>
+
+                    <TabsContent value="analytics" className="space-y-6">
+                        {renderAnalytics()}
+                    </TabsContent>
+                </Tabs>
+            )}
+        </div>
     );
 }
