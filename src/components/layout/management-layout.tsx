@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,6 +30,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useMockData } from '@/hooks/use-mock-data';
 import {
     Phone,
     Users,
@@ -89,6 +91,7 @@ interface NavigationItem {
 export default function ManagementLayout({ children, title, subtitle }: ManagementLayoutProps) {
     const router = useRouter();
     const pathname = usePathname() || '';
+    const { mode, toggleMode, isDemoMode } = useMockData();
     const [user] = useState({
         name: 'Admin User',
         email: 'admin@fairgo.com',
@@ -472,9 +475,17 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             )}
                         </div>
                         <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600">Demo Mode</span>
+                                <Switch
+                                    checked={isDemoMode}
+                                    onCheckedChange={toggleMode}
+                                    className="data-[state=checked]:bg-blue-600"
+                                />
+                            </div>
                             <Badge variant="outline" className="text-xs">
                                 <Activity className="h-3 w-3 mr-1" />
-                                System Online
+                                {isDemoMode ? 'Demo Data' : 'Live Data'}
                             </Badge>
                         </div>
                     </header>

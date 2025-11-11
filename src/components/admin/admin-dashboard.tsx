@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Settings, 
-  Users, 
-  Globe, 
-  Activity, 
-  FileText, 
+import {
+  Settings,
+  Users,
+  Globe,
+  Activity,
+  FileText,
   Shield,
   Activity as Monitor,
   Database,
@@ -33,6 +33,7 @@ import UserManagement from './user-management';
 import IntegrationManagement from './integration-management';
 import SystemMonitoring from './system-monitoring';
 import LogManagement from './log-management';
+import MockDataManager from './mock-data-manager';
 
 interface DashboardStats {
   totalUsers: number;
@@ -45,7 +46,7 @@ interface DashboardStats {
   uptime: number;
 }
 
-type AdminTab = 'overview' | 'settings' | 'users' | 'integrations' | 'monitoring' | 'logs';
+type AdminTab = 'overview' | 'settings' | 'users' | 'integrations' | 'monitoring' | 'logs' | 'mock-data';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -96,6 +97,12 @@ export default function AdminDashboard() {
       name: 'Log Management',
       icon: FileText,
       description: 'System logs and debugging'
+    },
+    {
+      id: 'mock-data' as AdminTab,
+      name: 'Mock Data Manager',
+      icon: Database,
+      description: 'Manage demo data and scenarios'
     }
   ];
 
@@ -111,6 +118,8 @@ export default function AdminDashboard() {
         return <SystemMonitoring />;
       case 'logs':
         return <LogManagement />;
+      case 'mock-data':
+        return <MockDataManager />;
       default:
         return renderOverview();
     }
@@ -313,7 +322,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <Badge variant={
                       integration.status === 'connected' ? 'default' :
-                      integration.status === 'warning' ? 'secondary' : 'destructive'
+                        integration.status === 'warning' ? 'secondary' : 'destructive'
                     }>
                       {integration.status}
                     </Badge>
@@ -369,11 +378,10 @@ export default function AdminDashboard() {
               }
             ].map((activity, index) => (
               <div key={index} className="flex items-start gap-3 p-3 border-l-2 border-l-blue-200 bg-blue-50 rounded-r">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  activity.type === 'success' ? 'bg-green-600' :
+                <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'success' ? 'bg-green-600' :
                   activity.type === 'warning' ? 'bg-yellow-600' :
-                  activity.type === 'error' ? 'bg-red-600' : 'bg-blue-600'
-                }`} />
+                    activity.type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+                  }`} />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{activity.event}</p>
@@ -402,14 +410,13 @@ export default function AdminDashboard() {
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
-              
+
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-6 py-3 text-left hover:bg-gray-100 transition-colors ${
-                    isActive ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-600' : 'text-gray-700'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-6 py-3 text-left hover:bg-gray-100 transition-colors ${isActive ? 'bg-blue-50 border-r-2 border-blue-600 text-blue-600' : 'text-gray-700'
+                    }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="font-medium">{item.name}</span>

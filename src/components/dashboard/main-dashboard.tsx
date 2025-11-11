@@ -51,6 +51,7 @@ import AgentTemplates from '@/components/ai-agent/agent-templates';
 import AITaskBuilder from '@/components/ai-agent/ai-task-builder';
 import VoiceCloning from '@/components/voice-cloning/voice-cloning';
 import VideoIVR from '@/components/video-ivr/video-ivr';
+import { useMockData, mockDataGenerators } from '@/hooks/use-mock-data';
 
 interface DashboardStats {
   totalCalls: number;
@@ -74,6 +75,7 @@ interface SystemHealth {
 
 export default function MainDashboard() {
   const router = useRouter();
+  const { isDemoMode } = useMockData();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
@@ -92,66 +94,78 @@ export default function MainDashboard() {
     services: []
   });
 
-  // Fetch real-time dashboard data
+  // Fetch real-time or mock dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
 
-        // Fetch dashboard analytics
-        const analyticsResponse = await fetch('/api/analytics/dashboard');
-        const analyticsData = await analyticsResponse.json();
+        if (isDemoMode) {
+          // Use mock data in demo mode
+          const mockStats = mockDataGenerators.generateDashboardStats();
+          const mockHealth = mockDataGenerators.generateSystemHealth();
 
-        // Fetch IVR stats
-        const statsResponse = await fetch('/api/ivr/stats');
-        const statsData = await statsResponse.json();
+          setStats(mockStats);
+          setHealth(mockHealth);
 
-        if (analyticsData.success && analyticsData.analytics) {
-          const analytics = analyticsData.analytics;
+          // Simulate loading delay for demo
+          setTimeout(() => setLoading(false), 1000);
+        } else {
+          // Fetch real data in realtime mode
+          const analyticsResponse = await fetch('/api/analytics/dashboard');
+          const analyticsData = await analyticsResponse.json();
 
-          setStats({
-            totalCalls: analytics.totalCalls || statsData.total_calls || 0,
-            activeCalls: analytics.realTimeStats?.currentActiveCalls || statsData.active_calls || 0,
-            totalAgents: analytics.driverMetrics?.totalDrivers || 12,
-            activeAgents: analytics.driverMetrics?.activeDrivers || 9,
-            workflows: analytics.activeWorkflows || 8,
-            uptime: 99.9, // This would come from system health API
-            satisfaction: analytics.driverMetrics?.averageRating || 4.8,
-            revenue: Math.floor(analytics.totalCalls * 22.5) || 0 // Estimated revenue
-          });
+          // Fetch IVR stats
+          const statsResponse = await fetch('/api/ivr/stats');
+          const statsData = await statsResponse.json();
 
-          // Update system health based on real data
-          setHealth({
-            overall: analytics.realTimeStats?.systemLoad > 80 ? 'critical' :
-              analytics.realTimeStats?.systemLoad > 60 ? 'warning' : 'healthy',
-            services: [
-              {
-                name: 'Voice Processing',
-                status: analytics.realTimeStats?.responseTime < 500 ? 'online' : 'degraded',
-                uptime: 99.9
-              },
-              {
-                name: 'AI Engine',
-                status: analytics.amdDetection?.accuracyRate > 0.9 ? 'online' : 'degraded',
-                uptime: analytics.amdDetection?.accuracyRate * 100 || 98.7
-              },
-              {
-                name: 'Malayalam TTS',
-                status: analytics.culturalIntelligence?.malayalamInteractions > 1000 ? 'online' : 'degraded',
-                uptime: 99.5
-              },
-              {
-                name: 'Manglish STT',
-                status: analytics.culturalIntelligence?.manglishInteractions > 300 ? 'online' : 'degraded',
-                uptime: 95.2
-              },
-              {
-                name: 'Analytics',
-                status: 'online',
-                uptime: 99.8
-              }
-            ]
-          });
+          if (analyticsData.success && analyticsData.analytics) {
+            const analytics = analyticsData.analytics;
+
+            setStats({
+              totalCalls: analytics.totalCalls || statsData.total_calls || 0,
+              activeCalls: analytics.realTimeStats?.currentActiveCalls || statsData.active_calls || 0,
+              totalAgents: analytics.driverMetrics?.totalDrivers || 12,
+              activeAgents: analytics.driverMetrics?.activeDrivers || 9,
+              workflows: analytics.activeWorkflows || 8,
+              uptime: 99.9, // This would come from system health API
+              satisfaction: analytics.driverMetrics?.averageRating || 4.8,
+              revenue: Math.floor(analytics.totalCalls * 22.5) || 0 // Estimated revenue
+            });
+
+            // Update system health based on real data
+            setHealth({
+              overall: analytics.realTimeStats?.systemLoad > 80 ? 'critical' :
+                analytics.realTimeStats?.systemLoad > 60 ? 'warning' : 'healthy',
+              services: [
+                {
+                  name: 'Voice Processing',
+                  status: analytics.realTimeStats?.responseTime < 500 ? 'online' : 'degraded',
+                  uptime: 99.9
+                },
+                {
+                  name: 'AI Engine',
+                  status: analytics.amdDetection?.accuracyRate > 0.9 ? 'online' : 'degraded',
+                  uptime: analytics.amdDetection?.accuracyRate * 100 || 98.7
+                },
+                {
+                  name: 'Malayalam TTS',
+                  status: analytics.culturalIntelligence?.malayalamInteractions > 1000 ? 'online' : 'degraded',
+                  uptime: 99.5
+                },
+                {
+                  name: 'Manglish STT',
+                  status: analytics.culturalIntelligence?.manglishInteractions > 300 ? 'online' : 'degraded',
+                  uptime: 95.2
+                },
+                {
+                  name: 'Analytics',
+                  status: 'online',
+                  uptime: 99.8
+                }
+              ]
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -163,11 +177,52 @@ export default function MainDashboard() {
 
     fetchDashboardData();
 
-    // Set up real-time updates every 30 seconds
-    const interval = setInterval(fetchDashboardData, 30000);
+    // Set up real-time updates every 30 seconds (only in realtime mode)
+    const interval = !isDemoMode ? setInterval(fetchDashboardData, 30000) : null;
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isDemoMode]);
+
+  // Listen for mock data refresh events
+  useEffect(() => {
+    const handleMockDataRefresh = () => {
+      if (isDemoMode) {
+        const mockStats = mockDataGenerators.generateDashboardStats();
+        const mockHealth = mockDataGenerators.generateSystemHealth();
+        setStats(mockStats);
+        setHealth(mockHealth);
+      }
+    };
+
+    const handleCustomStatUpdate = (event: Event) => {
+      if (isDemoMode) {
+        const customEvent = event as CustomEvent;
+        const { field, value } = customEvent.detail;
+        setStats(prev => ({ ...prev, [field]: value }));
+      }
+    };
+
+    const handleMockDataReset = () => {
+      if (isDemoMode) {
+        const mockStats = mockDataGenerators.generateDashboardStats();
+        const mockHealth = mockDataGenerators.generateSystemHealth();
+        setStats(mockStats);
+        setHealth(mockHealth);
+      }
+    };
+
+    window.addEventListener('mock-data-refresh', handleMockDataRefresh);
+    window.addEventListener('mock-custom-stat-update', handleCustomStatUpdate);
+    window.addEventListener('mock-data-reset', handleMockDataReset);
+
+    return () => {
+      window.removeEventListener('mock-data-refresh', handleMockDataRefresh);
+      window.removeEventListener('mock-custom-stat-update', handleCustomStatUpdate);
+      window.removeEventListener('mock-data-reset', handleMockDataReset);
+    };
+  }, [isDemoMode]);
 
   const navigationTabs = [
     {
