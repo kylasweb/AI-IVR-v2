@@ -2,6 +2,11 @@
 // Swatantrata - स्वतंत्रता (Autonomous Independence)
 // Export all autonomous intelligence engines
 
+import { createSelfLearningAdaptationEngine } from './self-learning-adaptation';
+import { createPredictiveIntelligenceEngine } from './predictive-intelligence';
+import { createAutonomousOperationsEngine } from './autonomous-operations';
+import { createCulturalEvolutionEngine } from './cultural-evolution';
+
 export {
     SelfLearningAdaptationEngine,
     createSelfLearningAdaptationEngine,
