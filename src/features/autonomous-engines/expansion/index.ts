@@ -64,7 +64,7 @@ export const GLOBAL_EXPANSION_CONFIGS = {
     }
 };
 
-export default {
+const expansionEngines = {
     createGlobalExpansionCluster,
     createMultiRegionalAdaptationEngine,
     createDiasporaEngagementEngine,
@@ -72,3 +72,5 @@ export default {
     createLocalizationAutomationEngine,
     GLOBAL_EXPANSION_CONFIGS
 };
+
+export default expansionEngines;

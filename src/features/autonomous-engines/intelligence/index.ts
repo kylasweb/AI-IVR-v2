@@ -41,12 +41,6 @@ export {
 
 // Cluster factory function
 export function createAutonomousIntelligenceCluster() {
-    // Import dynamically to avoid circular dependency issues
-    const { createSelfLearningAdaptationEngine } = require('./self-learning-adaptation');
-    const { createPredictiveIntelligenceEngine } = require('./predictive-intelligence');
-    const { createAutonomousOperationsEngine } = require('./autonomous-operations');
-    const { createCulturalEvolutionEngine } = require('./cultural-evolution');
-
     return {
         selfLearningAdaptation: createSelfLearningAdaptationEngine(),
         predictiveIntelligence: createPredictiveIntelligenceEngine(),

@@ -66,7 +66,7 @@ export const TECHNOLOGY_INNOVATION_CONFIGS = {
     }
 };
 
-export default {
+const technologyEngines = {
     createTechnologyInnovationCluster,
     createQuantumReadyProcessingEngine,
     createAdvancedNLPResearchEngine,
@@ -74,3 +74,5 @@ export default {
     createIoTSmartCityEngine,
     TECHNOLOGY_INNOVATION_CONFIGS
 };
+
+export default technologyEngines;

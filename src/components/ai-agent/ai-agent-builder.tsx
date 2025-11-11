@@ -270,7 +270,7 @@ export default function AIAgentBuilder({
     }
   };
 
-  const useTemplate = (template: AgentTemplate) => {
+  const applyTemplate = (template: AgentTemplate) => {
     setAgent(prev => ({
       ...prev,
       name: template.name,
@@ -321,7 +321,7 @@ export default function AIAgentBuilder({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => useTemplate(template)}
+                      onClick={() => applyTemplate(template)}
                     >
                       Use Template
                     </Button>
