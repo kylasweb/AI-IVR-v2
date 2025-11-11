@@ -1,0 +1,115 @@
+{
+  "dataset_name": "Be-win/IndicST-malayalam-only",
+  "ingestion_timestamp": "2025-11-10T20:40:52.219618",
+  "engine_type": "stt_engine",
+  "dataset_config": {
+    "type": "audio_text_pairs",
+    "target": "whisper_stt",
+    "priority": "high",
+    "description": "Malayalam speech-to-text training data"
+  },
+  "storage_location": "storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only",
+  "splits": {
+    "train": {
+      "path": "storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\train.parquet",
+      "rows": 300804,
+      "columns": [
+        "path",
+        "text",
+        "task",
+        "source_text",
+        "source_language",
+        "tar_lang"
+      ],
+      "size_mb": 27.046013832092285
+    },
+    "dev": {
+      "path": "storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\dev.parquet",
+      "rows": 37346,
+      "columns": [
+        "path",
+        "text",
+        "task",
+        "source_text",
+        "source_language",
+        "tar_lang"
+      ],
+      "size_mb": 3.405017852783203
+    },
+    "test": {
+      "path": "storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\test.parquet",
+      "rows": 37757,
+      "columns": [
+        "path",
+        "text",
+        "task",
+        "source_text",
+        "source_language",
+        "tar_lang"
+      ],
+      "size_mb": 3.4460582733154297
+    },
+    "kathbath": {
+      "path": "storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\kathbath.parquet",
+      "rows": 44827,
+      "columns": [
+        "path",
+        "text",
+        "task",
+        "source_text",
+        "source_language",
+        "tar_lang"
+      ],
+      "size_mb": 4.8221635818481445
+    }
+  },
+  "statistics": {
+    "total_samples": 420734,
+    "split_distribution": {
+      "train": 300804,
+      "dev": 37346,
+      "test": 37757,
+      "kathbath": 44827
+    },
+    "features": {
+      "path": "Value('string')",
+      "text": "Value('string')",
+      "task": "Value('string')",
+      "source_text": "Value('string')",
+      "source_language": "Value('string')",
+      "tar_lang": "Value('string')"
+    }
+  },
+  "data_schema": {
+    "has_audio": false,
+    "has_text": true,
+    "has_labels": false,
+    "column_names": [
+      "path",
+      "text",
+      "task",
+      "source_text",
+      "source_language",
+      "tar_lang"
+    ],
+    "suspected_language_columns": []
+  },
+  "quality_metrics": {
+    "completeness_score": 1.0,
+    "consistency_score": 0.0,
+    "malayalam_content_ratio": 0.51,
+    "issues_found": []
+  },
+  "preprocessing_recommendations": [
+    "Convert audio to 16kHz mono WAV format",
+    "Normalize audio levels to prevent clipping",
+    "Remove silence segments shorter than 0.1 seconds",
+    "Validate audio-text alignment quality",
+    "Normalize Malayalam Unicode characters",
+    "Remove non-standard punctuation",
+    "Split long sentences for better training",
+    "Validate Malayalam script consistency",
+    "Segment audio to 30-second chunks for Whisper",
+    "Ensure text transcriptions are clean and accurate"
+  ]
+}
