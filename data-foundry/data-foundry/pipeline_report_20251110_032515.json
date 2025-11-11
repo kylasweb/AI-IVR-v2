@@ -1,0 +1,940 @@
+{
+  "execution_id": "datafoundry_20251110_010430",
+  "phases_requested": [
+    "phase1",
+    "phase2",
+    "phase3",
+    "phase4"
+  ],
+  "phase_reports": {
+    "phase1": {
+      "session_metadata": {
+        "session_id": "2025-11-10T01:04:30.784630",
+        "datasets_processed": {
+          "Be-win/IndicST-malayalam-only": {
+            "dataset_name": "Be-win/IndicST-malayalam-only",
+            "ingestion_timestamp": "2025-11-10T01:08:18.130966",
+            "engine_type": "stt_engine",
+            "dataset_config": {
+              "type": "audio_text_pairs",
+              "target": "whisper_stt",
+              "priority": "high",
+              "description": "Malayalam speech-to-text training data"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\train.parquet",
+                "rows": 300804,
+                "columns": [
+                  "path",
+                  "text",
+                  "task",
+                  "source_text",
+                  "source_language",
+                  "tar_lang"
+                ],
+                "size_mb": 27.046013832092285
+              },
+              "dev": {
+                "path": "data-foundry\\storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\dev.parquet",
+                "rows": 37346,
+                "columns": [
+                  "path",
+                  "text",
+                  "task",
+                  "source_text",
+                  "source_language",
+                  "tar_lang"
+                ],
+                "size_mb": 3.405017852783203
+              },
+              "test": {
+                "path": "data-foundry\\storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\test.parquet",
+                "rows": 37757,
+                "columns": [
+                  "path",
+                  "text",
+                  "task",
+                  "source_text",
+                  "source_language",
+                  "tar_lang"
+                ],
+                "size_mb": 3.4460582733154297
+              },
+              "kathbath": {
+                "path": "data-foundry\\storage\\raw\\stt_engine\\Be_win_IndicST_malayalam_only\\kathbath.parquet",
+                "rows": 44827,
+                "columns": [
+                  "path",
+                  "text",
+                  "task",
+                  "source_text",
+                  "source_language",
+                  "tar_lang"
+                ],
+                "size_mb": 4.8221635818481445
+              }
+            },
+            "statistics": {
+              "total_samples": 420734,
+              "split_distribution": {
+                "train": 300804,
+                "dev": 37346,
+                "test": 37757,
+                "kathbath": 44827
+              },
+              "features": {
+                "path": "Value('string')",
+                "text": "Value('string')",
+                "task": "Value('string')",
+                "source_text": "Value('string')",
+                "source_language": "Value('string')",
+                "tar_lang": "Value('string')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": true,
+              "has_labels": false,
+              "column_names": [
+                "path",
+                "text",
+                "task",
+                "source_text",
+                "source_language",
+                "tar_lang"
+              ],
+              "suspected_language_columns": []
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 0.51,
+              "issues_found": []
+            },
+            "preprocessing_recommendations": [
+              "Convert audio to 16kHz mono WAV format",
+              "Normalize audio levels to prevent clipping",
+              "Remove silence segments shorter than 0.1 seconds",
+              "Validate audio-text alignment quality",
+              "Normalize Malayalam Unicode characters",
+              "Remove non-standard punctuation",
+              "Split long sentences for better training",
+              "Validate Malayalam script consistency",
+              "Segment audio to 30-second chunks for Whisper",
+              "Ensure text transcriptions are clean and accurate"
+            ]
+          },
+          "Aby003/Malayalam_Dialects": {
+            "dataset_name": "Aby003/Malayalam_Dialects",
+            "ingestion_timestamp": "2025-11-10T02:14:30.046262",
+            "engine_type": "dialect_engine",
+            "dataset_config": {
+              "type": "audio_dialect_pairs",
+              "target": "dialect_adapter",
+              "priority": "critical",
+              "description": "Travancore/Malabar/Cochin dialect recognition"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\dialect_engine\\Aby003_Malayalam_Dialects",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\dialect_engine\\Aby003_Malayalam_Dialects\\train.parquet",
+                "rows": 9,
+                "columns": [
+                  "id",
+                  "translation"
+                ],
+                "size_mb": 0.0030755996704101562
+              }
+            },
+            "statistics": {
+              "total_samples": 9,
+              "split_distribution": {
+                "train": 9
+              },
+              "features": {
+                "id": "Value('int64')",
+                "translation": "Value('string')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": false,
+              "has_labels": false,
+              "column_names": [
+                "id",
+                "translation"
+              ],
+              "suspected_language_columns": []
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 0.0,
+              "issues_found": [
+                "Low Malayalam content detected"
+              ]
+            },
+            "preprocessing_recommendations": [
+              "Convert audio to 16kHz mono WAV format",
+              "Normalize audio levels to prevent clipping",
+              "Remove silence segments shorter than 0.1 seconds",
+              "Validate audio-text alignment quality"
+            ]
+          },
+          "Praha-Labs/rasa-malayalam-nano-codec": {
+            "dataset_name": "Praha-Labs/rasa-malayalam-nano-codec",
+            "ingestion_timestamp": "2025-11-10T02:14:44.259703",
+            "engine_type": "nlu_engine",
+            "dataset_config": {
+              "type": "intent_text",
+              "target": "nlu_intent",
+              "priority": "high",
+              "description": "Malayalam intent classification for Rasa"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\nlu_engine\\Praha_Labs_rasa_malayalam_nano_codec",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\nlu_engine\\Praha_Labs_rasa_malayalam_nano_codec\\train.parquet",
+                "rows": 30336,
+                "columns": [
+                  "text",
+                  "nano_layer_1",
+                  "nano_layer_2",
+                  "nano_layer_3",
+                  "nano_layer_4",
+                  "encoded_len"
+                ],
+                "size_mb": 14.057018280029297
+              }
+            },
+            "statistics": {
+              "total_samples": 30336,
+              "split_distribution": {
+                "train": 30336
+              },
+              "features": {
+                "text": "Value('string')",
+                "nano_layer_1": "List(Value('int64'))",
+                "nano_layer_2": "List(Value('int64'))",
+                "nano_layer_3": "List(Value('int64'))",
+                "nano_layer_4": "List(Value('int64'))",
+                "encoded_len": "Value('int64')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": true,
+              "has_labels": false,
+              "column_names": [
+                "text",
+                "nano_layer_1",
+                "nano_layer_2",
+                "nano_layer_3",
+                "nano_layer_4",
+                "encoded_len"
+              ],
+              "suspected_language_columns": [
+                "encoded_len"
+              ]
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 1.0,
+              "issues_found": []
+            },
+            "preprocessing_recommendations": [
+              "Normalize Malayalam Unicode characters",
+              "Remove non-standard punctuation",
+              "Split long sentences for better training",
+              "Validate Malayalam script consistency"
+            ]
+          },
+          "Sakshamrzt/IndicNLP-Malayalam": {
+            "dataset_name": "Sakshamrzt/IndicNLP-Malayalam",
+            "ingestion_timestamp": "2025-11-10T02:15:03.132474",
+            "engine_type": "nlu_engine",
+            "dataset_config": {
+              "type": "text_corpus",
+              "target": "nlu_understanding",
+              "priority": "high",
+              "description": "General Malayalam NLP corpus"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\nlu_engine\\Sakshamrzt_IndicNLP_Malayalam",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\nlu_engine\\Sakshamrzt_IndicNLP_Malayalam\\train.parquet",
+                "rows": 2998,
+                "columns": [
+                  "news",
+                  "class"
+                ],
+                "size_mb": 1.7085952758789062
+              },
+              "test": {
+                "path": "data-foundry\\storage\\raw\\nlu_engine\\Sakshamrzt_IndicNLP_Malayalam\\test.parquet",
+                "rows": 2999,
+                "columns": [
+                  "news",
+                  "class"
+                ],
+                "size_mb": 1.7422657012939453
+              }
+            },
+            "statistics": {
+              "total_samples": 5997,
+              "split_distribution": {
+                "train": 2998,
+                "test": 2999
+              },
+              "features": {
+                "news": "Value('string')",
+                "class": "Value('int64')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": false,
+              "has_labels": false,
+              "column_names": [
+                "news",
+                "class"
+              ],
+              "suspected_language_columns": []
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 0.0,
+              "issues_found": [
+                "Low Malayalam content detected"
+              ]
+            },
+            "preprocessing_recommendations": [
+              "Normalize Malayalam Unicode characters",
+              "Remove non-standard punctuation",
+              "Split long sentences for better training",
+              "Validate Malayalam script consistency"
+            ]
+          },
+          "wlkla/Malayalam_first_ready_for_sentiment": {
+            "dataset_name": "wlkla/Malayalam_first_ready_for_sentiment",
+            "ingestion_timestamp": "2025-11-10T02:15:09.086662",
+            "engine_type": "sentiment_engine",
+            "dataset_config": {
+              "type": "sentiment_text",
+              "target": "sentiment_classifier",
+              "priority": "high",
+              "description": "Malayalam sentiment analysis training data"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\sentiment_engine\\wlkla_Malayalam_first_ready_for_sentiment",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\sentiment_engine\\wlkla_Malayalam_first_ready_for_sentiment\\train.parquet",
+                "rows": 6739,
+                "columns": [
+                  "label",
+                  "query"
+                ],
+                "size_mb": 0.18802642822265625
+              }
+            },
+            "statistics": {
+              "total_samples": 6739,
+              "split_distribution": {
+                "train": 6739
+              },
+              "features": {
+                "label": "Value('string')",
+                "query": "Value('string')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": false,
+              "has_labels": true,
+              "column_names": [
+                "label",
+                "query"
+              ],
+              "suspected_language_columns": []
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 0.0,
+              "issues_found": [
+                "Low Malayalam content detected"
+              ]
+            },
+            "preprocessing_recommendations": [
+              "Normalize Malayalam Unicode characters",
+              "Remove non-standard punctuation",
+              "Split long sentences for better training",
+              "Validate Malayalam script consistency",
+              "Map sentiment labels to standard schema",
+              "Balance positive/negative/neutral classes",
+              "Remove ambiguous sentiment examples"
+            ]
+          },
+          "Praha-Labs/imasc_slr_Malayalam-nano-codec": {
+            "dataset_name": "Praha-Labs/imasc_slr_Malayalam-nano-codec",
+            "ingestion_timestamp": "2025-11-10T02:26:59.913570",
+            "engine_type": "tts_engine",
+            "dataset_config": {
+              "type": "tts_corpus",
+              "target": "malayalam_tts",
+              "priority": "medium",
+              "description": "Malayalam TTS vocoder training"
+            },
+            "storage_location": "data-foundry\\storage\\raw\\tts_engine\\Praha_Labs_imasc_slr_Malayalam_nano_codec",
+            "splits": {
+              "train": {
+                "path": "data-foundry\\storage\\raw\\tts_engine\\Praha_Labs_imasc_slr_Malayalam_nano_codec\\train.parquet",
+                "rows": 41144,
+                "columns": [
+                  "text",
+                  "nano_layer_1",
+                  "nano_layer_2",
+                  "nano_layer_3",
+                  "nano_layer_4",
+                  "encoded_len"
+                ],
+                "size_mb": 17.3436918258667
+              }
+            },
+            "statistics": {
+              "total_samples": 41144,
+              "split_distribution": {
+                "train": 41144
+              },
+              "features": {
+                "text": "Value('string')",
+                "nano_layer_1": "List(Value('int64'))",
+                "nano_layer_2": "List(Value('int64'))",
+                "nano_layer_3": "List(Value('int64'))",
+                "nano_layer_4": "List(Value('int64'))",
+                "encoded_len": "Value('int64')"
+              }
+            },
+            "data_schema": {
+              "has_audio": false,
+              "has_text": true,
+              "has_labels": false,
+              "column_names": [
+                "text",
+                "nano_layer_1",
+                "nano_layer_2",
+                "nano_layer_3",
+                "nano_layer_4",
+                "encoded_len"
+              ],
+              "suspected_language_columns": [
+                "encoded_len"
+              ]
+            },
+            "quality_metrics": {
+              "completeness_score": 1.0,
+              "consistency_score": 0.0,
+              "malayalam_content_ratio": 1.0,
+              "issues_found": []
+            },
+            "preprocessing_recommendations": []
+          }
+        },
+        "errors": [
+          "('Connection broken: IncompleteRead(109879880 bytes read, 1346633420 more expected)', IncompleteRead(109879880 bytes read, 1346633420 more expected))",
+          "(ReadTimeoutError(\"HTTPSConnectionPool(host='huggingface.co', port=443): Read timed out. (read timeout=10)\"), '(Request ID: 8354c7fb-a68d-4f23-91c7-d7a853137539)')",
+          "realloc of size 1360003072 failed"
+        ],
+        "statistics": {
+          "total_datasets": 0,
+          "successful_downloads": 6,
+          "failed_downloads": 3,
+          "total_size_gb": 0.0
+        }
+      },
+      "dataset_summary": {
+        "total_targeted": 9,
+        "successfully_ingested": 6,
+        "failed_ingestions": 3,
+        "success_rate": 66.66666666666666
+      },
+      "next_phase_recommendations": [
+        "Proceed to Phase 2: Data Standardization",
+        "Review quality metrics for datasets with low Malayalam content",
+        "Address any authentication issues for failed downloads",
+        "Prepare preprocessing pipelines based on recommendations"
+      ]
+    },
+    "phase2": {
+      "session_metadata": {
+        "session_id": "2025-11-10T02:27:04.629197",
+        "processed_datasets": {
+          "Aby003_Malayalam_Dialects": {
+            "type": "audio_standardization",
+            "input_files": 9,
+            "output_files": 0,
+            "conversion_errors": [],
+            "quality_metrics": {},
+            "format_compliance": true
+          },
+          "Praha_Labs_rasa_malayalam_nano_codec": {
+            "type": "text_standardization",
+            "input_samples": 30336,
+            "output_samples": 30193,
+            "normalization_applied": [],
+            "quality_improvements": {
+              "train": {
+                "total_texts": 30193,
+                "average_length": 83.08240320604114,
+                "length_std": 56.66673046834586,
+                "average_words": 8.870135461862022,
+                "word_std": 5.739249417365805,
+                "malayalam_coverage": 0.8908952164833795
+              }
+            }
+          },
+          "Sakshamrzt_IndicNLP_Malayalam": {
+            "type": "text_standardization",
+            "input_samples": 5997,
+            "output_samples": 0,
+            "normalization_applied": [],
+            "quality_improvements": {}
+          },
+          "wlkla_Malayalam_first_ready_for_sentiment": {
+            "type": "sentiment_standardization",
+            "input_samples": 6739,
+            "output_samples": 0,
+            "label_mapping": {},
+            "class_distribution": {},
+            "text_quality": {}
+          },
+          "Be_win_IndicST_malayalam_only": {
+            "type": "audio_standardization",
+            "input_files": 420734,
+            "output_files": 0,
+            "conversion_errors": [],
+            "quality_metrics": {},
+            "format_compliance": true
+          }
+        },
+        "audio_conversions": {
+          "successful": 0,
+          "failed": 420734
+        },
+        "text_normalizations": {
+          "successful": 30193,
+          "failed": 143
+        },
+        "quality_improvements": {}
+      },
+      "processing_summary": {
+        "total_datasets_processed": 5,
+        "audio_conversion_rate": 0.0,
+        "text_normalization_rate": 99.52861286919831
+      },
+      "next_phase_recommendations": [
+        "Proceed to Phase 3: Strategic Allocation",
+        "Review quality metrics for datasets with low Malayalam coverage",
+        "Consider additional preprocessing for datasets with high error rates",
+        "Prepare engine-specific routing configurations"
+      ]
+    },
+    "phase3": {
+      "session_metadata": {
+        "session_id": "2025-11-10T03:25:04.175424",
+        "allocations_performed": {
+          "Aby003_Malayalam_Dialects": {
+            "dataset_name": "Aby003_Malayalam_Dialects",
+            "target_engine": "dialect_adapter",
+            "allocation_result": {
+              "processed_files": 0,
+              "optimizations_applied": [],
+              "quality_improvements": {},
+              "engine_specific_metadata": {
+                "engine_type": "dialect_adapter",
+                "training_strategy": "lora_adapter_training",
+                "priority": "critical",
+                "value_proposition": "Travancore/Malabar/Cochin dialect recognition",
+                "adapter_type": "lora",
+                "base_model": "whisper_malayalam_base",
+                "target_dialects": [
+                  "travancore",
+                  "malabar",
+                  "cochin"
+                ],
+                "adapter_params": {
+                  "rank": 16,
+                  "alpha": 32,
+                  "dropout": 0.1
+                }
+              }
+            },
+            "training_config": {
+              "training_metadata": {
+                "engine": "dialect_adapter",
+                "strategy": "lora_adapter_training",
+                "priority": "critical",
+                "datasets_included": 0
+              },
+              "data_configuration": {
+                "input_path": "./storage/gold/dialect_adapter",
+                "validation_split": 0.1,
+                "test_split": 0.1,
+                "shuffle_data": true
+              },
+              "training_parameters": {
+                "epochs": 20,
+                "learning_rate": 0.0001,
+                "lora_rank": 16,
+                "lora_alpha": 32,
+                "target_modules": [
+                  "q_proj",
+                  "v_proj"
+                ]
+              },
+              "evaluation_metrics": [
+                "dialect_accuracy",
+                "wer_by_dialect"
+              ],
+              "deployment_config": {
+                "shadow_deployment": true,
+                "traffic_percentage": 10,
+                "rollback_threshold": 0.95
+              }
+            },
+            "status": "completed"
+          },
+          "Praha_Labs_rasa_malayalam_nano_codec": {
+            "dataset_name": "Praha_Labs_rasa_malayalam_nano_codec",
+            "target_engine": "nlu_intent",
+            "allocation_result": {
+              "processed_files": 1,
+              "optimizations_applied": [],
+              "quality_improvements": {
+                "train": {
+                  "size_reduction": 0.0,
+                  "quality_improvement": 0.1,
+                  "feature_enrichment": 2
+                }
+              },
+              "engine_specific_metadata": {
+                "engine_type": "nlu_intent",
+                "training_strategy": "intent_classification_training",
+                "priority": "high",
+                "value_proposition": "Structured intent recognition for conversational AI"
+              }
+            },
+            "training_config": {
+              "training_metadata": {
+                "engine": "nlu_intent",
+                "strategy": "intent_classification_training",
+                "priority": "high",
+                "datasets_included": 1
+              },
+              "data_configuration": {
+                "input_path": "./storage/gold/nlu_intent",
+                "validation_split": 0.1,
+                "test_split": 0.1,
+                "shuffle_data": true
+              },
+              "training_parameters": {
+                "epochs": 10,
+                "learning_rate": 1e-05
+              },
+              "evaluation_metrics": [
+                "intent_accuracy",
+                "f1_weighted"
+              ],
+              "deployment_config": {
+                "shadow_deployment": true,
+                "traffic_percentage": 10,
+                "rollback_threshold": 0.95
+              }
+            },
+            "status": "completed"
+          },
+          "Sakshamrzt_IndicNLP_Malayalam": {
+            "dataset_name": "Sakshamrzt_IndicNLP_Malayalam",
+            "target_engine": "nlu_understanding",
+            "allocation_result": {
+              "processed_files": 0,
+              "optimizations_applied": [],
+              "quality_improvements": {},
+              "engine_specific_metadata": {
+                "engine_type": "nlu_understanding",
+                "training_strategy": "language_model_fine_tuning",
+                "priority": "high",
+                "value_proposition": "Deep Malayalam linguistic understanding"
+              }
+            },
+            "training_config": {
+              "training_metadata": {
+                "engine": "nlu_understanding",
+                "strategy": "language_model_fine_tuning",
+                "priority": "high",
+                "datasets_included": 0
+              },
+              "data_configuration": {
+                "input_path": "./storage/gold/nlu_understanding",
+                "validation_split": 0.1,
+                "test_split": 0.1,
+                "shuffle_data": true
+              },
+              "training_parameters": {
+                "epochs": 10,
+                "learning_rate": 1e-05
+              },
+              "evaluation_metrics": [
+                "accuracy",
+                "loss"
+              ],
+              "deployment_config": {
+                "shadow_deployment": true,
+                "traffic_percentage": 10,
+                "rollback_threshold": 0.95
+              }
+            },
+            "status": "completed"
+          },
+          "wlkla_Malayalam_first_ready_for_sentiment": {
+            "dataset_name": "wlkla_Malayalam_first_ready_for_sentiment",
+            "target_engine": "sentiment_classifier",
+            "allocation_result": {
+              "processed_files": 0,
+              "optimizations_applied": [],
+              "quality_improvements": {},
+              "engine_specific_metadata": {
+                "engine_type": "sentiment_classifier",
+                "training_strategy": "classification_fine_tuning",
+                "priority": "high",
+                "value_proposition": "Emotion detection for better user experience"
+              }
+            },
+            "training_config": {
+              "training_metadata": {
+                "engine": "sentiment_classifier",
+                "strategy": "classification_fine_tuning",
+                "priority": "high",
+                "datasets_included": 0
+              },
+              "data_configuration": {
+                "input_path": "./storage/gold/sentiment_classifier",
+                "validation_split": 0.1,
+                "test_split": 0.1,
+                "shuffle_data": true
+              },
+              "training_parameters": {
+                "epochs": 15,
+                "learning_rate": 2e-05,
+                "batch_size": 32,
+                "class_weights": "balanced"
+              },
+              "evaluation_metrics": [
+                "accuracy",
+                "f1_macro",
+                "confusion_matrix"
+              ],
+              "deployment_config": {
+                "shadow_deployment": true,
+                "traffic_percentage": 10,
+                "rollback_threshold": 0.95
+              }
+            },
+            "status": "completed"
+          },
+          "Be_win_IndicST_malayalam_only": {
+            "dataset_name": "Be_win_IndicST_malayalam_only",
+            "target_engine": "whisper_stt",
+            "allocation_result": {
+              "processed_files": 0,
+              "optimizations_applied": [],
+              "quality_improvements": {},
+              "engine_specific_metadata": {
+                "engine_type": "whisper_stt",
+                "training_strategy": "supervised_fine_tuning",
+                "priority": "high",
+                "value_proposition": "Core Malayalam speech recognition capabilities",
+                "model_base": "openai/whisper-small",
+                "language": "ml",
+                "task": "transcribe",
+                "training_params": {
+                  "learning_rate": 1e-05,
+                  "batch_size": 16,
+                  "gradient_accumulation_steps": 2
+                }
+              }
+            },
+            "training_config": {
+              "training_metadata": {
+                "engine": "whisper_stt",
+                "strategy": "supervised_fine_tuning",
+                "priority": "high",
+                "datasets_included": 0
+              },
+              "data_configuration": {
+                "input_path": "./storage/gold/whisper_stt",
+                "validation_split": 0.1,
+                "test_split": 0.1,
+                "shuffle_data": true
+              },
+              "training_parameters": {
+                "epochs": 10,
+                "learning_rate": 1e-05,
+                "batch_size": 16,
+                "weight_decay": 0.01,
+                "warmup_steps": 500
+              },
+              "evaluation_metrics": [
+                "wer",
+                "cer",
+                "bleu"
+              ],
+              "deployment_config": {
+                "shadow_deployment": true,
+                "traffic_percentage": 10,
+                "rollback_threshold": 0.95
+              }
+            },
+            "status": "completed"
+          }
+        },
+        "engine_statistics": {
+          "whisper_stt": {
+            "datasets_allocated": 1,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "dialect_adapter": {
+            "datasets_allocated": 1,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "nlu_intent": {
+            "datasets_allocated": 1,
+            "total_samples": 1,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "nlu_understanding": {
+            "datasets_allocated": 1,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "sentiment_classifier": {
+            "datasets_allocated": 1,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "translation_model": {
+            "datasets_allocated": 0,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          },
+          "malayalam_tts": {
+            "datasets_allocated": 0,
+            "total_samples": 0,
+            "total_size_mb": 0.0,
+            "quality_score": 0.0
+          }
+        },
+        "quality_metrics": {},
+        "optimization_applied": [
+          "shared_vocabulary_optimization",
+          "cross_engine_validation"
+        ]
+      },
+      "allocation_summary": {
+        "total_datasets_allocated": 5,
+        "engines_utilized": 5,
+        "optimization_strategies_applied": 2
+      },
+      "engine_breakdown": {
+        "whisper_stt": {
+          "datasets_allocated": 1,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "dialect_adapter": {
+          "datasets_allocated": 1,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "nlu_intent": {
+          "datasets_allocated": 1,
+          "total_samples": 1,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "nlu_understanding": {
+          "datasets_allocated": 1,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "sentiment_classifier": {
+          "datasets_allocated": 1,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "translation_model": {
+          "datasets_allocated": 0,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        },
+        "malayalam_tts": {
+          "datasets_allocated": 0,
+          "total_samples": 0,
+          "total_size_mb": 0.0,
+          "quality_score": 0.0
+        }
+      },
+      "next_phase_recommendations": [
+        "Proceed to Phase 4: Fine-Tuning & Deployment",
+        "Review engine-specific training configurations",
+        "Set up monitoring for shadow deployment",
+        "Prepare model versioning and rollback strategies"
+      ]
+    },
+    "phase4": {
+      "training_jobs": {
+        "train_dialect_adapter_20251110_032515": "queued",
+        "train_nlu_intent_20251110_032515": "queued",
+        "train_nlu_understanding_20251110_032515": "queued",
+        "train_sentiment_classifier_20251110_032515": "queued",
+        "train_whisper_stt_20251110_032515": "queued"
+      },
+      "deployments": {},
+      "models_trained": 5,
+      "models_deployed": 0
+    }
+  },
+  "overall_statistics": {
+    "pipeline_duration": "02:20:45",
+    "phases_completed": 4,
+    "total_datasets_processed": 6,
+    "total_models_trained": 5,
+    "success_rate": 100.0
+  },
+  "recommendations": [
+    "Review failed dataset ingestions - consider authentication or dataset availability issues",
+    "Monitor shadow deployments for model performance validation",
+    "Prepare production deployment approval workflows",
+    "Set up continuous monitoring for deployed models",
+    "Implement automated retraining pipeline for continuous improvement",
+    "Set up data drift monitoring for incoming Malayalam conversations",
+    "Create feedback loop from production performance to training data curation"
+  ]
+}

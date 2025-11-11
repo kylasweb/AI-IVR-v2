@@ -28,7 +28,14 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    // Memory optimization options
+    "maxNodeModuleJsDepth": 0,
+    "preserveWatchOutput": true,
+    "skipDefaultLibCheck": true,
+    "disableReferencedProjectLoad": true,
+    "disableSolutionSearching": true,
+    "disableSourceOfProjectReferenceRedirect": true
   },
   "include": [
     "**/*.d.ts",
@@ -39,6 +46,18 @@
   ],
   "exclude": [
     "node_modules",
-    ".next/**/*"
-  ]
+    ".next/**/*",
+    "dist/**/*",
+    "build/**/*",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "**/*.test.tsx"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

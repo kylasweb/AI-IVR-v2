@@ -13,19 +13,21 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Settings, 
-  Save, 
-  RotateCcw, 
-  Volume2, 
-  Mic, 
-  Globe, 
-  Shield, 
+import {
+  Settings,
+  Save,
+  RotateCcw,
+  Volume2,
+  Mic,
+  Globe,
+  Shield,
   Database,
   Clock,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
+  GitBranch,
+  Tag
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -52,15 +54,26 @@ export default function SystemSettings() {
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('voice');
+  const [commits, setCommits] = useState<any[]>([]);
+  const [releases, setReleases] = useState<any[]>([]);
+  const [loadingCommits, setLoadingCommits] = useState(false);
+  const [loadingReleases, setLoadingReleases] = useState(false);
 
   useEffect(() => {
     fetchSettings();
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory === 'versioncontrol' && settings.length > 0) {
+      fetchCommits();
+      fetchReleases();
+    }
+  }, [selectedCategory, settings]);
+
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      
+
       // Mock data for demonstration - replace with actual API call
       const mockSettings: SettingCategory[] = [
         {
@@ -207,6 +220,40 @@ export default function SystemSettings() {
               isEncrypted: false
             }
           ]
+        },
+        {
+          name: 'Version Control',
+          icon: GitBranch,
+          description: 'GitHub repository commits and releases',
+          settings: [
+            {
+              id: '14',
+              key: 'version_control.github_owner',
+              value: 'your-github-username',
+              type: 'string',
+              category: 'version_control',
+              description: 'GitHub repository owner/username',
+              isEncrypted: false
+            },
+            {
+              id: '15',
+              key: 'version_control.github_repo',
+              value: 'ai-ivr-v2',
+              type: 'string',
+              category: 'version_control',
+              description: 'GitHub repository name',
+              isEncrypted: false
+            },
+            {
+              id: '16',
+              key: 'version_control.commit_limit',
+              value: '10',
+              type: 'number',
+              category: 'version_control',
+              description: 'Number of recent commits to display',
+              isEncrypted: false
+            }
+          ]
         }
       ];
 
@@ -223,13 +270,76 @@ export default function SystemSettings() {
     }
   };
 
-  const updateSetting = async (settingId: string, newValue: string) => {
+  const fetchCommits = async () => {
+    try {
+      setLoadingCommits(true);
+      const owner = settings.find(cat => cat.name === 'Version Control')?.settings.find(s => s.key === 'version_control.github_owner')?.value || 'your-github-username';
+      const repo = settings.find(cat => cat.name === 'Version Control')?.settings.find(s => s.key === 'version_control.github_repo')?.value || 'ai-ivr-v2';
+      const limit = settings.find(cat => cat.name === 'Version Control')?.settings.find(s => s.key === 'version_control.commit_limit')?.value || '10';
+
+      const response = await fetch(`/api/github/commits?owner=${owner}&repo=${repo}&limit=${limit}`);
+      const data = await response.json();
+
+      if (data.error) {
+        toast({
+          title: 'Error',
+          description: data.message || 'Failed to fetch commits',
+          variant: 'destructive'
+        });
+        setCommits([]);
+      } else {
+        setCommits(data.commits || []);
+      }
+    } catch (error) {
+      console.error('Error fetching commits:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch GitHub commits',
+        variant: 'destructive'
+      });
+      setCommits([]);
+    } finally {
+      setLoadingCommits(false);
+    }
+  };
+
+  const fetchReleases = async () => {
+    try {
+      setLoadingReleases(true);
+      const owner = settings.find(cat => cat.name === 'Version Control')?.settings.find(s => s.key === 'version_control.github_owner')?.value || 'your-github-username';
+      const repo = settings.find(cat => cat.name === 'Version Control')?.settings.find(s => s.key === 'version_control.github_repo')?.value || 'ai-ivr-v2';
+
+      const response = await fetch(`/api/github/releases?owner=${owner}&repo=${repo}&limit=5`);
+      const data = await response.json();
+
+      if (data.error) {
+        toast({
+          title: 'Error',
+          description: data.message || 'Failed to fetch releases',
+          variant: 'destructive'
+        });
+        setReleases([]);
+      } else {
+        setReleases(data.releases || []);
+      }
+    } catch (error) {
+      console.error('Error fetching releases:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch GitHub releases',
+        variant: 'destructive'
+      });
+      setReleases([]);
+    } finally {
+      setLoadingReleases(false);
+    }
+  }; const updateSetting = async (settingId: string, newValue: string) => {
     try {
       // Update local state
       setSettings(prev => prev.map(category => ({
         ...category,
-        settings: category.settings.map(setting => 
-          setting.id === settingId 
+        settings: category.settings.map(setting =>
+          setting.id === settingId
             ? { ...setting, value: newValue }
             : setting
         )
@@ -245,10 +355,10 @@ export default function SystemSettings() {
   const saveAllSettings = async () => {
     try {
       setSaving(true);
-      
+
       // TODO: Make API call to save all settings
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+
       toast({
         title: 'Settings Saved',
         description: 'All system settings have been updated successfully',
@@ -289,7 +399,7 @@ export default function SystemSettings() {
         return (
           <Switch
             checked={setting.value === 'true'}
-            onCheckedChange={(checked) => 
+            onCheckedChange={(checked) =>
               updateSetting(setting.id, checked.toString())
             }
           />
@@ -326,13 +436,13 @@ export default function SystemSettings() {
 
   const filteredCategories = settings.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.settings.some(setting => 
+    category.settings.some(setting =>
       setting.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
       setting.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
-  const currentCategory = filteredCategories.find(cat => 
+  const currentCategory = filteredCategories.find(cat =>
     cat.name.toLowerCase().replace(' settings', '').replace(' ', '') === selectedCategory
   );
 
@@ -358,15 +468,15 @@ export default function SystemSettings() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={resetToDefaults}
             className="flex items-center gap-2"
           >
             <RotateCcw className="h-4 w-4" />
             Reset to Defaults
           </Button>
-          <Button 
+          <Button
             onClick={saveAllSettings}
             disabled={saving}
             className="flex items-center gap-2"
@@ -406,14 +516,13 @@ export default function SystemSettings() {
                 const categoryKey = category.name.toLowerCase().replace(' settings', '').replace(' ', '');
                 const Icon = category.icon;
                 const isSelected = selectedCategory === categoryKey;
-                
+
                 return (
                   <button
                     key={categoryKey}
                     onClick={() => setSelectedCategory(categoryKey)}
-                    className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors ${
-                      isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                    }`}
+                    className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                      }`}
                   >
                     <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
                     <div>
@@ -434,47 +543,237 @@ export default function SystemSettings() {
         {/* Settings Content */}
         <div className="lg:col-span-3">
           {currentCategory ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <currentCategory.icon className="h-6 w-6" />
-                  {currentCategory.name}
-                </CardTitle>
-                <CardDescription>{currentCategory.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {currentCategory.settings.map((setting) => (
-                    <div key={setting.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <Label className="text-base font-medium">
-                            {setting.key}
-                            {setting.isEncrypted && (
-                              <Badge variant="secondary" className="ml-2 text-xs">
-                                Encrypted
+            currentCategory.name === 'Version Control' ? (
+              <div className="space-y-6">
+                {/* Version Control Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <currentCategory.icon className="h-6 w-6" />
+                      {currentCategory.name}
+                    </CardTitle>
+                    <CardDescription>{currentCategory.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {currentCategory.settings.map((setting) => (
+                        <div key={setting.id} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <Label className="text-base font-medium">
+                                {setting.key}
+                                {setting.isEncrypted && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">
+                                    Encrypted
+                                  </Badge>
+                                )}
+                              </Label>
+                              {setting.description && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {setting.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {setting.type}
                               </Badge>
-                            )}
-                          </Label>
-                          {setting.description && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              {setting.description}
-                            </p>
-                          )}
+                              {renderSettingInput(setting)}
+                            </div>
+                          </div>
+                          <Separator />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {setting.type}
-                          </Badge>
-                          {renderSettingInput(setting)}
-                        </div>
-                      </div>
-                      <Separator />
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Commits */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <GitBranch className="h-5 w-5" />
+                      Recent Commits
+                    </CardTitle>
+                    <CardDescription>Latest commits from the GitHub repository</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingCommits ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                        <span className="ml-2">Loading commits...</span>
+                      </div>
+                    ) : commits.length > 0 ? (
+                      <div className="space-y-4">
+                        {commits.map((commit) => (
+                          <div key={commit.sha} className="flex items-start gap-3 p-3 rounded-lg border">
+                            <div className="flex-shrink-0">
+                              {commit.author.avatar_url ? (
+                                <img
+                                  src={commit.author.avatar_url}
+                                  alt={commit.author.login}
+                                  className="w-8 h-8 rounded-full"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                  <span className="text-xs font-medium text-gray-600">
+                                    {commit.author.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                  {commit.short_sha}
+                                </code>
+                                <span className="text-sm font-medium text-gray-900">
+                                  {commit.author.name}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {new Date(commit.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">
+                                {commit.message.split('\n')[0]}
+                              </p>
+                              <a
+                                href={commit.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:text-blue-800"
+                              >
+                                View on GitHub →
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No commits found or repository not accessible</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Releases */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Tag className="h-5 w-5" />
+                      Recent Releases
+                    </CardTitle>
+                    <CardDescription>Latest releases and tags from the GitHub repository</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingReleases ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                        <span className="ml-2">Loading releases...</span>
+                      </div>
+                    ) : releases.length > 0 ? (
+                      <div className="space-y-4">
+                        {releases.map((release) => (
+                          <div key={release.id} className="p-4 rounded-lg border">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold text-lg">{release.name}</h4>
+                                <Badge variant={release.prerelease ? "secondary" : "default"}>
+                                  {release.tag_name}
+                                </Badge>
+                                {release.prerelease && (
+                                  <Badge variant="outline">Pre-release</Badge>
+                                )}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {new Date(release.published_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-3">
+                              {release.body.length > 200
+                                ? `${release.body.substring(0, 200)}...`
+                                : release.body
+                              }
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {release.author.avatar_url && (
+                                  <img
+                                    src={release.author.avatar_url}
+                                    alt={release.author.login}
+                                    className="w-6 h-6 rounded-full"
+                                  />
+                                )}
+                                <span className="text-sm text-gray-600">
+                                  {release.author.login}
+                                </span>
+                              </div>
+                              <a
+                                href={release.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                View Release →
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Tag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No releases found or repository not accessible</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <currentCategory.icon className="h-6 w-6" />
+                    {currentCategory.name}
+                  </CardTitle>
+                  <CardDescription>{currentCategory.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {currentCategory.settings.map((setting) => (
+                      <div key={setting.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <Label className="text-base font-medium">
+                              {setting.key}
+                              {setting.isEncrypted && (
+                                <Badge variant="secondary" className="ml-2 text-xs">
+                                  Encrypted
+                                </Badge>
+                              )}
+                            </Label>
+                            {setting.description && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                {setting.description}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {setting.type}
+                            </Badge>
+                            {renderSettingInput(setting)}
+                          </div>
+                        </div>
+                        <Separator />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )
           ) : (
             <Card>
               <CardContent className="text-center py-12">

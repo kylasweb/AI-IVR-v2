@@ -47,3 +47,56 @@ test
 prompt
 
 server.log
+
+# Data Foundry and Model Cache (large files)
+data-foundry/model_cache/
+/data-foundry/**/*.pyc
+data-foundry/__pycache__/
+/data-foundry/**/*.log
+data-foundry/storage/raw/**/*.parquet
+data-foundry/storage/silver/**/*.parquet
+data-foundry/storage/gold/**/*.parquet
+data-foundry/phase1-ingestion/storage/
+/data-foundry/data-foundry/storage/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Model and data files
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.model
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.pb
+*.ckpt
+*.weights
+*.npz

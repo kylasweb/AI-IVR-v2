@@ -1,0 +1,16 @@
+deployment:
+  deployment_timeout: 300
+  monitoring_window: 3600
+  rollback_threshold: 0.95
+  shadow_traffic_percentage: 10
+monitoring:
+  alert_thresholds:
+    error_rate: 0.05
+    latency_p95: 500
+    memory_usage: 0.8
+  metrics_collection_interval: 60
+training:
+  gpu_memory_limit: 8GB
+  max_concurrent_jobs: 3
+  training_timeout: 7200
+  validation_threshold: 0.85

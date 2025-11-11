@@ -573,6 +573,28 @@ declare module 'lucide-react' {
     export const Pencil: any
     export const Sliders: any
 
+    // Voice AI specific icons
+    export const TestTube: any
+    export const Cpu: any
+    export const HardDrive: any
+    export const Network: any
+    export const Server: any
+    export const Workflow: any
+    export const Gauge: any
+    export const Timer: any
+    export const Headphones: any
+    export const Speaker: any
+    export const FileAudio: any
+    export const Waveform: any
+    export const Radio: any
+    export const Lightning: any
+    export const TrendingDown: any
+    export const File: any
+    export const Tag: any
+    export const AudioWaveform: any
+    export const Flask: any
+    export const Wifi: any
+
     // Icon variants (some UI components use *Icon suffix)
     export const ChevronDownIcon: any
     export const ChevronLeftIcon: any

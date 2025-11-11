@@ -1,0 +1,75 @@
+2025-11-10 21:56:03,073 - __main__ - INFO -    STT: facebook/wav2vec2-large-xlsr-53
+2025-11-10 21:56:03,074 - __main__ - INFO -    NLU: bert-base-multilingual-cased
+2025-11-10 21:56:03,075 - __main__ - INFO -    Translation: Helsinki-NLP/opus-mt-mul-en
+2025-11-10 21:56:03,075 - __main__ - INFO -    Sentiment: cardiffnlp/twitter-roberta-base-sentiment-latest
+2025-11-10 21:56:03,075 - __main__ - INFO -    TTS: microsoft/speecht5_tts
+2025-11-10 21:56:03,086 - malayalam_models - INFO - Initializing Malayalam Model Manager on cpu
+2025-11-10 22:46:04,563 - huggingface_hub.file_download - WARNING - Error while downloading from https://huggingface.co/api/resolve-cache/models/Helsinki-NLP/opus-mt-mul-en/848eae0c1676cfce9bb791c200e8228e5a6396ff/target.spm: HTTPSConnectionPool(host='huggingface.co', port=443): Read timed out.
+Trying to resume download...
+2025-11-10 22:46:20,164 - huggingface_hub.file_download - WARNING - Error while downloading from https://huggingface.co/api/resolve-cache/models/Helsinki-NLP/opus-mt-mul-en/848eae0c1676cfce9bb791c200e8228e5a6396ff/target.spm: HTTPSConnectionPool(host='huggingface.co', port=443): Read timed out.
+Trying to resume download...
+2025-11-10 22:47:17,357 - huggingface_hub.file_download - WARNING - Error while downloading from https://huggingface.co/api/resolve-cache/models/cardiffnlp/twitter-roberta-base-sentiment-latest/3216a57f2a0d9c45a2e6c20157c20c49fb4bf9c7/merges.txt: HTTPSConnectionPool(host='huggingface.co', port=443): Read timed out.
+Trying to resume download...
+2025-11-11 01:34:41,973 - __main__ - INFO -    Intent for 'Hello, I need help': unknown
+2025-11-11 01:34:42,739 - __main__ - INFO -    python malayalam_api.py
+2025-11-11 01:34:42,747 - __main__ - INFO - 
+2025-11-11 01:34:42,770 - __main__ - INFO -    http://localhost:8000/docs - API documentation
+2025-11-11 01:34:42,772 - __main__ - INFO -    http://localhost:8000/health - Health check
+2025-11-11 01:34:42,773 - __main__ - INFO -    http://localhost:8000/conversation - Human-like conversation
+2025-11-11 01:34:42,775 - __main__ - INFO - 
+2025-11-11 01:34:42,786 - __main__ - INFO -    1. Install: pip install sentencepiece protobuf
+2025-11-11 01:34:42,787 - __main__ - INFO -    2. Authenticate: hf auth login
+2025-11-11 01:34:42,787 - __main__ - INFO -    3. Request AI4Bharat model access
+2025-11-11 01:34:42,787 - __main__ - INFO -    4. Run: python test_ai4bharat_deployment.py
+2025-11-11 10:56:28,610 - __main__ - INFO -    STT: facebook/wav2vec2-large-xlsr-53
+2025-11-11 10:56:28,613 - __main__ - INFO -    NLU: bert-base-multilingual-cased
+2025-11-11 10:56:28,615 - __main__ - INFO -    Translation: Helsinki-NLP/opus-mt-mul-en
+2025-11-11 10:56:28,616 - __main__ - INFO -    Sentiment: cardiffnlp/twitter-roberta-base-sentiment-latest
+2025-11-11 10:56:28,617 - __main__ - INFO -    TTS: microsoft/speecht5_tts
+2025-11-11 10:56:28,626 - malayalam_models - INFO - Initializing Malayalam Model Manager on cpu
+2025-11-11 10:56:42,600 - __main__ - INFO -    Intent for 'Hello, I need help': unknown
+2025-11-11 10:56:42,985 - __main__ - INFO -    python malayalam_api.py
+2025-11-11 10:56:42,986 - __main__ - INFO - 
+2025-11-11 10:56:42,988 - __main__ - INFO -    http://localhost:8000/docs - API documentation
+2025-11-11 10:56:42,988 - __main__ - INFO -    http://localhost:8000/health - Health check
+2025-11-11 10:56:42,988 - __main__ - INFO -    http://localhost:8000/conversation - Human-like conversation
+2025-11-11 10:56:42,988 - __main__ - INFO - 
+2025-11-11 10:56:42,990 - __main__ - INFO -    1. Install: pip install sentencepiece protobuf
+2025-11-11 10:56:42,991 - __main__ - INFO -    2. Authenticate: hf auth login
+2025-11-11 10:56:42,991 - __main__ - INFO -    3. Request AI4Bharat model access
+2025-11-11 10:56:42,991 - __main__ - INFO -    4. Run: python test_ai4bharat_deployment.py
+2025-11-11 12:32:17,668 - __main__ - INFO -    STT: facebook/wav2vec2-large-xlsr-53
+2025-11-11 12:32:17,669 - __main__ - INFO -    NLU: bert-base-multilingual-cased
+2025-11-11 12:32:17,669 - __main__ - INFO -    Translation: Helsinki-NLP/opus-mt-mul-en
+2025-11-11 12:32:17,669 - __main__ - INFO -    Sentiment: cardiffnlp/twitter-roberta-base-sentiment-latest
+2025-11-11 12:32:17,670 - __main__ - INFO -    TTS: microsoft/speecht5_tts
+2025-11-11 12:32:20,733 - malayalam_models - INFO - Initializing Malayalam Model Manager on cpu
+2025-11-11 12:32:40,965 - __main__ - INFO -    Intent for 'Hello, I need help': unknown
+2025-11-11 12:32:41,824 - __main__ - INFO -    python malayalam_api.py
+2025-11-11 12:32:41,824 - __main__ - INFO - 
+2025-11-11 12:32:41,828 - __main__ - INFO -    http://localhost:8000/docs - API documentation
+2025-11-11 12:32:41,829 - __main__ - INFO -    http://localhost:8000/health - Health check
+2025-11-11 12:32:41,829 - __main__ - INFO -    http://localhost:8000/conversation - Human-like conversation
+2025-11-11 12:32:41,829 - __main__ - INFO - 
+2025-11-11 12:32:41,833 - __main__ - INFO -    1. Install: pip install sentencepiece protobuf
+2025-11-11 12:32:41,837 - __main__ - INFO -    2. Authenticate: hf auth login
+2025-11-11 12:32:41,839 - __main__ - INFO -    3. Request AI4Bharat model access
+2025-11-11 12:32:41,839 - __main__ - INFO -    4. Run: python test_ai4bharat_deployment.py
+2025-11-11 12:36:16,524 - __main__ - INFO -    STT: facebook/wav2vec2-large-xlsr-53
+2025-11-11 12:36:16,524 - __main__ - INFO -    NLU: bert-base-multilingual-cased
+2025-11-11 12:36:16,525 - __main__ - INFO -    Translation: Helsinki-NLP/opus-mt-mul-en
+2025-11-11 12:36:16,525 - __main__ - INFO -    Sentiment: cardiffnlp/twitter-roberta-base-sentiment-latest
+2025-11-11 12:36:16,525 - __main__ - INFO -    TTS: microsoft/speecht5_tts
+2025-11-11 12:36:16,575 - malayalam_models - WARNING - To enable Google Speech API, set vertex_project_id in ModelConfig.
+2025-11-11 12:36:16,576 - malayalam_models - INFO - Initializing Malayalam Model Manager on cpu
+2025-11-11 12:36:39,989 - __main__ - INFO -    Intent for 'Hello, I need help': unknown
+2025-11-11 12:36:40,704 - __main__ - INFO -    python malayalam_api.py
+2025-11-11 12:36:40,704 - __main__ - INFO - 
+2025-11-11 12:36:40,706 - __main__ - INFO -    http://localhost:8000/docs - API documentation
+2025-11-11 12:36:40,707 - __main__ - INFO -    http://localhost:8000/health - Health check
+2025-11-11 12:36:40,707 - __main__ - INFO -    http://localhost:8000/conversation - Human-like conversation
+2025-11-11 12:36:40,707 - __main__ - INFO - 
+2025-11-11 12:36:40,711 - __main__ - INFO -    1. Install: pip install sentencepiece protobuf
+2025-11-11 12:36:40,711 - __main__ - INFO -    2. Authenticate: hf auth login
+2025-11-11 12:36:40,711 - __main__ - INFO -    3. Request AI4Bharat model access
+2025-11-11 12:36:40,711 - __main__ - INFO -    4. Run: python test_ai4bharat_deployment.py

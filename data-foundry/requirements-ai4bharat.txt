@@ -1,0 +1,56 @@
+# AI4Bharat Malayalam Models - Enhanced Requirements
+# Optimized for human-like conversational AI with pre-trained models
+
+# Core AI4Bharat Dependencies
+transformers>=4.36.0
+torch>=2.0.0
+torchaudio>=2.0.0
+accelerate>=0.20.0
+
+# Essential for Model Loading (Critical Fix)
+sentencepiece>=0.1.99
+protobuf>=4.21.0
+
+# Audio Processing (Essential for Malayalam speech)
+soundfile>=0.12.1
+librosa>=0.10.1
+scipy>=1.11.0
+
+# Model Loading & Caching
+huggingface_hub>=0.17.0
+datasets>=2.14.0
+
+# FastAPI Service (Production Ready)
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.4.0
+
+# Audio & Signal Processing
+numpy>=1.24.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+
+# Development & Logging
+loguru>=0.7.0
+python-dotenv>=1.0.0
+typer>=0.9.0
+
+# Optional: GPU Acceleration
+# nvidia-ml-py>=12.535.108  # Uncomment for NVIDIA GPU monitoring
+
+# Optional: Advanced Audio Features
+# praat-parselmouth>=0.4.3  # Advanced phonetic analysis
+# pydub>=0.25.1  # Audio manipulation
+
+# Performance Optimization
+packaging>=23.0
+safetensors>=0.3.0
+
+# Malayalam Language Support
+indic-nlp-library>=0.81  # For Malayalam text processing
+polyglot>=16.7.4  # Multilingual support
+
+# Human-like Conversation Features
+python-speech-features>=0.6  # Voice feature extraction
+webrtcvad>=2.0.10  # Voice activity detection

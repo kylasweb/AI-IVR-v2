@@ -5,20 +5,105 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // 禁用 Next.js 热重载，由 nodemon 处理重编译
-  reactStrictMode: false,
-  webpack: (config, { dev }) => {
-    if (dev) {
-      // 禁用 webpack 的热模块替换
-      config.watchOptions = {
-        ignored: ['**/*'], // 忽略所有文件变化
-      };
-    }
-    return config;
-  },
   eslint: {
     // 构建时忽略ESLint错误
     ignoreDuringBuilds: true,
+  },
+
+  // Turbopack configuration (replaces experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+
+  // Memory optimization settings
+  experimental: {
+    // Reduce memory usage during compilation
+    webpackBuildWorker: false,
+  },
+
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks.chunks = 'all';
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+        },
+        radix: {
+          test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+          name: 'radix-ui',
+          chunks: 'all',
+          priority: 20,
+        },
+        lucide: {
+          test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+          name: 'lucide-react',
+          chunks: 'all',
+          priority: 20,
+        },
+      };
+    }
+
+    // Reduce memory usage in development
+    if (dev) {
+      // Enable webpack cache for faster rebuilds
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
+      };
+
+      // Optimize for development
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+
+    // Bundle analyzer (only in production)
+    if (!dev && process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: './analyze/client.html',
+        })
+      );
+    }
+
+    return config;
+  },
+
+  // Performance optimizations
+  images: {
+    // Optimize image loading
+    formats: ['image/webp', 'image/avif'],
+  },
+
+  // Reduce bundle size
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/{{member}}',
+    },
+    '@radix-ui/react-icons': {
+      transform: 'lucide-react/{{member}}',
+    },
+  },
+
+  // Compiler options
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 };
 
