@@ -16,6 +16,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def check_dependencies():
     """Check if required dependencies are installed"""
     required_packages = [
@@ -26,21 +27,22 @@ def check_dependencies():
         'speechrecognition',
         'pyttsx3'
     ]
-    
+
     missing_packages = []
-    
+
     for package in required_packages:
         try:
             __import__(package.replace('-', '_'))
         except ImportError:
             missing_packages.append(package)
-    
+
     if missing_packages:
         logger.error(f"Missing packages: {missing_packages}")
         logger.info("Please install dependencies with: pip install -r requirements.txt")
         return False
-    
+
     return True
+
 
 def install_dependencies():
     """Install required dependencies"""
@@ -55,11 +57,12 @@ def install_dependencies():
         logger.error(f"Failed to install dependencies: {e}")
         return False
 
+
 def start_server():
     """Start the FastAPI server"""
     logger.info("Starting AI IVR Platform Backend...")
     logger.info("Server will be available at http://localhost:8000")
-    
+
     try:
         import uvicorn
         uvicorn.run(
@@ -73,29 +76,31 @@ def start_server():
         logger.error(f"Failed to start server: {e}")
         sys.exit(1)
 
+
 def main():
     """Main startup function"""
     logger.info("AI IVR Platform Backend Startup")
     logger.info("=" * 40)
-    
+
     # Change to the script directory
     script_dir = Path(__file__).parent
     os.chdir(script_dir)
-    
+
     # Check dependencies
     if not check_dependencies():
         logger.info("Attempting to install missing dependencies...")
         if not install_dependencies():
             logger.error("Failed to install dependencies. Please install manually.")
             sys.exit(1)
-        
+
         # Check again after installation
         if not check_dependencies():
             logger.error("Dependencies still missing after installation attempt.")
             sys.exit(1)
-    
+
     # Start the server
     start_server()
+
 
 if __name__ == "__main__":
     main()

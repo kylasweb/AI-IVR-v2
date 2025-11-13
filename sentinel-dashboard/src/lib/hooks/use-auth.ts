@@ -48,7 +48,8 @@ export function usePermissions() {
 
     const hasPermission = (permission: string): boolean => {
         if (!user) return false;
-        return userPermissions[user.role]?.[permission as keyof typeof userPermissions[typeof user.role]] ?? false;
+        const role = user.role as keyof typeof userPermissions;
+        return userPermissions[role]?.[permission as keyof typeof userPermissions[typeof role]] ?? false;
     };
 
     const canViewModule = (module: string): boolean => {

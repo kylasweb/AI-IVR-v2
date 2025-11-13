@@ -37,7 +37,8 @@ import {
     Monitor,
     Terminal,
     Layers,
-    Target
+    Target,
+    Lock
 } from 'lucide-react'; interface SystemMetrics {
     cpuUsage: number;
     memoryUsage: number;

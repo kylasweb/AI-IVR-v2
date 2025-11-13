@@ -21,7 +21,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -200,7 +199,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     url: '/voice-cloning',
                     icon: Mic,
                     badge: 'AI',
-                    isActive: pathname.includes('/voice')
+                    isActive: pathname.includes('/voice-cloning')
                 },
                 {
                     title: 'Voice AI Agents',
@@ -213,21 +212,48 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     title: 'Voice Biometrics',
                     url: '/voice-biometrics',
                     icon: Headphones,
-                    isActive: pathname.includes('/biometric')
+                    isActive: pathname.includes('/voice-biometric')
+                },
+                {
+                    title: 'Voice Model Management',
+                    url: '/voice-model-management',
+                    icon: VoiceIcon,
+                    badge: 'AI',
+                    isActive: pathname.includes('/voice-model')
+                },
+                {
+                    title: 'Voice Data Management',
+                    url: '/voice-data-management',
+                    icon: Database,
+                    isActive: pathname.includes('/voice-data-management')
+                },
+                {
+                    title: 'Voice Command Center',
+                    url: '/voice-command-center',
+                    icon: CommandIcon,
+                    badge: 'New',
+                    isActive: pathname.includes('/voice-command-center')
+                },
+                {
+                    title: 'Speech Synthesizer',
+                    url: '/speech-synthesizer',
+                    icon: VoiceIcon,
+                    badge: 'TTS',
+                    isActive: pathname.includes('/speech-synthesizer')
                 },
                 {
                     title: 'Video IVR',
                     url: '/video-ivr',
                     icon: Camera,
                     badge: 'Beta',
-                    isActive: pathname.includes('/video')
+                    isActive: pathname.includes('/video-ivr')
                 },
                 {
                     title: 'Cultural AI',
                     url: '/cultural-ai',
                     icon: Globe,
                     badge: 'ML',
-                    isActive: pathname.includes('/cultural')
+                    isActive: pathname.includes('/cultural-ai')
                 }
             ]
         },
@@ -255,6 +281,13 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/testing/voice-ai')
                 },
                 {
+                    title: 'Voice Testing Suite',
+                    url: '/voice-testing-suite',
+                    icon: Headphones,
+                    badge: 'New',
+                    isActive: pathname.includes('/voice-testing-suite')
+                },
+                {
                     title: 'Performance Testing',
                     url: '/testing/performance',
                     icon: Activity,
@@ -280,11 +313,25 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/ai-kb')
                 },
                 {
+                    title: 'AI Task Builder',
+                    url: '/ai-task-builder',
+                    icon: Zap,
+                    badge: 'New',
+                    isActive: pathname.includes('/ai-task-builder')
+                },
+                {
                     title: 'Command Centre',
                     url: '/command-centre',
                     icon: CommandIcon,
                     badge: 'New',
                     isActive: pathname.includes('/command-centre')
+                },
+                {
+                    title: 'API Gateway',
+                    url: '/api-gateway',
+                    icon: WifiIcon,
+                    badge: 'API',
+                    isActive: pathname.includes('/api-gateway')
                 },
                 {
                     title: 'Sentinel Dashboard',
@@ -303,6 +350,20 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     url: '/analytics',
                     icon: BarChart3,
                     isActive: pathname.includes('/analytics')
+                },
+                {
+                    title: 'Data Foundry Management',
+                    url: '/data-foundry-management',
+                    icon: Database,
+                    badge: 'New',
+                    isActive: pathname.includes('/data-foundry')
+                },
+                {
+                    title: 'Voice Data Processing',
+                    url: '/voice-data-processing-pipeline',
+                    icon: Activity,
+                    badge: 'Pipeline',
+                    isActive: pathname.includes('/voice-data-processing')
                 },
                 {
                     title: 'Log Management',
@@ -325,25 +386,46 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     title: 'System Settings',
                     url: '/admin/settings',
                     icon: Settings,
-                    isActive: pathname.includes('/settings')
+                    isActive: pathname.includes('/admin/settings')
+                },
+                {
+                    title: 'Pilot Program',
+                    url: '/pilot-program',
+                    icon: TestIcon,
+                    badge: 'Beta',
+                    isActive: pathname.includes('/pilot-program')
+                },
+                {
+                    title: 'Strategic Engines Demo',
+                    url: '/strategic-engines-demo',
+                    icon: BrainCircuit,
+                    badge: 'Demo',
+                    isActive: pathname.includes('/strategic-engines-demo')
+                },
+                {
+                    title: 'Verification',
+                    url: '/verification',
+                    icon: Shield,
+                    badge: 'Security',
+                    isActive: pathname.includes('/verification')
                 },
                 {
                     title: 'Integrations',
                     url: '/admin/integrations',
                     icon: Code,
-                    isActive: pathname.includes('/integration')
+                    isActive: pathname.includes('/admin/integration')
                 },
                 {
                     title: 'Security & Permissions',
                     url: '/admin/security',
                     icon: Shield,
-                    isActive: pathname.includes('/security')
+                    isActive: pathname.includes('/admin/security')
                 },
                 {
                     title: 'Database Management',
                     url: '/admin/database',
                     icon: Database,
-                    isActive: pathname.includes('/database')
+                    isActive: pathname.includes('/admin/database')
                 }
             ]
         }
@@ -356,7 +438,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
-                <Sidebar variant="inset" collapsible="offcanvas" className="border-r border-gray-200">
+                <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200">
                     <SidebarHeader className="border-b border-gray-200 bg-white">
                         <div className="flex items-center gap-2 px-4 py-3">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -496,15 +578,18 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                         <div className="flex items-center gap-2">
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-gray-600">Demo Mode</span>
-                                <Switch
-                                    checked={isDemoMode}
-                                    onCheckedChange={toggleMode}
-                                    className="data-[state=checked]:bg-blue-600"
-                                />
+                                <Button
+                                    onClick={toggleMode}
+                                    variant={isDemoMode ? "default" : "outline"}
+                                    size="sm"
+                                    className="text-xs"
+                                >
+                                    {isDemoMode ? 'Demo Data' : 'Live Data'}
+                                </Button>
                             </div>
                             <Badge variant="outline" className="text-xs">
                                 <Activity className="h-3 w-3 mr-1" />
-                                {isDemoMode ? 'Demo Data' : 'Live Data'}
+                                {isDemoMode ? 'Demo Active' : 'Live Active'}
                             </Badge>
                         </div>
                     </header>

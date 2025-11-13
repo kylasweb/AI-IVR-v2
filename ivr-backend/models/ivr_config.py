@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-import uuid
+
 
 @dataclass
 class IVRConfig:
     """IVR Configuration for different flows"""
-    
+
     id: str
     name: str
     description: str
@@ -14,33 +14,33 @@ class IVRConfig:
     is_active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    
+
     # Flow configuration
     welcome_message: str = ""
     main_menu_options: List[Dict[str, Any]] = field(default_factory=list)
     timeout_message: str = ""
     max_attempts: int = 3
     timeout_seconds: int = 10
-    
+
     # Voice settings
     voice_gender: str = "female"
     voice_speed: float = 1.0
     voice_volume: float = 0.9
-    
+
     # Transfer settings
     transfer_numbers: Dict[str, str] = field(default_factory=dict)
     transfer_enabled: bool = True
-    
+
     # Business hours
     business_hours: Dict[str, Any] = field(default_factory=dict)
     after_hours_message: str = ""
-    
+
     # Advanced settings
     enable_sentiment_analysis: bool = False
     enable_recording: bool = True
     enable_transcription: bool = True
     confidence_threshold: float = 0.7
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
@@ -68,7 +68,7 @@ class IVRConfig:
             "enable_transcription": self.enable_transcription,
             "confidence_threshold": self.confidence_threshold
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'IVRConfig':
         """Create from dictionary"""
@@ -77,48 +77,48 @@ class IVRConfig:
             data["created_at"] = datetime.fromisoformat(data["created_at"])
         if isinstance(data.get("updated_at"), str):
             data["updated_at"] = datetime.fromisoformat(data["updated_at"])
-        
+
         return cls(**data)
-    
+
     def update(self, **kwargs):
         """Update configuration"""
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.updated_at = datetime.now()
-    
+
     def is_business_hours(self) -> bool:
         """Check if current time is within business hours"""
         if not self.business_hours:
             return True
-        
+
         now = datetime.now()
         day_of_week = now.strftime("%A").lower()
-        
+
         if day_of_week not in self.business_hours:
             return False
-        
+
         hours = self.business_hours[day_of_week]
         if not hours.get("open", False):
             return False
-        
+
         current_time = now.time()
         open_time = datetime.strptime(hours["open"], "%H:%M").time()
         close_time = datetime.strptime(hours["close"], "%H:%M").time()
-        
+
         return open_time <= current_time <= close_time
-    
+
     def get_transfer_number(self, department: str) -> Optional[str]:
         """Get transfer number for department"""
         return self.transfer_numbers.get(department)
-    
+
     def add_menu_option(self, option: Dict[str, Any]):
         """Add main menu option"""
         required_keys = ["key", "description", "action"]
         if all(key in option for key in required_keys):
             self.main_menu_options.append(option)
             self.updated_at = datetime.now()
-    
+
     def remove_menu_option(self, key: str) -> bool:
         """Remove main menu option by key"""
         for i, option in enumerate(self.main_menu_options):
@@ -127,36 +127,37 @@ class IVRConfig:
                 self.updated_at = datetime.now()
                 return True
         return False
-    
+
     def validate(self) -> List[str]:
         """Validate configuration and return list of errors"""
         errors = []
-        
+
         if not self.name:
             errors.append("Name is required")
-        
+
         if not self.welcome_message:
             errors.append("Welcome message is required")
-        
+
         if not self.main_menu_options:
             errors.append("At least one menu option is required")
-        
+
         if self.max_attempts < 1:
             errors.append("Max attempts must be at least 1")
-        
+
         if self.timeout_seconds < 1:
             errors.append("Timeout seconds must be at least 1")
-        
+
         if not 0.0 <= self.voice_speed <= 2.0:
             errors.append("Voice speed must be between 0.0 and 2.0")
-        
+
         if not 0.0 <= self.voice_volume <= 1.0:
             errors.append("Voice volume must be between 0.0 and 1.0")
-        
+
         if not 0.0 <= self.confidence_threshold <= 1.0:
             errors.append("Confidence threshold must be between 0.0 and 1.0")
-        
+
         return errors
+
 
 # Default IVR configurations
 DEFAULT_CONFIGS = {
@@ -171,7 +172,8 @@ DEFAULT_CONFIGS = {
             {"key": "3", "description": "Schedule appointment", "action": "appointment"},
             {"key": "0", "description": "Speak with agent", "action": "transfer"}
         ],
-        timeout_message="I'm sorry, I didn't understand. Please choose from the available options.",
+        timeout_message="I'm sorry, I didn't understand. Please choose from "
+                       "the available options.",
         transfer_numbers={
             "billing": "+1234567890",
             "technical": "+1234567891",

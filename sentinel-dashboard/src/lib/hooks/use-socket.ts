@@ -1,13 +1,13 @@
 // Real-time WebSocket hook
 
 import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { useAuthStore } from '../../stores/auth.store';
 import { WebSocketEvent, Alert, DefconStatus } from '../../types/security';
 
 export function useSocket() {
     const { isAuthenticated, user } = useAuthStore();
-    const socketRef = useRef<Socket | null>(null);
+    const socketRef = useRef<ReturnType<typeof io> | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
 

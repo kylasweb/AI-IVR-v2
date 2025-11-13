@@ -74,6 +74,8 @@ import {
     Zap as ZapIcon
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api-client';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface TestSuite {
     id: string;
@@ -134,11 +136,13 @@ interface TestConfiguration {
 }
 
 export default function VoiceTestingSuitePage() {
+    const { isDemoMode } = useMockData();
     const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
     const [selectedSuite, setSelectedSuite] = useState<TestSuite | null>(null);
     const [showCreateSuiteDialog, setShowCreateSuiteDialog] = useState(false);
     const [showTestDetails, setShowTestDetails] = useState(false);
     const [showRunTestDialog, setShowRunTestDialog] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [suiteForm, setSuiteForm] = useState({
         name: '',
@@ -148,128 +152,152 @@ export default function VoiceTestingSuitePage() {
 
     const [selectedTab, setSelectedTab] = useState('suites');
 
-    // Mock data
+    // Load test suites data
     useEffect(() => {
-        const mockTestSuites: TestSuite[] = [
-            {
-                id: 'suite-1',
-                name: 'Malayalam STT Quality Test Suite',
-                description: 'Comprehensive quality testing for Malayalam speech-to-text models',
-                type: 'quality',
-                status: 'completed',
-                progress: 100,
-                testCases: [
-                    {
-                        id: 'test-1',
-                        name: 'Clean Audio STT Test',
-                        type: 'stt',
-                        modelId: 'vertex-ai-chirp2',
-                        inputData: 'malayalam_clean_audio.wav',
-                        expectedOutput: 'Expected Malayalam transcription',
-                        status: 'passed',
-                        duration: 2.3,
-                        metrics: {
-                            accuracy: 94.2,
-                            latency: 1.8,
-                            quality: 92.1
-                        }
-                    },
-                    {
-                        id: 'test-2',
-                        name: 'Noisy Audio STT Test',
-                        type: 'stt',
-                        modelId: 'assembly-ai',
-                        inputData: 'malayalam_noisy_audio.wav',
-                        expectedOutput: 'Expected Malayalam transcription',
-                        status: 'passed',
-                        duration: 3.1,
-                        metrics: {
-                            accuracy: 87.6,
-                            latency: 2.2,
-                            quality: 85.4
-                        }
-                    },
-                    {
-                        id: 'test-3',
-                        name: 'Long Audio STT Test',
-                        type: 'stt',
-                        modelId: 'ai4bharat-whisper',
-                        inputData: 'malayalam_long_audio.wav',
-                        expectedOutput: 'Expected Malayalam transcription',
-                        status: 'failed',
-                        duration: 15.7,
-                        error: 'Timeout exceeded',
-                        metrics: {
-                            accuracy: 0,
-                            latency: 15.7,
-                            quality: 0
-                        }
-                    }
-                ],
-                createdAt: '2024-11-01T10:00:00Z',
-                updatedAt: '2024-11-08T15:30:00Z',
-                results: {
-                    totalTests: 3,
-                    passedTests: 2,
-                    failedTests: 1,
-                    avgLatency: 7.2,
-                    avgAccuracy: 60.6,
-                    avgQuality: 59.2,
-                    totalDuration: 21.1,
-                    coverage: 85.3
-                }
-            },
-            {
-                id: 'suite-2',
-                name: 'Voice Synthesis Performance Test',
-                description: 'Performance testing for voice synthesis models',
-                type: 'performance',
-                status: 'running',
-                progress: 67,
-                testCases: [
-                    {
-                        id: 'test-4',
-                        name: 'TTS Speed Test',
-                        type: 'tts',
-                        modelId: 'elevenlabs-voice-1',
-                        inputData: 'Hello world in Malayalam',
-                        expectedOutput: 'synthesized_audio.wav',
-                        status: 'running',
-                        duration: 1.2,
-                        metrics: {
-                            latency: 1.2,
-                            quality: 88.5,
-                            similarity: 92.1
-                        }
-                    },
-                    {
-                        id: 'test-5',
-                        name: 'TTS Quality Test',
-                        type: 'tts',
-                        modelId: 'elevenlabs-voice-2',
-                        inputData: 'Complex Malayalam sentence',
-                        expectedOutput: 'synthesized_audio.wav',
-                        status: 'pending',
-                        metrics: {}
-                    }
-                ],
-                createdAt: '2024-11-02T14:20:00Z',
-                updatedAt: '2024-11-08T16:45:00Z',
-                results: {
-                    totalTests: 2,
-                    passedTests: 0,
-                    failedTests: 0,
-                    avgLatency: 1.2,
-                    avgAccuracy: 0,
-                    avgQuality: 88.5,
-                    totalDuration: 1.2,
-                    coverage: 50.0
-                }
-            }
-        ];
+        loadTestSuites();
+    }, [isDemoMode]);
 
-        setTestSuites(mockTestSuites);
-    }, []);
+    const loadTestSuites = async () => {
+        try {
+            setLoading(true);
+
+            if (isDemoMode) {
+                // Mock data for demonstration
+                const mockTestSuites: TestSuite[] = [
+                    {
+                        id: 'suite-1',
+                        name: 'Malayalam STT Quality Test Suite',
+                        description: 'Comprehensive quality testing for Malayalam speech-to-text models',
+                        type: 'quality',
+                        status: 'completed',
+                        progress: 100,
+                        testCases: [
+                            {
+                                id: 'test-1',
+                                name: 'Clean Audio STT Test',
+                                type: 'stt',
+                                modelId: 'vertex-ai-chirp2',
+                                inputData: 'malayalam_clean_audio.wav',
+                                expectedOutput: 'Expected Malayalam transcription',
+                                status: 'passed',
+                                duration: 2.3,
+                                metrics: {
+                                    accuracy: 94.2,
+                                    latency: 1.8,
+                                    quality: 92.1
+                                }
+                            },
+                            {
+                                id: 'test-2',
+                                name: 'Noisy Audio STT Test',
+                                type: 'stt',
+                                modelId: 'assembly-ai',
+                                inputData: 'malayalam_noisy_audio.wav',
+                                expectedOutput: 'Expected Malayalam transcription',
+                                status: 'passed',
+                                duration: 3.1,
+                                metrics: {
+                                    accuracy: 87.6,
+                                    latency: 2.2,
+                                    quality: 85.4
+                                }
+                            },
+                            {
+                                id: 'test-3',
+                                name: 'Long Audio STT Test',
+                                type: 'stt',
+                                modelId: 'ai4bharat-whisper',
+                                inputData: 'malayalam_long_audio.wav',
+                                expectedOutput: 'Expected Malayalam transcription',
+                                status: 'failed',
+                                duration: 15.7,
+                                error: 'Timeout exceeded',
+                                metrics: {
+                                    accuracy: 0,
+                                    latency: 15.7,
+                                    quality: 0
+                                }
+                            }
+                        ],
+                        createdAt: '2024-11-01T10:00:00Z',
+                        updatedAt: '2024-11-08T15:30:00Z',
+                        results: {
+                            totalTests: 3,
+                            passedTests: 2,
+                            failedTests: 1,
+                            avgLatency: 7.2,
+                            avgAccuracy: 60.6,
+                            avgQuality: 59.2,
+                            totalDuration: 21.1,
+                            coverage: 85.3
+                        }
+                    },
+                    {
+                        id: 'suite-2',
+                        name: 'Voice Synthesis Performance Test',
+                        description: 'Performance testing for voice synthesis models',
+                        type: 'performance',
+                        status: 'running',
+                        progress: 67,
+                        testCases: [
+                            {
+                                id: 'test-4',
+                                name: 'TTS Speed Test',
+                                type: 'tts',
+                                modelId: 'elevenlabs-voice-1',
+                                inputData: 'Hello world in Malayalam',
+                                expectedOutput: 'synthesized_audio.wav',
+                                status: 'running',
+                                duration: 1.2,
+                                metrics: {
+                                    latency: 1.2,
+                                    quality: 88.5,
+                                    similarity: 92.1
+                                }
+                            },
+                            {
+                                id: 'test-5',
+                                name: 'TTS Quality Test',
+                                type: 'tts',
+                                modelId: 'elevenlabs-voice-2',
+                                inputData: 'Complex Malayalam sentence',
+                                expectedOutput: 'synthesized_audio.wav',
+                                status: 'pending',
+                                metrics: {}
+                            }
+                        ],
+                        createdAt: '2024-11-02T14:20:00Z',
+                        updatedAt: '2024-11-08T16:45:00Z',
+                        results: {
+                            totalTests: 2,
+                            passedTests: 0,
+                            failedTests: 0,
+                            avgLatency: 1.2,
+                            avgAccuracy: 0,
+                            avgQuality: 88.5,
+                            totalDuration: 1.2,
+                            coverage: 50.0
+                        }
+                    }
+                ];
+
+                setTestSuites(mockTestSuites);
+            } else {
+                // Real API call
+                const response = await api.getVoiceTestingSuites();
+                setTestSuites(response.data);
+            }
+        } catch (error) {
+            console.error('Error loading test suites:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to load voice testing suites',
+                variant: 'destructive'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {

@@ -22,12 +22,10 @@ import {
     Zap
 } from 'lucide-react';
 
-import { LucideIcon } from 'lucide-react';
-
 interface NavigationItem {
     name: string;
     href: string;
-    icon: LucideIcon;
+    icon: React.ComponentType<any>;
     permission: string;
 }
 

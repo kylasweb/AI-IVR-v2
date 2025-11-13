@@ -5,11 +5,12 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 class ConversationManager:
     def __init__(self):
         self.conversation_flows = self._load_conversation_flows()
         self.responses = self._load_responses()
-        
+
     def _load_conversation_flows(self) -> Dict[str, Dict]:
         """Load predefined conversation flows"""
         flows = {
@@ -17,7 +18,7 @@ class ConversationManager:
                 "greeting": "Welcome to our AI IVR system. How can I help you today?",
                 "options": [
                     "For billing inquiries, say 'billing' or press 1",
-                    "For technical support, say 'support' or press 2", 
+                    "For technical support, say 'support' or press 2",
                     "To schedule an appointment, say 'appointment' or press 3",
                     "To speak with an agent, say 'agent' or press 0"
                 ],
@@ -59,7 +60,7 @@ class ConversationManager:
             }
         }
         return flows
-    
+
     def _load_responses(self) -> Dict[str, Dict[str, str]]:
         """Load response templates"""
         responses = {
@@ -125,32 +126,38 @@ class ConversationManager:
             }
         }
         return responses
-    
+
     async def get_greeting(self, language: str = "en") -> str:
         """Get greeting message in specified language"""
         try:
-            return self.responses["greeting"].get(language, self.responses["greeting"]["en"])
+            return self.responses["greeting"].get(
+                language, self.responses["greeting"]["en"])
         except Exception as e:
             logger.error(f"Error getting greeting: {str(e)}")
             return self.responses["greeting"]["en"]
-    
-    async def generate_response(self, user_input: str, intent: str, entities: Dict[str, Any], session) -> str:
+
+    async def generate_response(self,
+                                user_input: str,
+                                intent: str,
+                                entities: Dict[str,
+                                               Any],
+                                session) -> str:
         """
         Generate appropriate response based on user input and intent
-        
+
         Args:
             user_input: User's transcribed speech
             intent: Detected intent
             entities: Extracted entities
             session: Call session object
-        
+
         Returns:
             Generated response text
         """
         try:
             # Get language preference
             language = getattr(session, 'language', 'en')
-            
+
             # Handle different intents
             if intent == "greeting":
                 return await self._handle_greeting(language, session)
@@ -174,11 +181,12 @@ class ConversationManager:
                 return await self._handle_unknown(user_input, language, session)
             else:
                 return await self._handle_general_intent(intent, entities, language, session)
-                
+
         except Exception as e:
             logger.error(f"Error generating response: {str(e)}")
-            return self.responses["apology"].get(language, self.responses["apology"]["en"])
-    
+            return self.responses["apology"].get(
+                language, self.responses["apology"]["en"])
+
     async def _handle_greeting(self, language: str, session) -> str:
         """Handle greeting intent"""
         # Check if this is the first interaction
@@ -187,77 +195,83 @@ class ConversationManager:
             flow = self.conversation_flows["main_menu"]
             return f"{flow['greeting']} {' '.join(flow['options'])}"
         else:
-            return self.responses["greeting"].get(language, self.responses["greeting"]["en"])
-    
+            return self.responses["greeting"].get(
+                language, self.responses["greeting"]["en"])
+
     async def _handle_goodbye(self, language: str, session) -> str:
         """Handle goodbye intent"""
         session.status = "ending"
         return self.responses["goodbye"].get(language, self.responses["goodbye"]["en"])
-    
+
     async def _handle_help(self, language: str, session) -> str:
         """Handle help intent"""
         flow = self.conversation_flows["main_menu"]
         return f"I'm here to help! {flow['greeting']} {' '.join(flow['options'])}"
-    
+
     async def _handle_transfer(self, language: str, session) -> str:
         """Handle transfer to agent intent"""
         session.status = "transferring"
         return "I'll connect you with a human agent right away. Please hold while I transfer your call."
-    
+
     async def _handle_billing(self, language: str, session) -> str:
         """Handle billing intent"""
         session.current_flow = "billing"
         flow = self.conversation_flows["billing"]
         return f"{flow['greeting']} {' '.join(flow['options'])}"
-    
+
     async def _handle_technical_support(self, language: str, session) -> str:
         """Handle technical support intent"""
         session.current_flow = "technical_support"
         flow = self.conversation_flows["technical_support"]
         return f"{flow['greeting']} {' '.join(flow['options'])}"
-    
+
     async def _handle_appointment(self, language: str, session) -> str:
         """Handle appointment intent"""
         session.current_flow = "appointment"
         flow = self.conversation_flows["appointment"]
         return f"{flow['greeting']} {' '.join(flow['options'])}"
-    
+
     async def _handle_confirmation(self, language: str, session) -> str:
         """Handle yes/confirmation intent"""
         if hasattr(session, 'pending_action'):
             action = session.pending_action
             delattr(session, 'pending_action')
-            
+
             if action == "transfer":
                 return await self._handle_transfer(language, session)
             elif action == "schedule_appointment":
                 return "Great! I can help you schedule that. What date and time works best for you?"
             elif action == "payment":
                 return "Perfect! I can process your payment. What's the payment amount?"
-        
-        return self.responses["confirmation"].get(language, self.responses["confirmation"]["en"])
-    
+
+        return self.responses["confirmation"].get(
+            language, self.responses["confirmation"]["en"])
+
     async def _handle_negation(self, language: str, session) -> str:
         """Handle no/negation intent"""
         if hasattr(session, 'pending_action'):
             delattr(session, 'pending_action')
-        
+
         return "I understand. Is there something else I can help you with?"
-    
+
     async def _handle_unknown(self, user_input: str, language: str, session) -> str:
         """Handle unknown intent"""
         # Check if we're in a specific flow
-        if hasattr(session, 'current_flow') and session.current_flow in self.conversation_flows:
+        if hasattr(
+                session,
+                'current_flow') and session.current_flow in self.conversation_flows:
             flow = self.conversation_flows[session.current_flow]
             return flow["timeout_message"]
-        
+
         # Try to detect if it's a question
-        if any(word in user_input.lower() for word in ["what", "where", "when", "how", "why", "who"]):
+        if any(word in user_input.lower()
+               for word in ["what", "where", "when", "how", "why", "who"]):
             return "That's a great question. Let me help you with that. Could you provide more details?"
-        
+
         return self.responses["unclear"].get(language, self.responses["unclear"]["en"])
-    
-    async def _handle_general_intent(self, intent: str, entities: Dict[str, Any], language: str, session) -> str:
+
+    async def _handle_general_intent(
+            self, intent: str, entities: Dict[str, Any], language: str, session) -> str:
         """Handle general intents"""
         responses = {
             "question": "That's a good question. Let me help you find the answer.",
@@ -265,15 +279,14 @@ class ConversationManager:
             "statement": "Thank you for sharing that. How can I assist you further?",
             "complaint": "I'm sorry to hear you're having issues. Let me help resolve this for you.",
             "information": "I can provide you with that information. What would you like to know?",
-            "sales": "I'd be happy to discuss our products and services. What are you interested in?"
-        }
-        
+            "sales": "I'd be happy to discuss our products and services. What are you interested in?"}
+
         return responses.get(intent, "I'm here to help. How can I assist you?")
-    
+
     async def get_fallback_response(self, language: str = "en") -> str:
         """Get fallback response when no other response is available"""
         return self.responses["unclear"].get(language, self.responses["unclear"]["en"])
-    
+
     def get_conversation_state(self, session) -> Dict[str, Any]:
         """Get current conversation state"""
         state = {
@@ -283,19 +296,19 @@ class ConversationManager:
             "last_intent": getattr(session, 'last_intent', None)
         }
         return state
-    
+
     def update_conversation_state(self, session, intent: str, response: str):
         """Update conversation state based on interaction"""
         session.last_intent = intent
-        
+
         # Increment attempts if we're in a flow
         if hasattr(session, 'current_flow'):
             session.attempts = getattr(session, 'attempts', 0) + 1
-            
+
             # Check if we've exceeded max attempts
             flow = self.conversation_flows.get(session.current_flow, {})
             max_attempts = flow.get('max_attempts', 3)
-            
+
             if session.attempts >= max_attempts:
                 session.pending_action = "transfer"
                 session.status = "needs_transfer"

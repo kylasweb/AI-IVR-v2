@@ -1,10 +1,10 @@
 import re
 import logging
-from typing import Tuple, List, Dict, Any, Optional
-import asyncio
+from typing import Tuple, List, Dict, Any
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class MalayalamIntent:
@@ -12,6 +12,7 @@ class MalayalamIntent:
     confidence: float
     entities: Dict[str, Any]
     language: str  # 'malayalam' or 'manglish'
+
 
 @dataclass
 class MalayalamEntity:
@@ -21,38 +22,51 @@ class MalayalamEntity:
     end: int
     language: str
 
+
 class MalayalamNLPService:
     def __init__(self):
         self.malayalam_intent_patterns = self._load_malayalam_intent_patterns()
         self.manglish_intent_patterns = self._load_manglish_intent_patterns()
         self.malayalam_entity_patterns = self._load_malayalam_entity_patterns()
         self.manglish_entity_patterns = self._load_manglish_entity_patterns()
-        
+
         # Enhanced Malayalam cultural and contextual patterns
         self.cultural_patterns = {
             'respectful_address': {
-                'malayalam': ['സർ', 'മാം', 'മാഷ്', 'ടീച്ചർ', 'ചേട്ടൻ', 'ചേച്ചി', 'അമ്മ', 'അച്ഛൻ', 'മുത്തശ്ശി', 'മുത്തശ്ശൻ'],
-                'manglish': ['sir', 'mam', 'mash', 'teacher', 'chetan', 'chechi', 'amma', 'achan', 'muthassi', 'muthassan']
+                'malayalam': ['സർ', 'മാം', 'മാഷ്', 'ടീച്ചർ', 'ചേട്ടൻ', 'ചേച്ചി',
+                             'അമ്മ', 'അച്ഛൻ', 'മുത്തശ്ശി', 'മുത്തശ്ശൻ'],
+                'manglish': ['sir', 'mam', 'mash', 'teacher', 'chetan', 'chechi',
+                            'amma', 'achan', 'muthassi', 'muthassan']
             },
             'informal_address': {
-                'malayalam': ['മോനേ', 'മോളേ', 'എടാ', 'എടി', 'ബാബു', 'കുട്ടി', 'ഡാ', 'ഡി'],
-                'manglish': ['mone', 'mole', 'eda', 'edi', 'babu', 'kutti', 'da', 'di']
+                'malayalam': ['മോനേ', 'മോളേ', 'എടാ', 'എടി', 'ബാബു', 'കുട്ടി',
+                             'ഡാ', 'ഡി'],
+                'manglish': ['mone', 'mole', 'eda', 'edi', 'babu', 'kutti',
+                            'da', 'di']
             },
             'religious_context': {
-                'malayalam': ['ദൈവം', 'ഭഗവാൻ', 'അള്ളാഹ്', 'യേശു', 'കൃഷ്ണൻ', 'ശിവൻ', 'ഗണപതി'],
-                'manglish': ['daivam', 'bhagawan', 'allah', 'yesu', 'krishnan', 'shivan', 'ganapathi']
+                'malayalam': ['ദൈവം', 'ഭഗവാൻ', 'അള്ളാഹ്', 'യേശു', 'കൃഷ്ണൻ',
+                             'ശിവൻ', 'ഗണപതി'],
+                'manglish': ['daivam', 'bhagawan', 'allah', 'yesu', 'krishnan',
+                            'shivan', 'ganapathi']
             },
             'family_hierarchy': {
-                'malayalam': ['വലിയച്ഛൻ', 'വലിയമ്മ', 'ചെറിയച്ഛൻ', 'ചെറിയമ്മ', 'ചിറ്റപ്പൻ', 'അണിയൻ', 'അഗ്രജൻ'],
-                'manglish': ['valiyachan', 'valiyamma', 'cheriyachan', 'cheriyamma', 'chirappan', 'aniyan', 'agrajan']
+                'malayalam': ['വലിയച്ഛൻ', 'വലിയമ്മ', 'ചെറിയച്ഛൻ', 'ചെറിയമ്മ',
+                             'ചിറ്റപ്പൻ', 'അണിയൻ', 'അഗ്രജൻ'],
+                'manglish': ['valiyachan', 'valiyamma', 'cheriyachan', 'cheriyamma',
+                            'chirappan', 'aniyan', 'agrajan']
             },
             'festival_context': {
-                'malayalam': ['ഓണം', 'വിഷു', 'ദീപാവലി', 'ഈദ്', 'ക്രിസ്മസ്', 'പൂരം', 'തിരുവാതിര'],
-                'manglish': ['onam', 'vishu', 'deepavali', 'eid', 'christmas', 'pooram', 'thiruvatira']
+                'malayalam': ['ഓണം', 'വിഷു', 'ദീപാവലി', 'ഈദ്', 'ക്രിസ്മസ്',
+                             'പൂരം', 'തിരുവാതിര'],
+                'manglish': ['onam', 'vishu', 'deepavali', 'eid', 'christmas',
+                            'pooram', 'thiruvatira']
             },
             'age_respect_markers': {
-                'malayalam': ['മുതിർന്നവർ', 'വൃദ്ധർ', 'യുവാക്കൾ', 'കുട്ടികൾ', 'പ്രായമായവർ'],
-                'manglish': ['muthirnavar', 'vridhar', 'yuvaakkal', 'kuttikall', 'prayamayavar']
+                'malayalam': ['മുതിർന്നവർ', 'വൃദ്ധർ', 'യുവാക്കൾ', 'കുട്ടികൾ',
+                             'പ്രായമായവർ'],
+                'manglish': ['muthirnavar', 'vridhar', 'yuvaakkal', 'kuttikall',
+                            'prayamayavar']
             },
             'regional_indicators': {
                 'malayalam': ['തിരുവിതാംകൂർ', 'മലബാർ', 'കൊച്ചി', 'തൃശ്ശൂർ', 'കണ്ണൂർ'],
@@ -77,7 +91,7 @@ class MalayalamNLPService:
                 }
             }
         }
-        
+
     def is_healthy(self) -> bool:
         """Check if the service is healthy"""
         try:
@@ -85,15 +99,16 @@ class MalayalamNLPService:
         except Exception as e:
             logger.error(f"Malayalam NLP service health check failed: {e}")
             return False
-    
-    async def analyze_cultural_context(self, text: str, language: str = "ml") -> Dict[str, Any]:
+
+    async def analyze_cultural_context(
+            self, text: str, language: str = "ml") -> Dict[str, Any]:
         """
         Analyze cultural context in Malayalam/Manglish text
-        
+
         Args:
             text: Input text to analyze
             language: Language code ("ml" for Malayalam, "en" for Manglish)
-        
+
         Returns:
             Dictionary containing cultural context information
         """
@@ -111,19 +126,19 @@ class MalayalamNLPService:
                 'social_hierarchy': [],
                 'cultural_sensitivity_score': 0.5
             }
-            
+
             text_lower = text.lower()
             language_key = 'malayalam' if language == 'ml' else 'manglish'
-            
+
             # Analyze politeness level
             politeness_score = {'high': 0, 'medium': 0, 'low': 0}
-            
+
             for level, markers in self.cultural_patterns['politeness_levels'].items():
                 if language_key in markers:
                     for marker in markers[language_key]:
                         if marker.lower() in text_lower:
                             politeness_score[level] += 1
-            
+
             # Determine predominant politeness level
             if politeness_score['high'] > 0:
                 cultural_context['politeness_level'] = 'high'
@@ -133,53 +148,54 @@ class MalayalamNLPService:
                 cultural_context['politeness_level'] = 'low'
                 cultural_context['formality'] = 'informal'
                 cultural_context['cultural_sensitivity_score'] -= 0.2
-            
+
             # Check for respect markers
             for marker in self.cultural_patterns['respectful_address'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['respect_markers'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.1
-            
+
             # Check for family hierarchy markers
             for marker in self.cultural_patterns['family_hierarchy'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['family_context'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.1
-            
+
             # Check for religious context
             for marker in self.cultural_patterns['religious_context'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['religious_context'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.15
-            
+
             # Check for festival context
             for marker in self.cultural_patterns['festival_context'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['festival_context'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.1
-            
+
             # Check for regional indicators
             for marker in self.cultural_patterns['regional_indicators'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['regional_context'].append(marker)
-            
+
             # Check for age respect markers
             for marker in self.cultural_patterns['age_respect_markers'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['age_considerations'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.1
-            
+
             # Check for social hierarchy markers
             for marker in self.cultural_patterns['social_hierarchy'][language_key]:
                 if marker.lower() in text_lower:
                     cultural_context['social_hierarchy'].append(marker)
                     cultural_context['cultural_sensitivity_score'] += 0.05
-            
+
             # Normalize cultural sensitivity score
-            cultural_context['cultural_sensitivity_score'] = min(cultural_context['cultural_sensitivity_score'], 1.0)
-            
+            cultural_context['cultural_sensitivity_score'] = min(
+                cultural_context['cultural_sensitivity_score'], 1.0)
+
             return cultural_context
-            
+
         except Exception as e:
             logger.error(f"Error analyzing cultural context: {str(e)}")
             return {
@@ -195,16 +211,17 @@ class MalayalamNLPService:
                 'social_hierarchy': [],
                 'cultural_sensitivity_score': 0.5
             }
-    
-    def generate_culturally_appropriate_response(self, intent: str, cultural_context: Dict[str, Any], language: str = "ml") -> str:
+
+    def generate_culturally_appropriate_response(
+            self, intent: str, cultural_context: Dict[str, Any], language: str = "ml") -> str:
         """
         Generate culturally appropriate response based on detected cultural context
-        
+
         Args:
             intent: Detected intent
             cultural_context: Cultural context analysis result
             language: Response language
-        
+
         Returns:
             Culturally appropriate response string
         """
@@ -245,50 +262,51 @@ class MalayalamNLPService:
                     }
                 }
             }
-            
+
             lang_key = 'malayalam' if language == 'ml' else 'manglish'
             politeness = cultural_context.get('politeness_level', 'medium')
-            
+
             # Add religious blessing if religious context detected
             response = responses.get(lang_key, {}).get(intent, {}).get(politeness, '')
-            
+
             if cultural_context.get('religious_context'):
                 if language == 'ml':
                     response += ' ദൈവത്തിന്റെ അനുഗ്രഹം ഉണ്ടാകട്ടെ.'
                 else:
                     response += ' May God bless you.'
-            
+
             # Add festival greetings if festival context detected
             if cultural_context.get('festival_context'):
                 if language == 'ml':
                     response += ' ഉത്സവാശംസകൾ!'
                 else:
                     response += ' Festival greetings!'
-            
+
             return response if response else 'എങ്ങനെ സഹായിക്കാം?' if language == 'ml' else 'How can I help?'
-            
+
         except Exception as e:
             logger.error(f"Error generating culturally appropriate response: {str(e)}")
             return 'എങ്ങനെ സഹായിക്കാം?' if language == 'ml' else 'How can I help?'
-    
-    async def analyze_malayalam_intent(self, text: str, language: str = "ml") -> Tuple[str, Dict[str, Any], float, str]:
+
+    async def analyze_malayalam_intent(
+            self, text: str, language: str = "ml") -> Tuple[str, Dict[str, Any], float, str]:
         """
         Analyze Malayalam/Manglish text to determine intent and extract entities
-        
+
         Args:
             text: Input text
             language: Language code (ml, manglish)
-        
+
         Returns:
             Tuple of (intent, entities, confidence, detected_language)
         """
         try:
             if not text.strip():
                 return "unknown", {}, 0.0, language
-            
+
             text = text.strip()
             detected_language = self._detect_language_variant(text)
-            
+
             # Choose appropriate pattern set
             if detected_language == "manglish":
                 patterns = self.manglish_intent_patterns
@@ -296,58 +314,122 @@ class MalayalamNLPService:
             else:
                 patterns = self.malayalam_intent_patterns
                 entity_patterns = self.malayalam_entity_patterns
-            
+
             # Check each intent pattern
             best_intent = "unknown"
             best_entities = {}
             best_confidence = 0.0
-            
+
             for intent_name, intent_patterns in patterns.items():
                 for pattern in intent_patterns:
                     match = re.search(pattern, text, re.IGNORECASE)
                     if match:
-                        confidence = self._calculate_malayalam_confidence(text, pattern, detected_language)
+                        confidence = self._calculate_malayalam_confidence(
+                            text, pattern, detected_language)
                         if confidence > best_confidence:
                             best_confidence = confidence
                             best_intent = intent_name
-                            
+
                             # Extract entities
-                            entities = self._extract_malayalam_entities(text, intent_name, entity_patterns)
+                            entities = self._extract_malayalam_entities(
+                                text, intent_name, entity_patterns)
                             best_entities = entities
-            
+
             # If no intent matched, try contextual analysis
             if best_intent == "unknown":
-                best_intent = self._contextual_malayalam_analysis(text, detected_language)
+                best_intent = self._contextual_malayalam_analysis(
+                    text, detected_language)
                 best_confidence = 0.5
-            
+
             # Add cultural context to entities
-            best_entities.update(self._extract_cultural_context(text, detected_language))
-            
-            logger.info(f"Malayalam intent detected: {best_intent} (confidence: {best_confidence:.2f}, language: {detected_language})")
+            best_entities.update(
+                self._extract_cultural_context(
+                    text, detected_language))
+
+            logger.info(
+                f"Malayalam intent detected: {best_intent} (confidence: {
+                    best_confidence:.2f}, language: {detected_language})")
             return best_intent, best_entities, best_confidence, detected_language
-            
+
         except Exception as e:
             logger.error(f"Error analyzing Malayalam intent: {str(e)}")
             return "unknown", {}, 0.0, language
-    
+
     def _detect_language_variant(self, text: str) -> str:
         """Detect if text is Malayalam or Manglish"""
         # Check for Malayalam characters
-        malayalam_chars = ['ം', 'ഃ', 'അ', 'ആ', 'ഇ', 'ഈ', 'ഉ', 'ഊ', 'ഋ', 'എ', 'ഏ', 'ഐ', 'ഒ', 'ഓ', 'ഔ', 'ക', 'ഖ', 'ഗ', 'ഘ', 'ങ', 'ച', 'ഛ', 'ജ', 'ഝ', 'ഞ', 'ട', 'ഠ', 'ഡ', 'ഢ', 'ണ', 'ത', 'ഥ', 'ദ', 'ധ', 'ന', 'പ', 'ഫ', 'ബ', 'ഭ', 'മ', 'യ', 'ര', 'റ', 'ല', 'ള', 'ഴ', 'വ', 'ശ', 'ഷ', 'സ', 'ഹ', 'ൺ', 'ൻ', 'ർ', 'ൽ', 'ൾ', 'ൿ']
-        
+        malayalam_chars = [
+            'ം',
+            'ഃ',
+            'അ',
+            'ആ',
+            'ഇ',
+            'ഈ',
+            'ഉ',
+            'ഊ',
+            'ഋ',
+            'എ',
+            'ഏ',
+            'ഐ',
+            'ഒ',
+            'ഓ',
+            'ഔ',
+            'ക',
+            'ഖ',
+            'ഗ',
+            'ഘ',
+            'ങ',
+            'ച',
+            'ഛ',
+            'ജ',
+            'ഝ',
+            'ഞ',
+            'ട',
+            'ഠ',
+            'ഡ',
+            'ഢ',
+            'ണ',
+            'ത',
+            'ഥ',
+            'ദ',
+            'ധ',
+            'ന',
+            'പ',
+            'ഫ',
+            'ബ',
+            'ഭ',
+            'മ',
+            'യ',
+            'ര',
+            'റ',
+            'ല',
+            'ള',
+            'ഴ',
+            'വ',
+            'ശ',
+            'ഷ',
+            'സ',
+            'ഹ',
+            'ൺ',
+            'ൻ',
+            'ർ',
+            'ൽ',
+            'ൾ',
+            'ൿ']
+
         malayalam_char_count = sum(1 for char in text if char in malayalam_chars)
         total_chars = len(text.replace(' ', ''))
-        
+
         if total_chars == 0:
             return "unknown"
-        
+
         malayalam_ratio = malayalam_char_count / total_chars
-        
+
         if malayalam_ratio > 0.3:
             return "malayalam"
         else:
             return "manglish"
-    
+
     def _load_malayalam_intent_patterns(self) -> Dict[str, List[str]]:
         """Load Malayalam intent patterns"""
         patterns = {
@@ -547,7 +629,7 @@ class MalayalamNLPService:
             ]
         }
         return patterns
-    
+
     def _load_manglish_intent_patterns(self) -> Dict[str, List[str]]:
         """Load Manglish (Malayalam in English) intent patterns"""
         patterns = {
@@ -747,7 +829,7 @@ class MalayalamNLPService:
             ]
         }
         return patterns
-    
+
     def _load_malayalam_entity_patterns(self) -> Dict[str, str]:
         """Load Malayalam entity extraction patterns"""
         patterns = {
@@ -775,7 +857,7 @@ class MalayalamNLPService:
             "traditional_arts": r'\b(കളരിപ്പയറ്റ്|കഥകളി|മോഹിനിയാട്ടം|തിരുവാതിരകളി|ചെണ്ട|ചെണ്ടമേളം|പഞ്ചവാദ്യം|തയംബക)\b'
         }
         return patterns
-    
+
     def _load_manglish_entity_patterns(self) -> Dict[str, str]:
         """Load Manglish entity extraction patterns"""
         patterns = {
@@ -803,51 +885,108 @@ class MalayalamNLPService:
             "traditional_arts": r'\b(kalarippayatt|kathakali|mohiniyattam|thiruvatira kali|chenda|chenda melam|panchavadyam|thayambaka)\b'
         }
         return patterns
-    
-    def _calculate_malayalam_confidence(self, text: str, pattern: str, language: str) -> float:
+
+    def _calculate_malayalam_confidence(
+            self,
+            text: str,
+            pattern: str,
+            language: str) -> float:
         """Calculate confidence score for Malayalam pattern match"""
         try:
             match = re.search(pattern, text, re.IGNORECASE)
             if not match:
                 return 0.0
-            
+
             # Base confidence on match length
             match_length = len(match.group())
             text_length = len(text)
-            
+
             if text_length == 0:
                 return 0.0
-            
+
             base_confidence = match_length / text_length
-            
+
             # Boost confidence for exact matches
             if match.group().lower() == text.lower():
                 base_confidence = min(base_confidence * 1.5, 1.0)
-            
+
             # Additional boost for Malayalam specific patterns
             if language == "malayalam":
-                malayalam_chars = ['ം', 'ഃ', 'അ', 'ആ', 'ഇ', 'ഈ', 'ഉ', 'ഊ', 'ഋ', 'എ', 'ഏ', 'ഐ', 'ഒ', 'ഓ', 'ഔ', 'ക', 'ഖ', 'ഗ', 'ഘ', 'ങ', 'ച', 'ഛ', 'ജ', 'ഝ', 'ഞ', 'ട', 'ഠ', 'ഡ', 'ഢ', 'ണ', 'ത', 'ഥ', 'ദ', 'ധ', 'ന', 'പ', 'ഫ', 'ബ', 'ഭ', 'മ', 'യ', 'ര', 'റ', 'ല', 'ള', 'ഴ', 'വ', 'ശ', 'ഷ', 'സ', 'ഹ']
-                malayalam_char_count = sum(1 for char in text if char in malayalam_chars)
+                malayalam_chars = [
+                    'ം',
+                    'ഃ',
+                    'അ',
+                    'ആ',
+                    'ഇ',
+                    'ഈ',
+                    'ഉ',
+                    'ഊ',
+                    'ഋ',
+                    'എ',
+                    'ഏ',
+                    'ഐ',
+                    'ഒ',
+                    'ഓ',
+                    'ഔ',
+                    'ക',
+                    'ഖ',
+                    'ഗ',
+                    'ഘ',
+                    'ങ',
+                    'ച',
+                    'ഛ',
+                    'ജ',
+                    'ഝ',
+                    'ഞ',
+                    'ട',
+                    'ഠ',
+                    'ഡ',
+                    'ഢ',
+                    'ണ',
+                    'ത',
+                    'ഥ',
+                    'ദ',
+                    'ധ',
+                    'ന',
+                    'പ',
+                    'ഫ',
+                    'ബ',
+                    'ഭ',
+                    'മ',
+                    'യ',
+                    'ര',
+                    'റ',
+                    'ല',
+                    'ള',
+                    'ഴ',
+                    'വ',
+                    'ശ',
+                    'ഷ',
+                    'സ',
+                    'ഹ']
+                malayalam_char_count = sum(
+                    1 for char in text if char in malayalam_chars)
                 if malayalam_char_count > 0:
                     base_confidence += 0.2
-            
+
             return min(base_confidence, 1.0)
-            
+
         except Exception as e:
             logger.error(f"Error calculating Malayalam confidence: {str(e)}")
             return 0.0
-    
-    def _extract_malayalam_entities(self, text: str, intent: str, entity_patterns: Dict[str, str]) -> Dict[str, Any]:
+
+    def _extract_malayalam_entities(
+            self, text: str, intent: str, entity_patterns: Dict[str, str]) -> Dict[str, Any]:
         """Extract Malayalam entities from text"""
         entities = {}
-        
+
         try:
             # Extract general entities
             for entity_type, pattern in entity_patterns.items():
                 matches = re.findall(pattern, text, re.IGNORECASE)
                 if matches:
                     entities[entity_type] = matches
-            
+
             # Extract intent-specific entities
             if intent == "appointment":
                 entities.update(self._extract_malayalam_appointment_entities(text))
@@ -857,17 +996,17 @@ class MalayalamNLPService:
                 entities.update(self._extract_malayalam_support_entities(text))
             elif intent == "emergency":
                 entities.update(self._extract_malayalam_emergency_entities(text))
-            
+
             return entities
-            
+
         except Exception as e:
             logger.error(f"Error extracting Malayalam entities: {str(e)}")
             return {}
-    
+
     def _extract_malayalam_appointment_entities(self, text: str) -> Dict[str, Any]:
         """Extract appointment-specific entities"""
         entities = {}
-        
+
         # Service types in Malayalam
         services = {
             "consultation": ["കൺസൾട്ടേഷൻ", "ഡോക്ടറെ കാണുക", "പരിശോധന"],
@@ -875,19 +1014,19 @@ class MalayalamNLPService:
             "followup": ["ഫോളോവപ്പ്", "വീണ്ടും കാണൽ", "തുടർപരിശോധന"],
             "emergency": ["അടിയന്തരം", "അപകടം", "ഉടന്"]
         }
-        
+
         for service, keywords in services.items():
             for keyword in keywords:
                 if keyword in text:
                     entities["service_type"] = service
                     break
-        
+
         return entities
-    
+
     def _extract_malayalam_billing_entities(self, text: str) -> Dict[str, Any]:
         """Extract billing-specific entities"""
         entities = {}
-        
+
         # Payment methods in Malayalam
         payment_methods = {
             "credit_card": ["ക്രെഡിറ്റ് കാർഡ്", "കാർഡ്", "വിസ", "മാസ്റ്റർകാർഡ്"],
@@ -895,19 +1034,19 @@ class MalayalamNLPService:
             "cash": ["പണം", "കാഷ്", "കൈയിൽ നൽകുക"],
             "online": ["ഓൺലൈൻ", "ഇന്റർനെറ്റ്", "ജിപേ", "ഫോൺപേ"]
         }
-        
+
         for method, keywords in payment_methods.items():
             for keyword in keywords:
                 if keyword in text:
                     entities["payment_method"] = method
                     break
-        
+
         return entities
-    
+
     def _extract_malayalam_support_entities(self, text: str) -> Dict[str, Any]:
         """Extract technical support entities"""
         entities = {}
-        
+
         # Issue types in Malayalam
         issues = {
             "internet": ["ഇന്റർനെറ്റ്", "വൈഫൈ", "നെറ്റ്‌വർക്ക്", "കണക്ഷൻ"],
@@ -915,19 +1054,19 @@ class MalayalamNLPService:
             "hardware": ["ഹാർഡ്‌വെയർ", "ഡിവൈസ്", "കമ്പ്യൂട്ടർ", "മൊബൈൽ"],
             "account": ["അക്കൗണ്ട്", "ലോഗിൻ", "പാസ്‌വേഡ്", "യൂസർ ഐഡി"]
         }
-        
+
         for issue, keywords in issues.items():
             for keyword in keywords:
                 if keyword in text:
                     entities["issue_type"] = issue
                     break
-        
+
         return entities
-    
+
     def _extract_malayalam_emergency_entities(self, text: str) -> Dict[str, Any]:
         """Extract emergency-specific entities"""
         entities = {}
-        
+
         # Emergency types in Malayalam
         emergency_types = {
             "medical": ["ആശുപത്രി", "ഡോക്ടർ", "വൈദ്യൻ", "വൈദ്യശാസ്ത്രം", "മരുന്ന്"],
@@ -935,72 +1074,80 @@ class MalayalamNLPService:
             "fire": ["ഫയർ", "തീ", "അഗ്നിശമനം", "ഫയർ സർവീസ്"],
             "accident": ["അപകടം", "വാഹനാപകടം", "റോഡ് അപകടം"]
         }
-        
+
         for emergency_type, keywords in emergency_types.items():
             for keyword in keywords:
                 if keyword in text:
                     entities["emergency_type"] = emergency_type
                     break
-        
+
         return entities
-    
+
     def _extract_cultural_context(self, text: str, language: str) -> Dict[str, Any]:
         """Extract cultural context from Malayalam text"""
         entities = {}
-        
+
         try:
             # Check for respectful address
             for respect_term in self.cultural_patterns['respectful_address']:
                 if respect_term in text:
                     entities['respect_level'] = 'formal'
                     break
-            
+
             # Check for informal address
             for informal_term in self.cultural_patterns['informal_address']:
                 if informal_term in text:
                     entities['respect_level'] = 'informal'
                     break
-            
+
             # Check for time references
             for time_ref in self.cultural_patterns['time_references']:
                 if time_ref in text:
                     entities['time_context'] = time_ref
                     break
-            
+
             # Check for place references
             for place_ref in self.cultural_patterns['place_references']:
                 if place_ref in text:
                     entities['place_context'] = place_ref
                     break
-            
+
             return entities
-            
+
         except Exception as e:
             logger.error(f"Error extracting cultural context: {str(e)}")
             return {}
-    
+
     def _contextual_malayalam_analysis(self, text: str, language: str) -> str:
         """Perform contextual analysis for Malayalam text"""
         text_lower = text.lower()
-        
+
         # Question detection in Malayalam
-        question_words = ['എന്ത്', 'എങ്ങനെ', 'എവിടെ', 'എപ്പോൾ', 'എന്തുകൊണ്ട്', 'ആര്', 'എന്താണ്']
+        question_words = [
+            'എന്ത്',
+            'എങ്ങനെ',
+            'എവിടെ',
+            'എപ്പോൾ',
+            'എന്തുകൊണ്ട്',
+            'ആര്',
+            'എന്താണ്']
         if any(word in text_lower for word in question_words):
             return "question"
-        
+
         # Request detection
         request_words = ['ചെയ്യാമോ', 'തരാമോ', 'പറയാമോ', 'കിട്ടുമോ', 'വേണം']
         if any(word in text_lower for word in request_words):
             return "request"
-        
+
         # Statement detection
         statement_words = ['എനിക്ക് വേണം', 'എനിക്ക് ആവശ്യം', 'ഞാൻ ആഗ്രഹിക്കുന്നു']
         if any(word in text_lower for word in statement_words):
             return "request"
-        
+
         return "statement"
-    
-    async def get_malayalam_response_suggestions(self, intent: str, entities: Dict[str, Any], language: str = "ml") -> List[str]:
+
+    async def get_malayalam_response_suggestions(
+            self, intent: str, entities: Dict[str, Any], language: str = "ml") -> List[str]:
         """Get response suggestions based on Malayalam intent and entities"""
         suggestions = {
             "greeting": [
@@ -1039,9 +1186,10 @@ class MalayalamNLPService:
                 "അടിയന്തര സേവനം സജീവമാക്കുന്നു. ദയവായി വിവരം തരൂ."
             ]
         }
-        
+
         # Adjust suggestions based on respect level
         if entities.get('respect_level') == 'formal':
-            suggestions = {k: [s.replace('ഞാൻ', 'ഞങ്ങൾ') for s in v] for k, v in suggestions.items()}
-        
+            suggestions = {k: [s.replace('ഞാൻ', 'ഞങ്ങൾ') for s in v]
+                           for k, v in suggestions.items()}
+
         return suggestions.get(intent, ["ഞാൻ സഹായിക്കാൻ തയ്യാറാണ്. എന്താണ് ആവശ്യം?"])

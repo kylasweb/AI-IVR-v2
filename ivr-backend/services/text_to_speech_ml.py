@@ -10,15 +10,16 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
 class MalayalamTextToSpeechService:
     def __init__(self):
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.voices_cache = {}
         self.malayalam_voice_id = None
-        
+
         # Initialize Malayalam TTS engine
         self._initialize_malayalam_engine()
-        
+
         # Malayalam pronunciation mappings
         self.pronunciation_map = {
             # Common Malayalam words with proper pronunciation hints
@@ -37,7 +38,7 @@ class MalayalamTextToSpeechService:
             'അല്ല': 'alla',
             'ശരി': 'sari'
         }
-        
+
         # Emotion-based speech parameters for Malayalam
         self.emotion_params = {
             'happy': {'rate': 160, 'volume': 0.95, 'pitch': 1.1},
@@ -46,12 +47,12 @@ class MalayalamTextToSpeechService:
             'neutral': {'rate': 150, 'volume': 0.9, 'pitch': 1.0},
             'professional': {'rate': 140, 'volume': 0.85, 'pitch': 1.0}
         }
-    
+
     def _initialize_malayalam_engine(self):
         """Initialize TTS engine for Malayalam"""
         try:
             self.engine = pyttsx3.init()
-            
+
             # Try to find Malayalam voice
             voices = self.engine.getProperty('voices')
             for voice in voices:
@@ -60,22 +61,22 @@ class MalayalamTextToSpeechService:
                     self.engine.setProperty('voice', voice.id)
                     logger.info(f"Found Malayalam voice: {voice.name}")
                     break
-            
+
             if not self.malayalam_voice_id:
                 logger.warning("Malayalam voice not found, using default voice")
                 # Use first available voice as fallback
                 if voices:
                     self.malayalam_voice_id = voices[0].id
                     self.engine.setProperty('voice', voices[0].id)
-            
+
             # Set default Malayalam-friendly settings
             self.engine.setProperty('rate', 140)  # Slightly slower for Malayalam
             self.engine.setProperty('volume', 0.9)
-            
+
         except Exception as e:
             logger.error(f"Error initializing Malayalam TTS engine: {e}")
             self.engine = None
-    
+
     def is_healthy(self) -> bool:
         """Check if the service is healthy"""
         try:
@@ -83,33 +84,38 @@ class MalayalamTextToSpeechService:
         except Exception as e:
             logger.error(f"Malayalam text to speech service health check failed: {e}")
             return False
-    
-    async def synthesize(self, text: str, language: str = "ml", emotion: str = "neutral") -> str:
+
+    async def synthesize(
+            self,
+            text: str,
+            language: str = "ml",
+            emotion: str = "neutral") -> str:
         """
         Synthesize Malayalam text to speech
-        
+
         Args:
             text: Text to synthesize
             language: Language code (ml, manglish)
             emotion: Emotional tone
-        
+
         Returns:
             Base64 encoded audio data
         """
         try:
             if not text.strip():
                 return ""
-            
+
             if not self.engine:
                 logger.error("TTS engine not initialized")
                 return ""
-            
+
             # Preprocess text for better Malayalam pronunciation
             processed_text = self._preprocess_malayalam_text(text, language)
-            
+
             # Apply emotion settings
-            emotion_settings = self.emotion_params.get(emotion, self.emotion_params['neutral'])
-            
+            emotion_settings = self.emotion_params.get(
+                emotion, self.emotion_params['neutral'])
+
             # Run synthesis in thread pool to avoid blocking
             loop = asyncio.get_event_loop()
             audio_data = await loop.run_in_executor(
@@ -118,24 +124,24 @@ class MalayalamTextToSpeechService:
                 processed_text,
                 emotion_settings
             )
-            
+
             return audio_data
-            
+
         except Exception as e:
             logger.error(f"Error synthesizing Malayalam speech: {str(e)}")
             return ""
-    
+
     def _preprocess_malayalam_text(self, text: str, language: str) -> str:
         """Preprocess text for better Malayalam pronunciation"""
         if language == "manglish":
             # Convert Manglish to proper Malayalam
             text = self._manglish_to_malayalam(text)
-        
+
         # Add pronunciation pauses for better Malayalam flow
         text = self._add_pronunciation_pauses(text)
-        
+
         return text
-    
+
     def _manglish_to_malayalam(self, text: str) -> str:
         """Convert Manglish text to Malayalam"""
         manglish_map = {
@@ -158,86 +164,90 @@ class MalayalamTextToSpeechService:
             'problem': 'പ്രശ്നം',
             'issue': 'പ്രശ്നം'
         }
-        
+
         text_lower = text.lower()
         for manglish, malayalam in manglish_map.items():
             text_lower = text_lower.replace(manglish, malayalam)
-        
+
         return text_lower
-    
+
     def _add_pronunciation_pauses(self, text: str) -> str:
         """Add pauses for better Malayalam pronunciation"""
         # Add commas after common Malayalam conjunctions
         conjunctions = ['എന്നും', 'ആയി', 'ഉം', 'മാത്രം', 'എന്നാൽ']
         for conj in conjunctions:
             text = text.replace(conj, f"{conj},")
-        
+
         # Add pauses at question marks
         text = text.replace('?', '.,')
         text = text.replace('?', '.')
-        
+
         return text
-    
+
     def _synthesize_malayalam_text(self, text: str, emotion_settings: Dict) -> str:
         """Synthesize Malayalam text using pyttsx3"""
         try:
             # Create temporary engine instance for thread safety
             temp_engine = pyttsx3.init()
-            
+
             # Set voice
             if self.malayalam_voice_id:
                 temp_engine.setProperty('voice', self.malayalam_voice_id)
-            
+
             # Apply emotion settings
             temp_engine.setProperty('rate', emotion_settings['rate'])
             temp_engine.setProperty('volume', emotion_settings['volume'])
-            
+
             # Save to temporary file
             with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
                 temp_filename = temp_file.name
-            
+
             temp_engine.save_to_file(text, temp_filename)
             temp_engine.runAndWait()
-            
+
             # Read the file and encode to base64
             with open(temp_filename, 'rb') as f:
                 audio_bytes = f.read()
-            
+
             # Clean up
             os.unlink(temp_filename)
             temp_engine.stop()
-            
+
             return base64.b64encode(audio_bytes).decode('utf-8')
-            
+
         except Exception as e:
             logger.error(f"Error in Malayalam text synthesis: {str(e)}")
             return ""
-    
-    async def synthesize_with_dialect(self, text: str, dialect: str = "standard", emotion: str = "neutral") -> str:
+
+    async def synthesize_with_dialect(
+            self,
+            text: str,
+            dialect: str = "standard",
+            emotion: str = "neutral") -> str:
         """
         Synthesize text with specific Malayalam dialect
-        
+
         Args:
             text: Text to synthesize
             dialect: Malayalam dialect (travancore, malabar, cochin, standard)
             emotion: Emotional tone
-        
+
         Returns:
             Base64 encoded audio data
         """
         try:
             # Adjust text based on dialect
             dialect_text = self._apply_dialect_variations(text, dialect)
-            
+
             # Adjust speech parameters based on dialect
             dialect_emotion = self._get_dialect_emotion_settings(dialect, emotion)
-            
+
             return await self.synthesize(dialect_text, "ml", dialect_emotion)
-            
+
         except Exception as e:
             logger.error(f"Error synthesizing with dialect: {str(e)}")
             return await self.synthesize(text, "ml", emotion)
-    
+
     def _apply_dialect_variations(self, text: str, dialect: str) -> str:
         """Apply dialect-specific variations to text"""
         dialect_variations = {
@@ -257,18 +267,18 @@ class MalayalamTextToSpeechService:
                 'വരുന്നു': 'വരുന്നു'
             }
         }
-        
+
         if dialect in dialect_variations:
             variations = dialect_variations[dialect]
             for standard, dialect_variant in variations.items():
                 text = text.replace(standard, dialect_variant)
-        
+
         return text
-    
+
     def _get_dialect_emotion_settings(self, dialect: str, emotion: str) -> str:
         """Get emotion settings adjusted for dialect"""
         base_emotion = self.emotion_params.get(emotion, self.emotion_params['neutral'])
-        
+
         # Adjust speech rate based on dialect
         dialect_adjustments = {
             'travancore': {'rate_adjust': -10},  # Slightly slower
@@ -276,13 +286,13 @@ class MalayalamTextToSpeechService:
             'cochin': {'rate_adjust': 0},        # Standard
             'standard': {'rate_adjust': 0}
         }
-        
+
         adjustment = dialect_adjustments.get(dialect, {'rate_adjust': 0})
         adjusted_emotion = base_emotion.copy()
         adjusted_emotion['rate'] += adjustment['rate_adjust']
-        
+
         return emotion  # Return original emotion name for simplicity
-    
+
     async def create_malayalam_audio_library(self) -> Dict[str, str]:
         """Create a library of common Malayalam phrases"""
         common_phrases = {
@@ -295,16 +305,15 @@ class MalayalamTextToSpeechService:
             'goodbye': 'വിളിച്ചതിന് നന്ദി. വീണ്ടും കാണാം!',
             'error_message': 'ക്ഷമിക്കണം, എനിക്ക് മനസ്സിലായില്ല. ദയവായി വീണ്ടും പറയാമോ?',
             'confirmation': 'ശരി, ഞാൻ സഹായിക്കാം',
-            'thanks': 'നന്ദി'
-        }
-        
+            'thanks': 'നന്ദി'}
+
         audio_library = {}
         for key, phrase in common_phrases.items():
             audio_data = await self.synthesize(phrase, "ml", "professional")
             audio_library[key] = audio_data
-        
+
         return audio_library
-    
+
     def get_malayalam_voice_settings(self) -> Dict:
         """Get current Malayalam voice settings"""
         return {
@@ -317,7 +326,7 @@ class MalayalamTextToSpeechService:
                 'pitch': 1.0
             }
         }
-    
+
     def update_malayalam_voice_settings(self, settings: Dict):
         """Update Malayalam voice settings"""
         try:
@@ -329,7 +338,7 @@ class MalayalamTextToSpeechService:
                 if 'voice_id' in settings:
                     self.engine.setProperty('voice', settings['voice_id'])
                     self.malayalam_voice_id = settings['voice_id']
-                
+
                 logger.info(f"Updated Malayalam voice settings: {settings}")
         except Exception as e:
             logger.error(f"Error updating Malayalam voice settings: {e}")

@@ -64,6 +64,8 @@ import {
     BarChart3
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api-client';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface VideoCall {
     id: string;
@@ -136,6 +138,7 @@ interface VideoStats {
 }
 
 const VideoIVR: React.FC = () => {
+    const { isDemoMode } = useMockData();
     const [calls, setCalls] = useState<VideoCall[]>([]);
     const [workflows, setWorkflows] = useState<VideoWorkflow[]>([]);
     const [sessions, setSessions] = useState<VideoSession[]>([]);
@@ -147,6 +150,7 @@ const VideoIVR: React.FC = () => {
         satisfactionScore: 0,
         recordingStorage: 0
     });
+    const [loading, setLoading] = useState(true);
 
     const [selectedCall, setSelectedCall] = useState<VideoCall | null>(null);
     const [selectedWorkflow, setSelectedWorkflow] = useState<VideoWorkflow | null>(null);
@@ -262,37 +266,67 @@ const VideoIVR: React.FC = () => {
     useEffect(() => {
         loadData();
         setupWebRTC();
-    }, []);
+    }, [isDemoMode]);
 
     const loadData = async () => {
         try {
-            // Simulate API calls
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setCalls(mockCalls);
-            setWorkflows(mockWorkflows);
+            setLoading(true);
 
-            // Calculate stats
-            const activeCalls = mockCalls.filter(c => c.status === 'active').length;
-            const totalCalls = mockCalls.length;
-            const avgDuration = mockCalls.reduce((sum, c) => sum + c.duration, 0) / totalCalls;
-            const totalWorkflows = mockWorkflows.reduce((sum, w) => sum + w.analytics.totalCalls, 0);
-            const avgCompletion = mockWorkflows.reduce((sum, w) => sum + w.analytics.completionRate, 0) / mockWorkflows.length;
-            const avgSatisfaction = mockWorkflows.reduce((sum, w) => sum + w.analytics.satisfactionScore, 0) / mockWorkflows.length;
+            if (isDemoMode) {
+                // Mock data for demonstration
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                setCalls(mockCalls);
+                setWorkflows(mockWorkflows);
 
-            setStats({
-                activeCalls,
-                totalCalls: totalWorkflows,
-                avgDuration,
-                completionRate: avgCompletion,
-                satisfactionScore: avgSatisfaction,
-                recordingStorage: 15.7 // Mock value in GB
-            });
+                // Calculate stats
+                const activeCalls = mockCalls.filter(c => c.status === 'active').length;
+                const totalCalls = mockCalls.length;
+                const avgDuration = mockCalls.reduce((sum, c) => sum + c.duration, 0) / totalCalls;
+                const totalWorkflows = mockWorkflows.reduce((sum, w) => sum + w.analytics.totalCalls, 0);
+                const avgCompletion = mockWorkflows.reduce((sum, w) => sum + w.analytics.completionRate, 0) / mockWorkflows.length;
+                const avgSatisfaction = mockWorkflows.reduce((sum, w) => sum + w.analytics.satisfactionScore, 0) / mockWorkflows.length;
+
+                setStats({
+                    activeCalls,
+                    totalCalls: totalWorkflows,
+                    avgDuration,
+                    completionRate: avgCompletion,
+                    satisfactionScore: avgSatisfaction,
+                    recordingStorage: 15.7 // Mock value in GB
+                });
+            } else {
+                // Real API calls
+                const [callsResponse, workflowsResponse] = await Promise.all([
+                    api.getVideoCalls(),
+                    api.getVideoWorkflows()
+                ]);
+
+                setCalls(callsResponse.data || []);
+                setWorkflows(workflowsResponse.data || []);
+
+                // Calculate stats from real data
+                const activeCalls = (callsResponse.data || []).filter((c: VideoCall) => c.status === 'active').length;
+                const totalCalls = (callsResponse.data || []).length;
+                const avgDuration = totalCalls > 0 ? (callsResponse.data || []).reduce((sum: number, c: VideoCall) => sum + c.duration, 0) / totalCalls : 0;
+
+                setStats({
+                    activeCalls,
+                    totalCalls,
+                    avgDuration,
+                    completionRate: 0, // Would be calculated from real workflow data
+                    satisfactionScore: 0, // Would be calculated from real workflow data
+                    recordingStorage: 0 // Would come from real API
+                });
+            }
         } catch (error) {
+            console.error('Error loading video IVR data:', error);
             toast({
                 title: "Error",
                 description: "Failed to load video IVR data",
                 variant: "destructive",
             });
+        } finally {
+            setLoading(false);
         }
     };
 

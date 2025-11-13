@@ -6,20 +6,24 @@ async function main() {
     console.log('🌱 Starting database seed...');
 
     // Create sample users
-    const user1 = await prisma.user.create({
-        data: {
+    const user1 = await prisma.user.upsert({
+        where: { email: 'test@kerala.gov.in' },
+        update: {},
+        create: {
             email: 'test@kerala.gov.in',
             name: 'Test User Kerala'
         }
     });
 
     // Create default workflows with nodes
-    const workflow1 = await prisma.workflow.create({
-        data: {
+    const workflow1 = await prisma.workflow.upsert({
+        where: { name: 'Customer Support Malayalam' },
+        update: {},
+        create: {
             name: 'Customer Support Malayalam',
             description: 'Malayalam customer support workflow with cultural intelligence',
-            status: 'active',
-            version: '1.0',
+            isActive: true,
+            category: 'CUSTOM',
             nodes: {
                 create: [
                     {
@@ -115,7 +119,7 @@ async function main() {
                 sorry: 'ക്ഷമിക്കണം'
             },
             isActive: true
-        },
+        }
     });
 
     console.log('✅ Seed completed successfully!');

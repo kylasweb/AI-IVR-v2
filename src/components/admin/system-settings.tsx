@@ -30,6 +30,8 @@ import {
   Tag
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api-client';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface SystemSetting {
   id: string;
@@ -49,6 +51,7 @@ interface SettingCategory {
 }
 
 export default function SystemSettings() {
+  const { isDemoMode } = useMockData();
   const [settings, setSettings] = useState<SettingCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,7 +64,7 @@ export default function SystemSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => {
     if (selectedCategory === 'versioncontrol' && settings.length > 0) {
@@ -74,190 +77,196 @@ export default function SystemSettings() {
     try {
       setLoading(true);
 
-      // Mock data for demonstration - replace with actual API call
-      const mockSettings: SettingCategory[] = [
-        {
-          name: 'Voice Settings',
-          icon: Volume2,
-          description: 'Configure voice processing and TTS settings',
-          settings: [
-            {
-              id: '1',
-              key: 'voice.tts.provider',
-              value: 'google',
-              type: 'string',
-              category: 'voice',
-              description: 'Text-to-speech provider (google, azure, aws)',
-              isEncrypted: false
-            },
-            {
-              id: '2',
-              key: 'voice.tts.malayalam_voice',
-              value: 'ml-IN-Standard-A',
-              type: 'string',
-              category: 'voice',
-              description: 'Malayalam voice model for TTS',
-              isEncrypted: false
-            },
-            {
-              id: '3',
-              key: 'voice.stt.confidence_threshold',
-              value: '0.85',
-              type: 'number',
-              category: 'voice',
-              description: 'Minimum confidence for speech recognition',
-              isEncrypted: false
-            },
-            {
-              id: '4',
-              key: 'voice.noise_reduction',
-              value: 'true',
-              type: 'boolean',
-              category: 'voice',
-              description: 'Enable background noise reduction',
-              isEncrypted: false
-            }
-          ]
-        },
-        {
-          name: 'Integration Settings',
-          icon: Globe,
-          description: 'Manage external service integrations',
-          settings: [
-            {
-              id: '5',
-              key: 'integration.gemini.api_key',
-              value: 'AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8',
-              type: 'string',
-              category: 'integration',
-              description: 'Google Gemini API key for AI processing',
-              isEncrypted: true
-            },
-            {
-              id: '6',
-              key: 'integration.webhook.timeout',
-              value: '30000',
-              type: 'number',
-              category: 'integration',
-              description: 'Webhook timeout in milliseconds',
-              isEncrypted: false
-            },
-            {
-              id: '7',
-              key: 'integration.retry.max_attempts',
-              value: '3',
-              type: 'number',
-              category: 'integration',
-              description: 'Maximum retry attempts for failed requests',
-              isEncrypted: false
-            }
-          ]
-        },
-        {
-          name: 'Security Settings',
-          icon: Shield,
-          description: 'Security and authentication configuration',
-          settings: [
-            {
-              id: '8',
-              key: 'security.jwt.expiry',
-              value: '3600',
-              type: 'number',
-              category: 'security',
-              description: 'JWT token expiry time in seconds',
-              isEncrypted: false
-            },
-            {
-              id: '9',
-              key: 'security.encryption.enabled',
-              value: 'true',
-              type: 'boolean',
-              category: 'security',
-              description: 'Enable data encryption at rest',
-              isEncrypted: false
-            },
-            {
-              id: '10',
-              key: 'security.rate_limit.calls_per_minute',
-              value: '100',
-              type: 'number',
-              category: 'security',
-              description: 'Maximum API calls per minute per user',
-              isEncrypted: false
-            }
-          ]
-        },
-        {
-          name: 'System Settings',
-          icon: Database,
-          description: 'Core system and database configuration',
-          settings: [
-            {
-              id: '11',
-              key: 'system.log_level',
-              value: 'info',
-              type: 'string',
-              category: 'system',
-              description: 'System logging level (debug, info, warn, error)',
-              isEncrypted: false
-            },
-            {
-              id: '12',
-              key: 'system.session_timeout',
-              value: '1800',
-              type: 'number',
-              category: 'system',
-              description: 'User session timeout in seconds',
-              isEncrypted: false
-            },
-            {
-              id: '13',
-              key: 'system.auto_backup',
-              value: 'true',
-              type: 'boolean',
-              category: 'system',
-              description: 'Enable automatic database backups',
-              isEncrypted: false
-            }
-          ]
-        },
-        {
-          name: 'Version Control',
-          icon: GitBranch,
-          description: 'GitHub repository commits and releases',
-          settings: [
-            {
-              id: '14',
-              key: 'version_control.github_owner',
-              value: 'your-github-username',
-              type: 'string',
-              category: 'version_control',
-              description: 'GitHub repository owner/username',
-              isEncrypted: false
-            },
-            {
-              id: '15',
-              key: 'version_control.github_repo',
-              value: 'ai-ivr-v2',
-              type: 'string',
-              category: 'version_control',
-              description: 'GitHub repository name',
-              isEncrypted: false
-            },
-            {
-              id: '16',
-              key: 'version_control.commit_limit',
-              value: '10',
-              type: 'number',
-              category: 'version_control',
-              description: 'Number of recent commits to display',
-              isEncrypted: false
-            }
-          ]
-        }
-      ];
+      if (isDemoMode) {
+        // Mock data for demonstration - replace with actual API call
+        const mockSettings: SettingCategory[] = [
+          {
+            name: 'Voice Settings',
+            icon: Volume2,
+            description: 'Configure voice processing and TTS settings',
+            settings: [
+              {
+                id: '1',
+                key: 'voice.tts.provider',
+                value: 'google',
+                type: 'string',
+                category: 'voice',
+                description: 'Text-to-speech provider (google, azure, aws)',
+                isEncrypted: false
+              },
+              {
+                id: '2',
+                key: 'voice.tts.malayalam_voice',
+                value: 'ml-IN-Standard-A',
+                type: 'string',
+                category: 'voice',
+                description: 'Malayalam voice model for TTS',
+                isEncrypted: false
+              },
+              {
+                id: '3',
+                key: 'voice.stt.confidence_threshold',
+                value: '0.85',
+                type: 'number',
+                category: 'voice',
+                description: 'Minimum confidence for speech recognition',
+                isEncrypted: false
+              },
+              {
+                id: '4',
+                key: 'voice.noise_reduction',
+                value: 'true',
+                type: 'boolean',
+                category: 'voice',
+                description: 'Enable background noise reduction',
+                isEncrypted: false
+              }
+            ]
+          },
+          {
+            name: 'Integration Settings',
+            icon: Globe,
+            description: 'Manage external service integrations',
+            settings: [
+              {
+                id: '5',
+                key: 'integration.gemini.api_key',
+                value: 'AIzaSyBW5iYIIHl9x6ZYraRcWzu0TwTe-ihewo8',
+                type: 'string',
+                category: 'integration',
+                description: 'Google Gemini API key for AI processing',
+                isEncrypted: true
+              },
+              {
+                id: '6',
+                key: 'integration.webhook.timeout',
+                value: '30000',
+                type: 'number',
+                category: 'integration',
+                description: 'Webhook timeout in milliseconds',
+                isEncrypted: false
+              },
+              {
+                id: '7',
+                key: 'integration.retry.max_attempts',
+                value: '3',
+                type: 'number',
+                category: 'integration',
+                description: 'Maximum retry attempts for failed requests',
+                isEncrypted: false
+              }
+            ]
+          },
+          {
+            name: 'Security Settings',
+            icon: Shield,
+            description: 'Security and authentication configuration',
+            settings: [
+              {
+                id: '8',
+                key: 'security.jwt.expiry',
+                value: '3600',
+                type: 'number',
+                category: 'security',
+                description: 'JWT token expiry time in seconds',
+                isEncrypted: false
+              },
+              {
+                id: '9',
+                key: 'security.encryption.enabled',
+                value: 'true',
+                type: 'boolean',
+                category: 'security',
+                description: 'Enable data encryption at rest',
+                isEncrypted: false
+              },
+              {
+                id: '10',
+                key: 'security.rate_limit.calls_per_minute',
+                value: '100',
+                type: 'number',
+                category: 'security',
+                description: 'Maximum API calls per minute per user',
+                isEncrypted: false
+              }
+            ]
+          },
+          {
+            name: 'System Settings',
+            icon: Database,
+            description: 'Core system and database configuration',
+            settings: [
+              {
+                id: '11',
+                key: 'system.log_level',
+                value: 'info',
+                type: 'string',
+                category: 'system',
+                description: 'System logging level (debug, info, warn, error)',
+                isEncrypted: false
+              },
+              {
+                id: '12',
+                key: 'system.session_timeout',
+                value: '1800',
+                type: 'number',
+                category: 'system',
+                description: 'User session timeout in seconds',
+                isEncrypted: false
+              },
+              {
+                id: '13',
+                key: 'system.auto_backup',
+                value: 'true',
+                type: 'boolean',
+                category: 'system',
+                description: 'Enable automatic database backups',
+                isEncrypted: false
+              }
+            ]
+          },
+          {
+            name: 'Version Control',
+            icon: GitBranch,
+            description: 'GitHub repository commits and releases',
+            settings: [
+              {
+                id: '14',
+                key: 'version_control.github_owner',
+                value: 'your-github-username',
+                type: 'string',
+                category: 'version_control',
+                description: 'GitHub repository owner/username',
+                isEncrypted: false
+              },
+              {
+                id: '15',
+                key: 'version_control.github_repo',
+                value: 'ai-ivr-v2',
+                type: 'string',
+                category: 'version_control',
+                description: 'GitHub repository name',
+                isEncrypted: false
+              },
+              {
+                id: '16',
+                key: 'version_control.commit_limit',
+                value: '10',
+                type: 'number',
+                category: 'version_control',
+                description: 'Number of recent commits to display',
+                isEncrypted: false
+              }
+            ]
+          }
+        ];
 
-      setSettings(mockSettings);
+        setSettings(mockSettings);
+      } else {
+        // Real API call
+        const response = await api.getSystemSettings();
+        setSettings(response.data);
+      }
     } catch (error) {
       console.error('Error fetching settings:', error);
       toast({

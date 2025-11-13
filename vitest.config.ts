@@ -14,7 +14,18 @@ export default defineConfig({
                 'node_modules/',
                 'tests/',
                 '**/*.d.ts',
-            ]
+                'src/**/*.test.{ts,tsx}',
+                'src/**/*.spec.{ts,tsx}',
+            ],
+            thresholds: {
+                global: {
+                    branches: 70,
+                    functions: 70,
+                    lines: 70,
+                    statements: 70
+                }
+            },
+            provider: 'v8', // Faster than istanbul
         }
     },
     resolve: {

@@ -6,11 +6,13 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Intent:
     name: str
     confidence: float
     entities: Dict[str, Any]
+
 
 @dataclass
 class Entity:
@@ -19,11 +21,12 @@ class Entity:
     start: int
     end: int
 
+
 class NLPService:
     def __init__(self):
         self.intent_patterns = self._load_intent_patterns()
         self.entity_patterns = self._load_entity_patterns()
-        
+
     def is_healthy(self) -> bool:
         """Check if the service is healthy"""
         try:
@@ -31,29 +34,30 @@ class NLPService:
         except Exception as e:
             logger.error(f"NLP service health check failed: {e}")
             return False
-    
-    async def analyze_intent(self, text: str, language: str = "en") -> Tuple[str, Dict[str, Any], float]:
+
+    async def analyze_intent(
+            self, text: str, language: str = "en") -> Tuple[str, Dict[str, Any], float]:
         """
         Analyze text to determine intent and extract entities
-        
+
         Args:
             text: Input text
             language: Language code
-        
+
         Returns:
             Tuple of (intent, entities, confidence)
         """
         try:
             if not text.strip():
                 return "unknown", {}, 0.0
-            
+
             text = text.lower().strip()
-            
+
             # Check each intent pattern
             best_intent = "unknown"
             best_entities = {}
             best_confidence = 0.0
-            
+
             for intent_name, patterns in self.intent_patterns.items():
                 for pattern in patterns:
                     match = re.search(pattern, text, re.IGNORECASE)
@@ -62,23 +66,25 @@ class NLPService:
                         if confidence > best_confidence:
                             best_confidence = confidence
                             best_intent = intent_name
-                            
+
                             # Extract entities
                             entities = self._extract_entities(text, intent_name)
                             best_entities = entities
-            
+
             # If no intent matched, try to detect general purpose
             if best_intent == "unknown":
                 best_intent = self._detect_general_intent(text)
                 best_confidence = 0.5
-            
-            logger.info(f"Intent detected: {best_intent} (confidence: {best_confidence:.2f})")
+
+            logger.info(
+                f"Intent detected: {best_intent} (confidence: {
+                    best_confidence:.2f})")
             return best_intent, best_entities, best_confidence
-            
+
         except Exception as e:
             logger.error(f"Error analyzing intent: {str(e)}")
             return "unknown", {}, 0.0
-    
+
     def _load_intent_patterns(self) -> Dict[str, List[str]]:
         """Load intent patterns for different languages"""
         patterns = {
@@ -220,7 +226,7 @@ class NLPService:
             ]
         }
         return patterns
-    
+
     def _load_entity_patterns(self) -> Dict[str, str]:
         """Load entity extraction patterns"""
         patterns = {
@@ -243,44 +249,44 @@ class NLPService:
             "traditional_arts": r'\b(kathakali|mohiniyattam|theyyam|kalaripayattu|classical dance|folk dance)\b'
         }
         return patterns
-    
+
     def _calculate_confidence(self, text: str, pattern: str) -> float:
         """Calculate confidence score for pattern match"""
         try:
             match = re.search(pattern, text, re.IGNORECASE)
             if not match:
                 return 0.0
-            
+
             # Base confidence on match length relative to text length
             match_length = len(match.group())
             text_length = len(text)
-            
+
             if text_length == 0:
                 return 0.0
-            
+
             base_confidence = match_length / text_length
-            
+
             # Boost confidence for exact matches
             if match.group().lower() == text.lower():
                 base_confidence = min(base_confidence * 1.5, 1.0)
-            
+
             return min(base_confidence, 1.0)
-            
+
         except Exception as e:
             logger.error(f"Error calculating confidence: {str(e)}")
             return 0.0
-    
+
     def _extract_entities(self, text: str, intent: str) -> Dict[str, Any]:
         """Extract entities from text based on intent"""
         entities = {}
-        
+
         try:
             # Extract general entities
             for entity_type, pattern in self.entity_patterns.items():
                 matches = re.findall(pattern, text, re.IGNORECASE)
                 if matches:
                     entities[entity_type] = matches
-            
+
             # Extract intent-specific entities
             if intent == "appointment":
                 entities.update(self._extract_appointment_entities(text))
@@ -288,36 +294,36 @@ class NLPService:
                 entities.update(self._extract_billing_entities(text))
             elif intent == "technical_support":
                 entities.update(self._extract_support_entities(text))
-            
+
             return entities
-            
+
         except Exception as e:
             logger.error(f"Error extracting entities: {str(e)}")
             return {}
-    
+
     def _extract_appointment_entities(self, text: str) -> Dict[str, Any]:
         """Extract appointment-specific entities"""
         entities = {}
-        
+
         # Service types
         services = {
             "consultation": ["consultation", "consult", "meeting"],
             "checkup": ["checkup", "check-up", "examination"],
             "followup": ["followup", "follow-up", "review"]
         }
-        
+
         for service, keywords in services.items():
             for keyword in keywords:
                 if keyword in text.lower():
                     entities["service_type"] = service
                     break
-        
+
         return entities
-    
+
     def _extract_billing_entities(self, text: str) -> Dict[str, Any]:
         """Extract billing-specific entities"""
         entities = {}
-        
+
         # Payment methods
         payment_methods = {
             "credit_card": ["credit card", "visa", "mastercard", "amex"],
@@ -325,19 +331,19 @@ class NLPService:
             "bank_transfer": ["bank transfer", "wire", "ach"],
             "check": ["check", "cheque"]
         }
-        
+
         for method, keywords in payment_methods.items():
             for keyword in keywords:
                 if keyword in text.lower():
                     entities["payment_method"] = method
                     break
-        
+
         return entities
-    
+
     def _extract_support_entities(self, text: str) -> Dict[str, Any]:
         """Extract technical support entities"""
         entities = {}
-        
+
         # Issue types
         issues = {
             "login": ["login", "sign in", "password", "account"],
@@ -345,34 +351,48 @@ class NLPService:
             "software": ["software", "application", "app", "program"],
             "hardware": ["hardware", "device", "equipment", "machine"]
         }
-        
+
         for issue, keywords in issues.items():
             for keyword in keywords:
                 if keyword in text.lower():
                     entities["issue_type"] = issue
                     break
-        
+
         return entities
-    
+
     def _detect_general_intent(self, text: str) -> str:
         """Detect general intent when no specific pattern matches"""
         text_lower = text.lower()
-        
+
         # Question detection
-        if any(word in text_lower for word in ["what", "where", "when", "how", "why", "who"]):
+        if any(
+            word in text_lower for word in [
+                "what",
+                "where",
+                "when",
+                "how",
+                "why",
+                "who"]):
             return "question"
-        
+
         # Request detection
-        if any(word in text_lower for word in ["can", "could", "would", "may", "might"]):
+        if any(
+            word in text_lower for word in [
+                "can",
+                "could",
+                "would",
+                "may",
+                "might"]):
             return "request"
-        
+
         # Statement detection
         if any(word in text_lower for word in ["i want", "i need", "i would like"]):
             return "request"
-        
+
         return "statement"
-    
-    async def get_response_suggestions(self, intent: str, entities: Dict[str, Any]) -> List[str]:
+
+    async def get_response_suggestions(
+            self, intent: str, entities: Dict[str, Any]) -> List[str]:
         """Get response suggestions based on intent and entities"""
         suggestions = {
             "greeting": [
@@ -406,5 +426,5 @@ class NLPService:
                 "Technical support is what I'm here for. What issue are you facing?"
             ]
         }
-        
+
         return suggestions.get(intent, ["I'm here to help. How can I assist you?"])

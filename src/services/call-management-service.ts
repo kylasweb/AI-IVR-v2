@@ -1,8 +1,9 @@
 import { io } from 'socket.io-client';
+import { apiClient } from '@/lib/api-client';
 
 // Define Socket type locally since socket.io-client may not export it
 interface Socket {
-    on(event: string, callback: (...args: any[]) => void): void;
+    on(event: string, callback: (...args: any[]) => void);
     emit(event: string, ...args: any[]): void;
     disconnect(): void;
     connected: boolean;
@@ -168,23 +169,20 @@ export class CallManagementService {
     // Call Management Methods
     async startCall(phoneNumber: string, language: 'en' | 'ml' | 'manglish' = 'en'): Promise<CallSession> {
         try {
-            const response = await fetch('/api/ivr/sessions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone_number: phoneNumber, language }),
-            });
+            // Use the real backend API
+            const backendResponse = await apiClient.startCall(phoneNumber, language);
 
-            if (!response.ok) {
-                throw new Error(`Failed to start call: ${response.statusText}`);
+            if (!backendResponse.success) {
+                throw new Error(backendResponse.error || 'Failed to start call');
             }
 
-            const data = await response.json();
+            const data = backendResponse.data;
 
             const callSession: CallSession = {
                 id: data.session_id,
                 sessionId: data.session_id,
                 phoneNumber,
-                status: 'incoming',
+                status: 'active', // Backend returns 'ready' status
                 startTime: new Date(),
                 language,
                 transcript: [],
@@ -202,12 +200,11 @@ export class CallManagementService {
 
     async endCall(sessionId: string): Promise<void> {
         try {
-            const response = await fetch(`/api/ivr/sessions/${sessionId}/end`, {
-                method: 'POST',
-            });
+            // Use the real backend API
+            const backendResponse = await apiClient.endSession(sessionId);
 
-            if (!response.ok) {
-                throw new Error('Failed to end call');
+            if (!backendResponse.success) {
+                throw new Error(backendResponse.error || 'Failed to end call');
             }
 
             const call = this.activeCalls.get(sessionId);

@@ -60,8 +60,8 @@ export function useRealTimeWorkflowData() {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        // Initialize WebSocket connection
-        const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001', {
+        // Initialize WebSocket connection to backend
+        const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000', {
             transports: ['websocket'],
             reconnection: true,
             reconnectionAttempts: 5,

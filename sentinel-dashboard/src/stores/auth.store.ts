@@ -2,9 +2,15 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, AuthState, LoginCredentials, MFACredentials } from '@/types/user';
+import { User, AuthState, LoginCredentials, MFACredentials } from '../types/user';
 
-interface AuthStore extends AuthState {
+interface AuthStore {
+    // State
+    user: User | null;
+    isAuthenticated: boolean;
+    isLoading: boolean;
+    mfaRequired: boolean;
+    mfaToken?: string;
     // Actions
     login: (credentials: LoginCredentials) => Promise<void>;
     verifyMFA: (credentials: MFACredentials) => Promise<void>;
@@ -20,6 +26,7 @@ const initialState: AuthState = {
     isAuthenticated: false,
     isLoading: false,
     mfaRequired: false,
+    mfaToken: undefined,
 };
 
 export const useAuthStore = create<AuthStore>()(

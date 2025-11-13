@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Shield, Clock, KeyIcon, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield, Clock, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
+import Key from 'lucide-react';
 
 export default function AdminSecurityPage() {
     return (
@@ -58,7 +59,7 @@ export default function AdminSecurityPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <KeyIcon className="h-5 w-5" />
+                            <Key className="h-5 w-5" />
                             Access Control
                         </CardTitle>
                         <CardDescription>
@@ -178,7 +179,7 @@ export default function AdminSecurityPage() {
                         </Button>
 
                         <Button variant="outline" className="w-full justify-start">
-                            <KeyIcon className="h-4 w-4 mr-2" />
+                            <Key className="h-4 w-4 mr-2" />
                             API Key Management
                         </Button>
 

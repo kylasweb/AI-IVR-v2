@@ -1,10 +1,15 @@
 import os
 import logging
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Optional
+
+import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import uvicorn
+from pydantic import BaseModel
 
 # Configure logging for production
 logging.basicConfig(
@@ -14,8 +19,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-from dotenv import load_dotenv
 load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,13 +36,18 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="AI IVR Malayalam Platform",
-    description="Interactive Voice Response platform with Malayalam AI agents and Manglish support",
+    description=(
+        "Interactive Voice Response platform with Malayalam AI agents "
+        "and Manglish support"
+    ),
     version="1.0.0",
     lifespan=lifespan
 )
 
 # CORS middleware for production
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:3000"
+).split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -54,9 +64,7 @@ try:
     from services.nlp_service_ml import MalayalamNLPService
     from services.conversation_manager_ml import MalayalamConversationManager
     from services.manglish_service import ManglishService
-    from models.call_session import CallSession
-    from models.ivr_config import IVRConfig
-    
+
     # Initialize Malayalam services
     voice_agent = VoiceAgent()
     stt_service = MalayalamSpeechToTextService()
@@ -64,9 +72,9 @@ try:
     nlp_service = MalayalamNLPService()
     conversation_manager = MalayalamConversationManager()
     manglish_service = ManglishService()
-    
+
     logger.info("All Malayalam services initialized successfully")
-    
+
 except ImportError as e:
     logger.error(f"Failed to import Malayalam services: {e}")
     # Set dummy services for deployment
@@ -80,11 +88,6 @@ except ImportError as e:
 # In-memory storage for sessions (for production, use Redis or database)
 active_sessions = {}
 
-# Pydantic models
-from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
-from datetime import datetime
-import uuid
 
 class CallRequest(BaseModel):
     phone_number: str
@@ -92,9 +95,11 @@ class CallRequest(BaseModel):
     dialect: str = "standard"
     ivr_flow_id: Optional[str] = None
 
+
 class VoiceData(BaseModel):
     audio_data: str
     session_id: str
+
 
 class TextResponse(BaseModel):
     text: str
@@ -103,8 +108,9 @@ class TextResponse(BaseModel):
     confidence: Optional[float] = None
     language: Optional[str] = None
     dialect: Optional[str] = None
-
 # Health check endpoint
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint for Render.com"""
@@ -118,6 +124,7 @@ async def health_check():
         "supported_dialects": ["standard", "travancore", "malabar", "cochin"]
     }
 
+
 @app.get("/")
 async def root():
     return {
@@ -128,12 +135,13 @@ async def root():
         "supports_manglish": True
     }
 
+
 @app.post("/api/call/start")
 async def start_call(request: CallRequest):
     """Initialize a new IVR call session with Malayalam support"""
     try:
         session_id = str(uuid.uuid4())
-        
+
         # Create session with Malayalam support
         session_data = {
             "session_id": session_id,
@@ -144,13 +152,13 @@ async def start_call(request: CallRequest):
             "status": "initialized",
             "start_time": datetime.now().isoformat()
         }
-        
+
         active_sessions[session_id] = session_data
-        
+
         # Get Malayalam greeting
         if conversation_manager:
             greeting = await conversation_manager.get_malayalam_greeting(
-                request.language, 
+                request.language,
                 "neutral"  # Default respect level
             )
         else:
@@ -161,7 +169,7 @@ async def start_call(request: CallRequest):
                 "en": "Hello! How can I help you today?"
             }
             greeting = greetings.get(request.language, greetings["ml"])
-        
+
         response = {
             "session_id": session_id,
             "message": greeting,
@@ -170,13 +178,18 @@ async def start_call(request: CallRequest):
             "language": request.language,
             "dialect": request.dialect
         }
-        
-        logger.info(f"Started new Malayalam call session: {session_id} for {request.phone_number} (lang: {request.language}, dialect: {request.dialect})")
+
+        logger.info(
+            f"Started new Malayalam call session: {session_id} for "
+            f"{request.phone_number} (lang: {request.language}, "
+            f"dialect: {request.dialect})"
+        )
         return response
-        
+
     except Exception as e:
         logger.error(f"Error starting Malayalam call: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/api/voice/process")
 async def process_voice(data: VoiceData):
@@ -185,39 +198,29 @@ async def process_voice(data: VoiceData):
         session = active_sessions.get(data.session_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
-        
+
         # Mock processing for deployment with Malayalam context
         language = session.get("language", "ml")
         dialect = session.get("dialect", "standard")
-        
-        # Mock transcripts based on language
-        mock_transcripts = {
-            "ml": "സഹായം വേണം",
-            "manglish": "sahayam vendam",
-            "en": "I need help"
-        }
-        
+
         mock_intents = {
             "ml": "help",
-            "manglish": "help", 
+            "manglish": "help",
             "en": "help"
         }
-        
+
         mock_responses = {
             "ml": "ഞാൻ സഹായിക്കാൻ തയ്യാറാണ്. എന്താണ് ആവശ്യം?",
             "manglish": "Njan sahayikan thayarayam. enthanu avashyam?",
             "en": "I'm here to help! What do you need?"
         }
-        
-        transcript = mock_transcripts.get(language, mock_transcripts["ml"])
+
         intent = mock_intents.get(language, "help")
         mock_response = mock_responses.get(language, mock_responses["ml"])
-        
-        # Update session
         session["last_activity"] = datetime.now().isoformat()
         session["transcript_count"] = session.get("transcript_count", 0) + 1
         session["last_intent"] = intent
-        
+
         return TextResponse(
             text=mock_response,
             session_id=data.session_id,
@@ -226,10 +229,11 @@ async def process_voice(data: VoiceData):
             language=language,
             dialect=dialect
         )
-        
+
     except Exception as e:
         logger.error(f"Error processing Malayalam voice: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/sessions")
 async def get_sessions():
@@ -241,7 +245,10 @@ async def get_sessions():
                 "phone_number": session["phone_number"],
                 "status": session["status"],
                 "start_time": session["start_time"],
-                "duration": (datetime.now() - datetime.fromisoformat(session["start_time"])).total_seconds(),
+                "duration": (
+                    datetime.now() -
+                    datetime.fromisoformat(session["start_time"])
+                ).total_seconds(),
                 "language": session.get("language", "ml"),
                 "dialect": session.get("dialect", "standard")
             }
@@ -249,13 +256,14 @@ async def get_sessions():
         ]
     }
 
+
 @app.get("/api/sessions/{session_id}")
 async def get_session(session_id: str):
     """Get specific session details"""
     session = active_sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     return {
         "session_id": session["session_id"],
         "phone_number": session["phone_number"],
@@ -267,16 +275,17 @@ async def get_session(session_id: str):
         "last_intent": session.get("last_intent")
     }
 
+
 @app.post("/api/sessions/{session_id}/end")
 async def end_session(session_id: str):
     """End a call session"""
     session = active_sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     session["status"] = "completed"
     session["end_time"] = datetime.now().isoformat()
-    
+
     # Malayalam goodbye message
     language = session.get("language", "ml")
     goodbyes = {
@@ -284,13 +293,15 @@ async def end_session(session_id: str):
         "manglish": "Vilichathu nandi. vittu kanam!",
         "en": "Thank you for calling. Goodbye!"
     }
-    
+
     return {
         "message": "Session ended successfully",
         "goodbye_message": goodbyes.get(language, goodbyes["ml"])
     }
 
 # Malayalam-specific endpoints
+
+
 @app.get("/api/languages")
 async def get_supported_languages():
     """Get supported languages and dialects"""
@@ -302,10 +313,14 @@ async def get_supported_languages():
                 "english_name": "Malayalam",
                 "flag": "🇮🇳",
                 "dialects": [
-                    {"code": "standard", "name": "സ്റ്റാൻഡേർഡ്", "english_name": "Standard"},
-                    {"code": "travancore", "name": "തിരുവിതാംകൂർ", "english_name": "Travancore"},
-                    {"code": "malabar", "name": "മലബാർ", "english_name": "Malabar"},
-                    {"code": "cochin", "name": "കൊച്ചി", "english_name": "Cochin"}
+                    {"code": "standard", "name": "സ്റ്റാൻഡേർഡ്",
+                     "english_name": "Standard"},
+                    {"code": "travancore", "name": "തിരുവിതാംകൂർ",
+                     "english_name": "Travancore"},
+                    {"code": "malabar", "name": "മലബാർ",
+                     "english_name": "Malabar"},
+                    {"code": "cochin", "name": "കൊച്ചി",
+                     "english_name": "Cochin"}
                 ]
             },
             {
@@ -314,9 +329,12 @@ async def get_supported_languages():
                 "english_name": "Manglish",
                 "flag": "🇮🇳",
                 "dialects": [
-                    {"code": "standard", "name": "സ്റ്റാൻഡേർഡ്", "english_name": "Standard"},
-                    {"code": "casual", "name": "കാഷ്വൽ", "english_name": "Casual"},
-                    {"code": "formal", "name": "ഫോർമൽ", "english_name": "Formal"}
+                    {"code": "standard", "name": "സ്റ്റാൻഡേർഡ്",
+                     "english_name": "Standard"},
+                    {"code": "casual", "name": "കാഷ്വൽ",
+                     "english_name": "Casual"},
+                    {"code": "formal", "name": "ഫോർമൽ",
+                     "english_name": "Formal"}
                 ]
             },
             {
@@ -325,28 +343,33 @@ async def get_supported_languages():
                 "english_name": "English",
                 "flag": "🇬🇧",
                 "dialects": [
-                    {"code": "standard", "name": "Standard", "english_name": "Standard"},
-                    {"code": "us", "name": "US English", "english_name": "US English"},
-                    {"code": "uk", "name": "UK English", "english_name": "UK English"}
+                    {"code": "standard", "name": "Standard",
+                     "english_name": "Standard"},
+                    {"code": "us", "name": "US English",
+                     "english_name": "US English"},
+                    {"code": "uk", "name": "UK English",
+                     "english_name": "UK English"}
                 ]
             }
         ]
     }
+
 
 @app.get("/api/malayalam/phrases")
 async def get_malayalam_phrases():
     """Get common Malayalam phrases for testing"""
     if not stt_service:
         return {"error": "Speech service not available"}
-    
+
     return await stt_service.get_malayalam_audio_samples()
+
 
 @app.get("/api/manglish/validate")
 async def validate_manglish(text: str):
     """Validate and provide feedback on Manglish input"""
     if not manglish_service:
         return {"error": "Manglish service not available"}
-    
+
     return manglish_service.validate_manglish_input(text)
 
 # Production server startup

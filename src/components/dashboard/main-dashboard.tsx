@@ -59,6 +59,7 @@ import AITaskBuilder from '@/components/ai-agent/ai-task-builder';
 import VoiceCloning from '@/components/voice-cloning/voice-cloning';
 import VideoIVR from '@/components/video-ivr/video-ivr';
 import { useMockData, mockDataGenerators } from '@/hooks/use-mock-data';
+import { api } from '@/lib/api-client';
 import { useUser, UserRole } from '@/hooks/use-user';
 
 interface DashboardStats {
@@ -102,6 +103,49 @@ export default function MainDashboard() {
     overall: 'healthy',
     services: []
   });
+
+  // Load dashboard data
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (isDemoMode) {
+        // Use mock data in demo mode
+        setStats(mockDataGenerators.generateDashboardStats());
+        setHealth(mockDataGenerators.generateSystemHealth());
+        setLoading(false);
+      } else {
+        // Use real API calls
+        try {
+          const [statsResponse, healthResponse] = await Promise.all([
+            api.getDashboardStats(),
+            api.getSystemHealth()
+          ]);
+
+          if (statsResponse.success && statsResponse.data) {
+            setStats(statsResponse.data);
+          }
+
+          if (healthResponse.success && healthResponse.data) {
+            setHealth(healthResponse.data);
+          }
+        } catch (error) {
+          console.error('Failed to load dashboard data:', error);
+          // Fallback to mock data on error
+          setStats(mockDataGenerators.generateDashboardStats());
+          setHealth(mockDataGenerators.generateSystemHealth());
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadDashboardData();
+
+    // Refresh data every 30 seconds if not in demo mode
+    if (!isDemoMode) {
+      const interval = setInterval(loadDashboardData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isDemoMode]);
 
   // Get role-specific navigation tabs
   const getNavigationTabs = (role: UserRole) => {

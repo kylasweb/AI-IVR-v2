@@ -58,7 +58,7 @@ export function useDefcon() {
 
     // Get escalation recommendations based on current alerts
     const getEscalationRecommendations = useCallback(() => {
-        const recommendations = [];
+        const recommendations: Array<{ level: DefconLevel; condition: string; automated: boolean }> = [];
 
         // DEFCON 1: Maximum readiness - only for critical national security threats
         if (currentLevel > 1) {

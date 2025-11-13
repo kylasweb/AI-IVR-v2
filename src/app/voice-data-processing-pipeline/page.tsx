@@ -70,6 +70,8 @@ import {
     Activity as Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api-client';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface ProcessingPipeline {
     id: string;
@@ -129,12 +131,14 @@ interface ProcessingJob {
 }
 
 export default function VoiceDataProcessingPipelinePage() {
+    const { isDemoMode } = useMockData();
     const [pipelines, setPipelines] = useState<ProcessingPipeline[]>([]);
     const [selectedPipeline, setSelectedPipeline] = useState<ProcessingPipeline | null>(null);
     const [showCreatePipelineDialog, setShowCreatePipelineDialog] = useState(false);
     const [showPipelineDetails, setShowPipelineDetails] = useState(false);
     const [showConfigureStageDialog, setShowConfigureStageDialog] = useState(false);
     const [selectedStage, setSelectedStage] = useState<ProcessingStage | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const [pipelineForm, setPipelineForm] = useState({
         name: '',
@@ -144,182 +148,204 @@ export default function VoiceDataProcessingPipelinePage() {
 
     const [selectedTab, setSelectedTab] = useState('pipelines');
 
-    // Mock data
+    // Load data
     useEffect(() => {
-        const mockPipelines: ProcessingPipeline[] = [
-            {
-                id: 'pipeline-1',
-                name: 'Audio Preprocessing Pipeline',
-                description: 'Complete audio preprocessing workflow for voice data',
-                type: 'audio_preprocessing',
-                status: 'running',
-                progress: 65,
-                stages: [
+        loadPipelines();
+    }, [isDemoMode]);
+
+    const loadPipelines = async () => {
+        try {
+            setLoading(true);
+
+            if (isDemoMode) {
+                // Mock data for demonstration
+                const mockPipelines: ProcessingPipeline[] = [
                     {
-                        id: 'stage-1',
-                        name: 'Audio Format Conversion',
-                        type: 'transform',
-                        status: 'completed',
-                        progress: 100,
-                        duration: 45,
-                        config: { targetFormat: 'wav', sampleRate: 16000 },
-                        inputCount: 1250,
-                        outputCount: 1250
-                    },
-                    {
-                        id: 'stage-2',
-                        name: 'Noise Reduction',
-                        type: 'filter',
+                        id: 'pipeline-1',
+                        name: 'Audio Preprocessing Pipeline',
+                        description: 'Complete audio preprocessing workflow for voice data',
+                        type: 'audio_preprocessing',
                         status: 'running',
-                        progress: 75,
-                        config: { algorithm: 'spectral_subtraction', strength: 0.8 },
-                        inputCount: 1250,
-                        outputCount: 0
+                        progress: 65,
+                        stages: [
+                            {
+                                id: 'stage-1',
+                                name: 'Audio Format Conversion',
+                                type: 'transform',
+                                status: 'completed',
+                                progress: 100,
+                                duration: 45,
+                                config: { targetFormat: 'wav', sampleRate: 16000 },
+                                inputCount: 1250,
+                                outputCount: 1250
+                            },
+                            {
+                                id: 'stage-2',
+                                name: 'Noise Reduction',
+                                type: 'filter',
+                                status: 'running',
+                                progress: 75,
+                                config: { algorithm: 'spectral_subtraction', strength: 0.8 },
+                                inputCount: 1250,
+                                outputCount: 0
+                            },
+                            {
+                                id: 'stage-3',
+                                name: 'Silence Removal',
+                                type: 'segment',
+                                status: 'pending',
+                                progress: 0,
+                                config: { threshold: -40, minDuration: 0.5 },
+                                inputCount: 0,
+                                outputCount: 0
+                            },
+                            {
+                                id: 'stage-4',
+                                name: 'Audio Normalization',
+                                type: 'normalize',
+                                status: 'pending',
+                                progress: 0,
+                                config: { targetLevel: -20, algorithm: 'peak' },
+                                inputCount: 0,
+                                outputCount: 0
+                            }
+                        ],
+                        inputDatasets: ['voice-samples-raw'],
+                        outputDatasets: ['voice-samples-processed'],
+                        createdAt: '2024-11-01T09:00:00Z',
+                        updatedAt: '2024-11-08T14:30:00Z',
+                        metrics: {
+                            totalSamples: 1250,
+                            processedSamples: 812,
+                            successRate: 94.2,
+                            avgProcessingTime: 2.3,
+                            dataQuality: 87.5
+                        }
                     },
                     {
-                        id: 'stage-3',
-                        name: 'Silence Removal',
-                        type: 'segment',
-                        status: 'pending',
+                        id: 'pipeline-2',
+                        name: 'Feature Extraction Pipeline',
+                        description: 'Extract acoustic features for voice model training',
+                        type: 'feature_extraction',
+                        status: 'idle',
                         progress: 0,
-                        config: { threshold: -40, minDuration: 0.5 },
-                        inputCount: 0,
-                        outputCount: 0
+                        stages: [
+                            {
+                                id: 'stage-5',
+                                name: 'MFCC Extraction',
+                                type: 'feature_extract',
+                                status: 'pending',
+                                progress: 0,
+                                config: { nMfcc: 13, hopLength: 512, nFft: 2048 },
+                                inputCount: 0,
+                                outputCount: 0
+                            },
+                            {
+                                id: 'stage-6',
+                                name: 'Pitch Analysis',
+                                type: 'feature_extract',
+                                status: 'pending',
+                                progress: 0,
+                                config: { algorithm: 'pyin', fmin: 75, fmax: 600 },
+                                inputCount: 0,
+                                outputCount: 0
+                            },
+                            {
+                                id: 'stage-7',
+                                name: 'Voice Activity Detection',
+                                type: 'validate',
+                                status: 'pending',
+                                progress: 0,
+                                config: { threshold: 0.5, minDuration: 0.1 },
+                                inputCount: 0,
+                                outputCount: 0
+                            }
+                        ],
+                        inputDatasets: ['voice-samples-processed'],
+                        outputDatasets: ['voice-features-extracted'],
+                        createdAt: '2024-11-02T11:15:00Z',
+                        updatedAt: '2024-11-08T16:45:00Z',
+                        metrics: {
+                            totalSamples: 0,
+                            processedSamples: 0,
+                            successRate: 0,
+                            avgProcessingTime: 0,
+                            dataQuality: 0
+                        }
                     },
                     {
-                        id: 'stage-4',
-                        name: 'Audio Normalization',
-                        type: 'normalize',
-                        status: 'pending',
-                        progress: 0,
-                        config: { targetLevel: -20, algorithm: 'peak' },
-                        inputCount: 0,
-                        outputCount: 0
-                    }
-                ],
-                inputDatasets: ['voice-samples-raw'],
-                outputDatasets: ['voice-samples-processed'],
-                createdAt: '2024-11-01T09:00:00Z',
-                updatedAt: '2024-11-08T14:30:00Z',
-                metrics: {
-                    totalSamples: 1250,
-                    processedSamples: 812,
-                    successRate: 94.2,
-                    avgProcessingTime: 2.3,
-                    dataQuality: 87.5
-                }
-            },
-            {
-                id: 'pipeline-2',
-                name: 'Feature Extraction Pipeline',
-                description: 'Extract acoustic features for voice model training',
-                type: 'feature_extraction',
-                status: 'idle',
-                progress: 0,
-                stages: [
-                    {
-                        id: 'stage-5',
-                        name: 'MFCC Extraction',
-                        type: 'feature_extract',
-                        status: 'pending',
-                        progress: 0,
-                        config: { nMfcc: 13, hopLength: 512, nFft: 2048 },
-                        inputCount: 0,
-                        outputCount: 0
-                    },
-                    {
-                        id: 'stage-6',
-                        name: 'Pitch Analysis',
-                        type: 'feature_extract',
-                        status: 'pending',
-                        progress: 0,
-                        config: { algorithm: 'pyin', fmin: 75, fmax: 600 },
-                        inputCount: 0,
-                        outputCount: 0
-                    },
-                    {
-                        id: 'stage-7',
-                        name: 'Voice Activity Detection',
-                        type: 'validate',
-                        status: 'pending',
-                        progress: 0,
-                        config: { threshold: 0.5, minDuration: 0.1 },
-                        inputCount: 0,
-                        outputCount: 0
-                    }
-                ],
-                inputDatasets: ['voice-samples-processed'],
-                outputDatasets: ['voice-features-extracted'],
-                createdAt: '2024-11-02T11:15:00Z',
-                updatedAt: '2024-11-08T16:45:00Z',
-                metrics: {
-                    totalSamples: 0,
-                    processedSamples: 0,
-                    successRate: 0,
-                    avgProcessingTime: 0,
-                    dataQuality: 0
-                }
-            },
-            {
-                id: 'pipeline-3',
-                name: 'Data Augmentation Pipeline',
-                description: 'Generate synthetic voice data for model training',
-                type: 'data_augmentation',
-                status: 'completed',
-                progress: 100,
-                stages: [
-                    {
-                        id: 'stage-8',
-                        name: 'Speed Perturbation',
-                        type: 'augment',
+                        id: 'pipeline-3',
+                        name: 'Data Augmentation Pipeline',
+                        description: 'Generate synthetic voice data for model training',
+                        type: 'data_augmentation',
                         status: 'completed',
                         progress: 100,
-                        duration: 120,
-                        config: { speedFactors: [0.9, 1.0, 1.1], probability: 0.3 },
-                        inputCount: 1000,
-                        outputCount: 3000
-                    },
-                    {
-                        id: 'stage-9',
-                        name: 'Pitch Shifting',
-                        type: 'augment',
-                        status: 'completed',
-                        progress: 100,
-                        duration: 95,
-                        config: { pitchSteps: [-2, -1, 1, 2], probability: 0.4 },
-                        inputCount: 1000,
-                        outputCount: 4000
-                    },
-                    {
-                        id: 'stage-10',
-                        name: 'Background Noise Addition',
-                        type: 'augment',
-                        status: 'completed',
-                        progress: 100,
-                        duration: 85,
-                        config: { noiseTypes: ['office', 'traffic', 'restaurant'], snrRange: [5, 15] },
-                        inputCount: 1000,
-                        outputCount: 2500
+                        stages: [
+                            {
+                                id: 'stage-8',
+                                name: 'Speed Perturbation',
+                                type: 'augment',
+                                status: 'completed',
+                                progress: 100,
+                                duration: 120,
+                                config: { speedFactors: [0.9, 1.0, 1.1], probability: 0.3 },
+                                inputCount: 1000,
+                                outputCount: 3000
+                            },
+                            {
+                                id: 'stage-9',
+                                name: 'Pitch Shifting',
+                                type: 'augment',
+                                status: 'completed',
+                                progress: 100,
+                                duration: 95,
+                                config: { pitchSteps: [-2, -1, 1, 2], probability: 0.4 },
+                                inputCount: 1000,
+                                outputCount: 4000
+                            },
+                            {
+                                id: 'stage-10',
+                                name: 'Background Noise Addition',
+                                type: 'augment',
+                                status: 'completed',
+                                progress: 100,
+                                duration: 85,
+                                config: { noiseTypes: ['office', 'traffic', 'restaurant'], snrRange: [5, 15] },
+                                inputCount: 1000,
+                                outputCount: 2500
+                            }
+                        ],
+                        inputDatasets: ['voice-samples-clean'],
+                        outputDatasets: ['voice-samples-augmented'],
+                        createdAt: '2024-11-03T08:30:00Z',
+                        updatedAt: '2024-11-08T12:15:00Z',
+                        metrics: {
+                            totalSamples: 1000,
+                            processedSamples: 1000,
+                            successRate: 98.7,
+                            avgProcessingTime: 1.8,
+                            dataQuality: 92.3
+                        }
                     }
-                ],
-                inputDatasets: ['voice-samples-clean'],
-                outputDatasets: ['voice-samples-augmented'],
-                createdAt: '2024-11-03T08:30:00Z',
-                updatedAt: '2024-11-08T12:15:00Z',
-                metrics: {
-                    totalSamples: 1000,
-                    processedSamples: 1000,
-                    successRate: 98.7,
-                    avgProcessingTime: 1.8,
-                    dataQuality: 92.3
-                }
+                ];
+
+                setPipelines(mockPipelines);
+            } else {
+                // Real API call
+                const response = await api.getVoiceDataProcessingPipelines();
+                setPipelines(response.data);
             }
-        ];
-
-        setPipelines(mockPipelines);
-    }, []);
-
-    const getStatusColor = (status: string) => {
+        } catch (error) {
+            console.error('Error loading voice data processing pipelines:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to load voice data processing pipelines',
+                variant: 'destructive'
+            });
+        } finally {
+            setLoading(false);
+        }
+    }; const getStatusColor = (status: string) => {
         switch (status) {
             case 'running': return 'bg-blue-100 text-blue-800';
             case 'completed': return 'bg-green-100 text-green-800';

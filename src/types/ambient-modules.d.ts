@@ -494,6 +494,8 @@ declare module 'sonner' {
 
 // lucide-react - comprehensive icon exports as any
 declare module 'lucide-react' {
+    // Export all icons as any to avoid import issues
+    export const Smartphone: any;
     // Core icons
     export const AlertCircle: any
     export const Bot: any
@@ -594,6 +596,23 @@ declare module 'lucide-react' {
     export const AudioWaveform: any
     export const Flask: any
     export const Wifi: any
+
+    // Missing icons causing TypeScript errors
+    export const LogOut: any
+    export const Menu: any
+    export const Smartphone: any
+    export const Folder: any
+    export const Code: any
+    export const BellRing: any
+    export const Lock: any
+    export const AlignJustify: any
+    export const CreditCard: any
+    export const Receipt: any
+    export const UserCheck: any
+    export const Router: any
+    export const Building: any
+    export const Award: any
+    export const LucideIcon: any
 
     // Icon variants (some UI components use *Icon suffix)
     export const ChevronDownIcon: any

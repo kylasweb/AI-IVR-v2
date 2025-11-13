@@ -46,6 +46,8 @@ import {
     Paintbrush as Palette
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api-client';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface VoiceModel {
     id: string;
@@ -198,6 +200,7 @@ const mockModels: VoiceModel[] = [
 ];
 
 function VoiceCloning() {
+    const { isDemoMode } = useMockData();
     const [models, setModels] = useState<VoiceModel[]>(mockModels);
     const [generations, setGenerations] = useState<VoiceGeneration[]>([]);
     const [stats, setStats] = useState<VoiceStats>({
@@ -226,35 +229,60 @@ function VoiceCloning() {
 
     useEffect(() => {
         loadVoiceModels();
-    }, []);
+    }, [isDemoMode]);
 
     const loadVoiceModels = async () => {
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setModels(mockModels);
+            if (isDemoMode) {
+                // Use mock data in demo mode
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                setModels(mockModels);
 
-            // Calculate stats
-            const totalModels = mockModels.length;
-            const activeModels = mockModels.filter(m => m.status === 'ready').length;
-            const totalGenerations = mockModels.reduce((sum, m) => sum + m.usage.totalGenerations, 0);
-            const totalDuration = mockModels.reduce((sum, m) => sum + m.usage.totalDuration, 0);
-            const avgQuality = mockModels.reduce((sum, m) => sum + m.accuracy, 0) / totalModels;
+                // Calculate stats
+                const totalModels = mockModels.length;
+                const activeModels = mockModels.filter(m => m.status === 'ready').length;
+                const totalGenerations = mockModels.reduce((sum, m) => sum + m.usage.totalGenerations, 0);
+                const totalDuration = mockModels.reduce((sum, m) => sum + m.usage.totalDuration, 0);
+                const avgQuality = mockModels.reduce((sum, m) => sum + m.accuracy, 0) / totalModels;
 
-            setStats({
-                totalModels,
-                activeModels,
-                totalGenerations,
-                totalDuration,
-                totalCost: totalGenerations * 0.02, // Estimate $0.02 per generation
-                avgQuality
-            });
+                setStats({
+                    totalModels,
+                    activeModels,
+                    totalGenerations,
+                    totalDuration,
+                    totalCost: totalGenerations * 0.02, // Estimate $0.02 per generation
+                    avgQuality
+                });
+            } else {
+                // Use real API calls
+                const response = await api.getVoiceProfiles();
+                if (response.success && response.data?.profiles) {
+                    const profiles = response.data.profiles;
+                    setModels(profiles);
+
+                    // Calculate stats from real data
+                    const totalModels = profiles.length;
+                    const activeModels = profiles.filter((m: any) => m.isActive).length;
+
+                    setStats({
+                        totalModels,
+                        activeModels,
+                        totalGenerations: 0, // Would come from usage data
+                        totalDuration: 0,    // Would come from usage data
+                        totalCost: 0,        // Would come from billing data
+                        avgQuality: 0        // Would come from performance data
+                    });
+                }
+            }
         } catch (error) {
+            console.error('Failed to load voice models:', error);
             toast({
                 title: "Error",
                 description: "Failed to load voice models",
                 variant: "destructive",
             });
+            // Fallback to mock data on error
+            setModels(mockModels);
         }
     };
 
