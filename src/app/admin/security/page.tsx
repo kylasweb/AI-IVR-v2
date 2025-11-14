@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Shield, Clock, Eye, AlertTriangle, CheckCircle } from 'lucide-react';
-import Key from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Shield, Clock, Eye, AlertTriangle, CheckCircle, Lock } from 'lucide-react';
 
 export default function AdminSecurityPage() {
     return (
@@ -32,7 +32,7 @@ export default function AdminSecurityPage() {
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Two-Factor Authentication</label>
+                                <Label>Two-Factor Authentication</Label>
                                 <p className="text-xs text-muted-foreground">Require 2FA for all users</p>
                             </div>
                             <Switch defaultChecked />
@@ -40,7 +40,7 @@ export default function AdminSecurityPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Password Complexity</label>
+                                <Label>Password Complexity</Label>
                                 <p className="text-xs text-muted-foreground">Enforce strong passwords</p>
                             </div>
                             <Switch defaultChecked />
@@ -48,7 +48,7 @@ export default function AdminSecurityPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Session Timeout</label>
+                                <Label>Session Timeout</Label>
                                 <p className="text-xs text-muted-foreground">Auto-logout after inactivity</p>
                             </div>
                             <Switch defaultChecked />
@@ -59,7 +59,7 @@ export default function AdminSecurityPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Key className="h-5 w-5" />
+                            <Lock className="h-5 w-5" />
                             Access Control
                         </CardTitle>
                         <CardDescription>
@@ -69,7 +69,7 @@ export default function AdminSecurityPage() {
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Role-Based Access</label>
+                                <Label>Role-Based Access</Label>
                                 <p className="text-xs text-muted-foreground">Enable RBAC system</p>
                             </div>
                             <Switch defaultChecked />
@@ -77,7 +77,7 @@ export default function AdminSecurityPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Audit Logging</label>
+                                <Label>Audit Logging</Label>
                                 <p className="text-xs text-muted-foreground">Log all access attempts</p>
                             </div>
                             <Switch defaultChecked />
@@ -85,7 +85,7 @@ export default function AdminSecurityPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">IP Whitelisting</label>
+                                <Label>IP Whitelisting</Label>
                                 <p className="text-xs text-muted-foreground">Restrict access by IP</p>
                             </div>
                             <Switch />
@@ -179,7 +179,7 @@ export default function AdminSecurityPage() {
                         </Button>
 
                         <Button variant="outline" className="w-full justify-start">
-                            <Key className="h-4 w-4 mr-2" />
+                            <Lock className="h-4 w-4 mr-2" />
                             API Key Management
                         </Button>
 

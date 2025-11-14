@@ -139,6 +139,51 @@ export default function SystemSettings() {
               },
               {
                 id: '6',
+                key: 'integration.vocode.api_key',
+                value: '',
+                type: 'string',
+                category: 'integration',
+                description: 'Vocode API key for voice AI processing',
+                isEncrypted: true
+              },
+              {
+                id: '7',
+                key: 'integration.openai.api_key',
+                value: '',
+                type: 'string',
+                category: 'integration',
+                description: 'OpenAI API key for Vocode ChatGPT agent',
+                isEncrypted: true
+              },
+              {
+                id: '8',
+                key: 'integration.azure.speech_key',
+                value: '',
+                type: 'string',
+                category: 'integration',
+                description: 'Azure Cognitive Services Speech API key',
+                isEncrypted: true
+              },
+              {
+                id: '9',
+                key: 'integration.azure.speech_region',
+                value: 'eastus',
+                type: 'string',
+                category: 'integration',
+                description: 'Azure Speech Services region',
+                isEncrypted: false
+              },
+              {
+                id: '10',
+                key: 'integration.deepgram.api_key',
+                value: '',
+                type: 'string',
+                category: 'integration',
+                description: 'Deepgram API key for speech transcription',
+                isEncrypted: true
+              },
+              {
+                id: '11',
                 key: 'integration.webhook.timeout',
                 value: '30000',
                 type: 'number',
@@ -147,7 +192,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '7',
+                id: '12',
                 key: 'integration.retry.max_attempts',
                 value: '3',
                 type: 'number',
@@ -163,7 +208,7 @@ export default function SystemSettings() {
             description: 'Security and authentication configuration',
             settings: [
               {
-                id: '8',
+                id: '13',
                 key: 'security.jwt.expiry',
                 value: '3600',
                 type: 'number',
@@ -172,7 +217,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '9',
+                id: '14',
                 key: 'security.encryption.enabled',
                 value: 'true',
                 type: 'boolean',
@@ -181,7 +226,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '10',
+                id: '15',
                 key: 'security.rate_limit.calls_per_minute',
                 value: '100',
                 type: 'number',
@@ -197,7 +242,7 @@ export default function SystemSettings() {
             description: 'Core system and database configuration',
             settings: [
               {
-                id: '11',
+                id: '16',
                 key: 'system.log_level',
                 value: 'info',
                 type: 'string',
@@ -206,7 +251,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '12',
+                id: '17',
                 key: 'system.session_timeout',
                 value: '1800',
                 type: 'number',
@@ -215,7 +260,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '13',
+                id: '18',
                 key: 'system.auto_backup',
                 value: 'true',
                 type: 'boolean',
@@ -231,7 +276,7 @@ export default function SystemSettings() {
             description: 'GitHub repository commits and releases',
             settings: [
               {
-                id: '14',
+                id: '19',
                 key: 'version_control.github_owner',
                 value: 'your-github-username',
                 type: 'string',
@@ -240,7 +285,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '15',
+                id: '20',
                 key: 'version_control.github_repo',
                 value: 'ai-ivr-v2',
                 type: 'string',
@@ -249,7 +294,7 @@ export default function SystemSettings() {
                 isEncrypted: false
               },
               {
-                id: '16',
+                id: '21',
                 key: 'version_control.commit_limit',
                 value: '10',
                 type: 'number',
@@ -365,17 +410,43 @@ export default function SystemSettings() {
     try {
       setSaving(true);
 
-      // TODO: Make API call to save all settings
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Prepare settings data for API
+      const settingsData = {
+        integration: {
+          vocode: {
+            api_key: settings.find(cat => cat.name === 'Integration Settings')?.settings.find(s => s.key === 'integration.vocode.api_key')?.value || '',
+            base_url: 'api.vocode.dev',
+            organization_id: ''
+          },
+          openai: {
+            api_key: settings.find(cat => cat.name === 'Integration Settings')?.settings.find(s => s.key === 'integration.openai.api_key')?.value || ''
+          },
+          azure: {
+            speech_key: settings.find(cat => cat.name === 'Integration Settings')?.settings.find(s => s.key === 'integration.azure.speech_key')?.value || '',
+            speech_region: settings.find(cat => cat.name === 'Integration Settings')?.settings.find(s => s.key === 'integration.azure.speech_region')?.value || 'eastus'
+          },
+          deepgram: {
+            api_key: settings.find(cat => cat.name === 'Integration Settings')?.settings.find(s => s.key === 'integration.deepgram.api_key')?.value || ''
+          }
+        }
+      };
+
+      // Make API call to save settings to backend
+      const result = await api.updateSettings(settingsData);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save settings to backend');
+      }
 
       toast({
         title: 'Settings Saved',
-        description: 'All system settings have been updated successfully',
+        description: 'All system settings have been updated successfully. API keys are now configured for Vocode integration.',
       });
     } catch (error) {
+      console.error('Error saving settings:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save settings',
+        description: 'Failed to save settings. Please check your API keys and try again.',
         variant: 'destructive'
       });
     } finally {

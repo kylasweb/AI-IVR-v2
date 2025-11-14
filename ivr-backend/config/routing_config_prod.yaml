@@ -1,0 +1,236 @@
+# IMOS Communications Engine - Production Routing Configuration
+# Kerala-optimized AI model routing with multi-provider redundancy
+
+# Global settings
+version: "2.0.0"
+environment: "production"
+region: "kerala"
+
+# Language configurations with Kerala dialects
+languages:
+  ml:  # Malayalam
+    name: "Malayalam"
+    dialects:
+      travancore:
+        name: "Travancore Malayalam"
+        region: "Southern Kerala"
+        priority_providers: ["proprietary_ml", "ai4bharat", "generic_cloud"]
+      malabar:
+        name: "Malabar Malayalam"
+        region: "Northern Kerala"
+        priority_providers: ["proprietary_ml", "ai4bharat", "generic_cloud"]
+      cochin:
+        name: "Cochin Malayalam"
+        region: "Central Kerala"
+        priority_providers: ["proprietary_ml", "ai4bharat", "generic_cloud"]
+    fallback_dialect: "travancore"
+
+  ta:  # Tamil
+    name: "Tamil"
+    dialects:
+      generic:
+        name: "Generic Tamil"
+        region: "Tamil Nadu"
+        priority_providers: ["ai4bharat", "generic_cloud", "proprietary_ml"]
+    fallback_dialect: "generic"
+
+  hi:  # Hindi
+    name: "Hindi"
+    dialects:
+      generic:
+        name: "Generic Hindi"
+        region: "North India"
+        priority_providers: ["generic_cloud", "ai4bharat", "proprietary_ml"]
+    fallback_dialect: "generic"
+
+  en:  # English
+    name: "English"
+    dialects:
+      generic:
+        name: "Generic English"
+        region: "Global"
+        priority_providers: ["generic_cloud", "ai4bharat", "proprietary_ml"]
+    fallback_dialect: "generic"
+
+# AI Provider configurations
+providers:
+  proprietary_ml:
+    name: "Proprietary ML Kerala"
+    base_url: "${PROPRIETARY_ML_BASE_URL}"
+    api_key: "${PROPRIETARY_ML_API_KEY}"
+    models:
+      malayalam_v1:
+        name: "Malayalam Kerala v1"
+        capabilities: ["conversational_ai", "stt", "tts"]
+        languages: ["ml"]
+        dialects: ["travancore", "malabar", "cochin"]
+        cost_per_minute: 0.02
+        latency_ms: 150
+        accuracy_score: 0.92
+      fallback_model:
+        name: "Fallback Kerala Model"
+        capabilities: ["conversational_ai"]
+        languages: ["ml", "en"]
+        dialects: ["generic"]
+        cost_per_minute: 0.01
+        latency_ms: 200
+        accuracy_score: 0.85
+
+  ai4bharat:
+    name: "AI4Bharat"
+    base_url: "${AI4BHARAT_BASE_URL}"
+    api_key: "${AI4BHARAT_API_KEY}"
+    models:
+      indic_gpt:
+        name: "Indic GPT"
+        capabilities: ["conversational_ai", "stt", "tts"]
+        languages: ["hi", "ta", "ml", "te", "kn", "gu", "pa", "or", "as", "mai", "ne", "ur", "en"]
+        dialects: ["generic"]
+        cost_per_minute: 0.015
+        latency_ms: 180
+        accuracy_score: 0.88
+      indic_tts:
+        name: "Indic TTS"
+        capabilities: ["tts"]
+        languages: ["hi", "ta", "ml", "te", "kn", "gu", "pa", "or", "as", "mai", "ne", "ur"]
+        dialects: ["generic"]
+        cost_per_minute: 0.008
+        latency_ms: 120
+        accuracy_score: 0.90
+
+  generic_cloud:
+    name: "Generic Cloud AI"
+    base_url: "${GENERIC_CLOUD_BASE_URL}"
+    api_key: "${GENERIC_CLOUD_API_KEY}"
+    models:
+      gpt4:
+        name: "GPT-4"
+        capabilities: ["conversational_ai"]
+        languages: ["en", "hi", "ta", "ml", "te", "kn", "gu", "pa", "or", "as", "mai", "ne", "ur", "es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh"]
+        dialects: ["generic"]
+        cost_per_minute: 0.06
+        latency_ms: 250
+        accuracy_score: 0.95
+      gpt3_turbo:
+        name: "GPT-3.5 Turbo"
+        capabilities: ["conversational_ai"]
+        languages: ["en", "hi", "ta", "ml", "te", "kn", "gu", "pa", "or", "as", "mai", "ne", "ur", "es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh"]
+        dialects: ["generic"]
+        cost_per_minute: 0.02
+        latency_ms: 180
+        accuracy_score: 0.87
+
+  vocode:
+    name: "Vocode Voice AI"
+    base_url: "${VOCODE_BASE_URL}"
+    api_key: "${VOCODE_API_KEY}"
+    organization_id: "${VOCODE_ORGANIZATION_ID}"
+    models:
+      voice_agent:
+        name: "Vocode Voice Agent"
+        capabilities: ["conversational_ai", "stt", "tts"]
+        languages: ["en", "es", "fr", "de", "it", "pt"]  # Vocode's primary languages
+        dialects: ["generic"]
+        cost_per_minute: 0.04  # Estimated - adjust based on actual pricing
+        latency_ms: 300
+        accuracy_score: 0.90
+      conversational_ai:
+        name: "Vocode Conversational AI"
+        capabilities: ["conversational_ai"]
+        languages: ["en", "es", "fr", "de", "it", "pt", "hi", "ta"]
+        dialects: ["generic"]
+        cost_per_minute: 0.025
+        latency_ms: 200
+        accuracy_score: 0.88
+
+# Routing rules
+routing_rules:
+  # Kerala optimization rules
+  kerala_priority:
+    condition: "region == 'kerala' and language == 'ml'"
+    priority_providers: ["proprietary_ml", "ai4bharat"]
+    min_confidence: 0.80
+
+  # Vocode voice-first scenarios
+  vocode_voice_priority:
+    condition: "voice_enabled == true and realtime_required == true"
+    priority_providers: ["vocode", "generic_cloud", "ai4bharat"]
+    min_confidence: 0.75
+
+  # Vocode for international languages
+  vocode_international:
+    condition: "language in ['es', 'fr', 'de', 'it', 'pt'] and voice_enabled == true"
+    priority_providers: ["vocode", "generic_cloud"]
+    min_confidence: 0.80
+
+  # Cost optimization for non-critical calls
+  cost_optimization:
+    condition: "cost_priority == true"
+    priority_providers: ["proprietary_ml", "ai4bharat", "vocode", "generic_cloud"]
+    max_cost_per_minute: 0.03
+
+  # Latency optimization for real-time calls
+  latency_optimization:
+    condition: "realtime_required == true"
+    priority_providers: ["proprietary_ml", "ai4bharat", "vocode"]
+    max_latency_ms: 250
+
+  # Fallback rules
+  global_fallback:
+    condition: "true"  # Always applies as last resort
+    priority_providers: ["generic_cloud", "ai4bharat", "vocode", "proprietary_ml"]
+    min_confidence: 0.60
+
+# Model type mappings
+model_types:
+  conversational_ai:
+    name: "Conversational AI"
+    required_capabilities: ["conversational_ai"]
+  speech_to_text:
+    name: "Speech to Text"
+    required_capabilities: ["stt"]
+  text_to_speech:
+    name: "Text to Speech"
+    required_capabilities: ["tts"]
+
+# Monitoring and alerting
+monitoring:
+  health_check_interval_seconds: 30
+  alert_thresholds:
+    error_rate_percent: 5.0
+    latency_ms: 500
+    cost_per_minute: 0.10
+  metrics:
+    enabled: true
+    prometheus_port: 9090
+
+# Transport provider configurations
+transport_providers:
+  twilio:
+    account_sid: "${TWILIO_ACCOUNT_SID}"
+    auth_token: "${TWILIO_AUTH_TOKEN}"
+    phone_numbers: ["${TWILIO_PHONE_NUMBER}"]
+    webhook_url: "${WEBHOOK_BASE_URL}/webhook/twilio"
+
+  exotel:
+    api_key: "${EXOTEL_API_KEY}"
+    api_token: "${EXOTEL_API_TOKEN}"
+    subdomain: "${EXOTEL_SUBDOMAIN}"
+    phone_numbers: ["${EXOTEL_PHONE_NUMBER}"]
+    webhook_url: "${WEBHOOK_BASE_URL}/webhook/exotel"
+
+# Security settings
+security:
+  api_key_header: "X-API-Key"
+  allowed_origins: ["${ALLOWED_ORIGINS}"]
+  rate_limits:
+    requests_per_minute: 100
+    burst_limit: 20
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/imos_engine.log"
+  max_file_size_mb: 100
+  backup_count: 5

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Settings, BellRing, Database, Shield } from 'lucide-react';
 
 export default function AdminSettingsPage() {
@@ -30,7 +31,7 @@ export default function AdminSettingsPage() {
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Email Notifications</label>
+                                <Label>Email Notifications</Label>
                                 <p className="text-xs text-muted-foreground">Send email alerts for system events</p>
                             </div>
                             <Switch defaultChecked />
@@ -38,7 +39,7 @@ export default function AdminSettingsPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">SMS Notifications</label>
+                                <Label>SMS Notifications</Label>
                                 <p className="text-xs text-muted-foreground">Send SMS alerts for critical events</p>
                             </div>
                             <Switch />
@@ -46,7 +47,7 @@ export default function AdminSettingsPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Push Notifications</label>
+                                <Label>Push Notifications</Label>
                                 <p className="text-xs text-muted-foreground">Browser push notifications</p>
                             </div>
                             <Switch defaultChecked />
@@ -67,7 +68,7 @@ export default function AdminSettingsPage() {
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Auto-save</label>
+                                <Label>Auto-save</Label>
                                 <p className="text-xs text-muted-foreground">Automatically save changes</p>
                             </div>
                             <Switch defaultChecked />
@@ -75,7 +76,7 @@ export default function AdminSettingsPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Dark Mode</label>
+                                <Label>Dark Mode</Label>
                                 <p className="text-xs text-muted-foreground">Enable dark theme by default</p>
                             </div>
                             <Switch />
@@ -83,7 +84,7 @@ export default function AdminSettingsPage() {
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <label className="text-sm font-medium">Debug Mode</label>
+                                <Label>Debug Mode</Label>
                                 <p className="text-xs text-muted-foreground">Show debug information</p>
                             </div>
                             <Switch />

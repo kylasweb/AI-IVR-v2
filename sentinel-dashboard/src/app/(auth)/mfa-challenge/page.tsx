@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../lib/hooks/use-auth';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { Badge } from '../../../components/ui/badge';
@@ -90,9 +91,9 @@ export default function MFAChallengePage() {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label htmlFor="mfa" className="block text-sm font-medium text-slate-300 mb-1">
+                                <Label htmlFor="mfa" className="block text-sm font-medium text-slate-300 mb-1">
                                     MFA Code
-                                </label>
+                                </Label>
                                 <Input
                                     id="mfa"
                                     type="text"

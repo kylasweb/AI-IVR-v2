@@ -159,6 +159,18 @@ class ApiClient {
         });
     }
 
+    // Settings (for Vocode API configuration)
+    async getSettings(): Promise<ApiResponse> {
+        return this.request('/settings');
+    }
+
+    async updateSettings(settings: any): Promise<ApiResponse> {
+        return this.request('/settings', {
+            method: 'POST',
+            body: JSON.stringify({ settings }),
+        });
+    }
+
     // Voice testing suites
     async getVoiceTestingSuites(): Promise<ApiResponse> {
         return this.request('/api/voice-testing-suite');
@@ -203,6 +215,8 @@ export const api = {
     createVoiceProfile: (profileData: any) => apiClient.createVoiceProfile(profileData),
     getSystemSettings: () => apiClient.getSystemSettings(),
     updateSystemSetting: (key: string, value: any) => apiClient.updateSystemSetting(key, value),
+    getSettings: () => apiClient.getSettings(),
+    updateSettings: (settings: any) => apiClient.updateSettings(settings),
     getVoiceTestingSuites: () => apiClient.getVoiceTestingSuites(),
     getVideoCalls: () => apiClient.getVideoCalls(),
     getVideoWorkflows: () => apiClient.getVideoWorkflows(),

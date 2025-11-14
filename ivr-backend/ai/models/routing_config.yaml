@@ -1,0 +1,211 @@
+# AI Model Routing Configuration for IMOS Communications Engine
+# This file defines how AI requests are routed to different providers based on language, dialect, and other criteria
+
+routing_rules:
+  # Malayalam - Primary focus for Kerala deployment
+  - language: ml
+    dialect: travancore
+    model_type: conversational
+    priority_providers: [proprietary_ml, ai4bharat, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.85
+    cost_limit: 0.008
+
+  - language: ml
+    dialect: malabar
+    model_type: conversational
+    priority_providers: [proprietary_ml, ai4bharat, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.85
+    cost_limit: 0.008
+
+  - language: ml
+    dialect: cochin
+    model_type: conversational
+    priority_providers: [proprietary_ml, ai4bharat, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.85
+    cost_limit: 0.008
+
+  - language: ml
+    model_type: conversational
+    priority_providers: [proprietary_ml, ai4bharat, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.01
+
+  - language: ml
+    model_type: stt
+    priority_providers: [ai4bharat, proprietary_ml, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.85
+    cost_limit: 0.003
+
+  - language: ml
+    model_type: tts
+    priority_providers: [ai4bharat, proprietary_ml, generic_cloud]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.004
+
+  # Tamil - Secondary language support
+  - language: ta
+    model_type: conversational
+    priority_providers: [ai4bharat, generic_cloud, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.75
+    cost_limit: 0.012
+
+  - language: ta
+    model_type: stt
+    priority_providers: [ai4bharat, generic_cloud, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.004
+
+  # Hindi - National language support
+  - language: hi
+    model_type: conversational
+    priority_providers: [generic_cloud, ai4bharat, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.7
+    cost_limit: 0.015
+
+  # Kannada - Karnataka region
+  - language: kn
+    model_type: conversational
+    priority_providers: [ai4bharat, generic_cloud, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.7
+    cost_limit: 0.012
+
+  # Telugu - Andhra Pradesh region
+  - language: te
+    model_type: conversational
+    priority_providers: [ai4bharat, generic_cloud, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.7
+    cost_limit: 0.012
+
+  # English - Fallback and international
+  - language: en
+    model_type: conversational
+    priority_providers: [generic_cloud, proprietary_ml, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.02
+
+  # Default fallback for any language
+  - language: "*"
+    model_type: conversational
+    priority_providers: [generic_cloud, ai4bharat, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.5
+    cost_limit: 0.05
+
+  # Vocode-optimized rules
+  - language: en
+    voice_enabled: true
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, proprietary_ml]
+    fallback_enabled: true
+    performance_threshold: 0.75
+    cost_limit: 0.05
+
+  # International languages - Vocode preferred
+  - language: es
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.04
+
+  - language: fr
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.04
+
+  - language: de
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.04
+
+  - language: it
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.04
+
+  - language: pt
+    model_type: conversational
+    priority_providers: [vocode, generic_cloud, ai4bharat]
+    fallback_enabled: true
+    performance_threshold: 0.8
+    cost_limit: 0.04
+
+# Provider-specific configurations
+provider_configs:
+  proprietary_ml:
+    endpoint: "http://localhost:8001/api/v1"
+    api_key: "${PROPRIETARY_ML_API_KEY}"
+    timeout_seconds: 30
+    retry_attempts: 3
+
+  ai4bharat:
+    endpoint: "https://api.ai4bharat.org/v1"
+    api_key: "${AI4BHARAT_API_KEY}"
+    timeout_seconds: 45
+    retry_attempts: 2
+
+  generic_cloud:
+    endpoint: "https://api.openai.com/v1"
+    api_key: "${OPENAI_API_KEY}"
+    timeout_seconds: 60
+    retry_attempts: 2
+    model_mappings:
+      conversational: "gpt-4"
+      stt: "whisper-1"
+      tts: "tts-1"
+
+  vocode:
+    # Vocode Core uses environment variables (following their patterns)
+    api_key: "${VOCODE_API_KEY}"
+    base_url: "${VOCODE_BASE_URL}"
+    organization_id: "${VOCODE_ORGANIZATION_ID}"
+    # Provider API keys that Vocode Core integrates with
+    openai_api_key: "${OPENAI_API_KEY}"
+    azure_speech_key: "${AZURE_SPEECH_KEY}"
+    azure_speech_region: "${AZURE_SPEECH_REGION}"
+    deepgram_api_key: "${DEEPGRAM_API_KEY}"
+    # Kerala-specific voice configurations
+    kerala_voices:
+      travancore: "ml-travancore-voice"
+      malabar: "ml-malabar-voice"
+    timeout_seconds: 30
+    retry_attempts: 2
+    models:
+      voice_agent:
+        capabilities: ["conversational_ai", "stt", "tts"]
+        languages: ["en", "es", "fr", "de", "it", "pt"]
+        cost_per_minute: 0.04
+        latency_ms: 300
+        accuracy_score: 0.90
+
+# Health check configurations
+health_checks:
+  enabled: true
+  interval_minutes: 5
+  timeout_seconds: 10
+  failure_threshold: 3
+
+# Monitoring and metrics
+monitoring:
+  enabled: true
+  metrics_endpoint: "http://localhost:9090/metrics"
+  log_routing_decisions: true
+  log_performance_metrics: true

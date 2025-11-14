@@ -70,7 +70,7 @@ import {
     Activity as Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { api } from '@/lib/api-client';
+import { apiClient as api } from '@/lib/api-client';
 import { useMockData } from '@/hooks/use-mock-data';
 
 interface ProcessingPipeline {

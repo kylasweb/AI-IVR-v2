@@ -6,6 +6,14 @@ import json
 import logging
 from datetime import datetime
 import uuid
+import os
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN_BACKEND"),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
 
 from services.voice_agent import VoiceAgent
 from services.speech_to_text import SpeechToTextService
