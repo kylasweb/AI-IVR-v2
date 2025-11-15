@@ -97,16 +97,19 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         avatar: 'AU'
     });
 
-    // Remove custom sidebar state management - let SidebarProvider handle it
-    // const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Add back controlled state for sidebar
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     // Handle responsive behavior
     useEffect(() => {
         const handleResize = () => {
-            // Responsive behavior is now handled by the SidebarProvider internally
+            // Auto-collapse on mobile
+            if (window.innerWidth < 768) {
+                setSidebarOpen(false);
+            }
         };
 
-        handleResize(); // Check initial size
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -431,9 +434,9 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     };
 
     return (
-        <SidebarProvider defaultOpen={true}>
-            <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
-                <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200">
+        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <div className="min-h-screen w-full bg-gray-50">
+                <Sidebar variant="sidebar" collapsible="icon" className="border-r border-gray-200">
                     <SidebarHeader className="border-b border-gray-200 bg-white">
                         <div className="flex items-center gap-2 px-4 py-3">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -557,7 +560,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     </SidebarFooter>
                 </Sidebar>
 
-                <SidebarInset className="flex-1 overflow-hidden">
+                <SidebarInset className={`flex-1 overflow-hidden transition-all duration-300 ease-in-out ${sidebarOpen ? 'md:ml-64' : 'md:ml-12'}`}>
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex flex-1 items-center gap-2">
