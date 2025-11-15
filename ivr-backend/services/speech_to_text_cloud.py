@@ -21,7 +21,7 @@ class SpeechToTextService:
         self.recognizer.energy_threshold = 4000
         self.recognizer.dynamic_energy_threshold = True
         self.recognizer.pause_threshold = 0.8
-        self.recognizer.operation_timeout = 10
+        # self.recognizer.operation_timeout = 10  # Not available in all versions
 
         logger.info("SpeechToTextService initialized for cloud deployment (no microphone)")
 
@@ -76,7 +76,7 @@ class SpeechToTextService:
 
             # Try Google Web Speech API first (free)
             try:
-                text = self.recognizer.recognize_google(audio, language=language)
+                text = self.recognizer.recognize_google(audio, language=language)  # type: ignore
                 logger.info(f"Google transcription: {text}")
                 return text
 
@@ -89,7 +89,7 @@ class SpeechToTextService:
 
                 # Fallback to offline recognition if available
                 try:
-                    text = self.recognizer.recognize_sphinx(audio)
+                    text = self.recognizer.recognize_sphinx(audio)  # type: ignore
                     logger.info(f"Sphinx transcription: {text}")
                     return text
                 except sr.UnknownValueError:
@@ -138,7 +138,7 @@ class SpeechToTextService:
                 audio = self.recognizer.record(source)
 
             # Use Google Speech Recognition
-            text = self.recognizer.recognize_google(audio, language=language)
+            text = self.recognizer.recognize_google(audio, language=language)  # type: ignore
             return text
 
         except Exception as e:

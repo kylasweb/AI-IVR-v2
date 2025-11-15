@@ -55,7 +55,7 @@ class CallSession:
     status: CallStatus = CallStatus.INITIALIZING
     language: str = "en"
     dialect: str = "standard"
-    transport_metadata: TransportMetadata = None
+    transport_metadata: Optional[TransportMetadata] = None
 
     # Timestamps
     created_at: datetime = field(default_factory=datetime.now)
@@ -155,6 +155,7 @@ class CallSessionManager:
         """End a call session"""
         session = self.active_sessions.get(session_id)
         if session:
+            assert session.transport_metadata is not None  # Should always be set
             session.status = CallStatus.COMPLETED
             session.completed_at = datetime.now()
 
@@ -190,6 +191,7 @@ class CallSessionManager:
     async def get_session_by_connection_id(self, connection_id: str) -> Optional[CallSession]:
         """Get a call session by transport connection ID"""
         for session in self.active_sessions.values():
+            assert session.transport_metadata is not None  # Should always be set
             if session.transport_metadata.connection_id == connection_id:
                 return session
         return None

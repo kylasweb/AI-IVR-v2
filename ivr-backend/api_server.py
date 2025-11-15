@@ -11,9 +11,12 @@ from typing import Dict, Any, Optional
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from pusher import Pusher
 
 from transport.call_session_manager import CallSessionManager, TransportType, TransportMetadata
 from ai import AIEngine
+import uuid
+from models.ivr_config import DEFAULT_CONFIGS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,11 +25,12 @@ logger = logging.getLogger(__name__)
 # Global instances
 session_manager: Optional[CallSessionManager] = None
 ai_engine: Optional[AIEngine] = None
+pusher_client: Optional[Pusher] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup/shutdown"""
-    global session_manager, ai_engine
+    global session_manager, ai_engine, pusher_client
 
     # Startup
     logger.info("🚀 Starting IMOS Communications Engine")
@@ -43,6 +47,11 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("AI engine initialization failed")
 
     logger.info("✅ AI layer initialized")
+
+    # Initialize Pusher
+    pusher_client = Pusher(app_id="2077902", key="598aeab4b16c7e656997", secret="530fd7d7a093c8e64f84", cluster="ap2")
+    logger.info("✅ Pusher client initialized")
+
     logger.info("🎉 IMOS Communications Engine ready!")
 
     yield
@@ -81,6 +90,32 @@ class HealthResponse(BaseModel):
     ai_layer: bool
     version: str
 
+class CallStartRequest(BaseModel):
+    """Request to start a call"""
+    phone_number: str
+    language: str = "en"
+    dialect: str = "standard"
+    transport_type: str = "api"
+
+class SessionsResponse(BaseModel):
+    """Response for sessions list"""
+    sessions: list
+
+class IVRConfigurationsResponse(BaseModel):
+    """Response for IVR configurations"""
+    configurations: Dict[str, Any]
+
+class VoiceProcessRequest(BaseModel):
+    """Request for voice processing"""
+    session_id: str
+    input_text: Optional[str] = None
+    audio_data: Optional[str] = None
+
+class VoiceProcessResponse(BaseModel):
+    """Response for voice processing"""
+    response_text: str
+    actions: Optional[Dict[str, Any]] = None
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
@@ -94,6 +129,7 @@ async def health_check():
 @app.post("/webhook/twilio")
 async def twilio_webhook(request: Request, background_tasks: BackgroundTasks):
     """Handle Twilio webhooks"""
+    assert session_manager is not None, "Session manager not initialized"
     try:
         form_data = await request.form()
         data = dict(form_data)
@@ -101,10 +137,10 @@ async def twilio_webhook(request: Request, background_tasks: BackgroundTasks):
         logger.info(f"📞 Twilio webhook: {data.get('CallSid', 'unknown')}")
 
         # Extract call information
-        call_sid = data.get("CallSid")
-        from_number = data.get("From")
-        to_number = data.get("To")
-        call_status = data.get("CallStatus")
+        call_sid = str(data.get("CallSid", ""))
+        from_number = str(data.get("From", ""))
+        to_number = str(data.get("To", ""))
+        call_status = str(data.get("CallStatus", ""))
 
         if not call_sid or not from_number:
             raise HTTPException(status_code=400, detail="Missing required call data")
@@ -153,6 +189,8 @@ async def twilio_webhook(request: Request, background_tasks: BackgroundTasks):
 @app.post("/webhook/twilio/voice")
 async def twilio_voice_processing(request: Request, background_tasks: BackgroundTasks):
     """Process voice input from Twilio"""
+    assert session_manager is not None, "Session manager not initialized"
+    assert ai_engine is not None, "AI engine not initialized"
     try:
         form_data = await request.form()
         data = dict(form_data)
@@ -171,7 +209,7 @@ async def twilio_voice_processing(request: Request, background_tasks: Background
             raise HTTPException(status_code=404, detail="Session not found")
 
         # Process with AI engine
-        if speech_result and ai_engine:
+        if speech_result and ai_engine is not None:
             # Route to appropriate AI model
             from ai.models.ai_model_router import AIModelType
 
@@ -218,6 +256,7 @@ async def twilio_voice_processing(request: Request, background_tasks: Background
 @app.post("/webhook/exotel")
 async def exotel_webhook(request: Request, background_tasks: BackgroundTasks):
     """Handle Exotel webhooks"""
+    assert session_manager is not None, "Session manager not initialized"
     try:
         data = await request.json()
         logger.info(f"📞 Exotel webhook: {data}")
@@ -261,10 +300,13 @@ async def exotel_webhook(request: Request, background_tasks: BackgroundTasks):
 @app.get("/sessions/{session_id}")
 async def get_session_info(session_id: str):
     """Get session information"""
+    assert session_manager is not None, "Session manager not initialized"
     try:
         session = await session_manager.get_session(session_id)
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
+
+        assert session is not None  # Type hint for mypy
 
         return {
             "session_id": session.session_id,
@@ -295,12 +337,15 @@ async def process_ai_request(request: Request):
             raise HTTPException(status_code=400, detail="Missing user_input")
 
         # Process with AI engine
-        ai_response = await ai_engine.process_conversation(
-            session_id=session_id,
-            user_input=user_input,
-            language=language,
-            dialect=dialect
-        )
+        if ai_engine is not None:
+            ai_response = await ai_engine.process_conversation(
+                session_id=session_id,
+                user_input=user_input,
+                language=language,
+                dialect=dialect
+            )
+        else:
+            raise HTTPException(status_code=503, detail="AI engine not available")
 
         return {
             "response": ai_response.response_text,
@@ -368,7 +413,7 @@ async def update_settings(request: Request):
             os.environ['DEEPGRAM_API_KEY'] = integration["deepgram"]["api_key"]
 
         # Re-initialize AI engine with new settings (if needed)
-        if ai_engine:
+        if ai_engine is not None:
             logger.info("🔄 Re-initializing AI engine with new settings...")
             success = await ai_engine.initialize()
             if not success:
@@ -383,6 +428,103 @@ async def update_settings(request: Request):
 
     except Exception as e:
         logger.error(f"❌ Settings update error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/call/start", response_model=Dict[str, str])
+async def start_call(request: CallStartRequest):
+    """Start a new call session"""
+    assert session_manager is not None, "Session manager not initialized"
+    try:
+        transport_metadata = TransportMetadata(
+            transport_type=TransportType.WEBRTC,  # Default for API calls
+            provider_id="api",
+            connection_id=str(uuid.uuid4())
+        )
+
+        session = await session_manager.create_session(
+            phone_number=request.phone_number,
+            transport_metadata=transport_metadata,
+            language=request.language,
+            dialect=request.dialect
+        )
+
+        logger.info(f"📞 Started call session: {session.session_id}")
+        return {"session_id": session.session_id}
+
+    except Exception as e:
+        logger.error(f"❌ Call start error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/sessions", response_model=SessionsResponse)
+async def list_sessions():
+    """Get list of active sessions"""
+    assert session_manager is not None, "Session manager not initialized"
+    try:
+        active_sessions = await session_manager.get_active_sessions()
+        sessions_list = []
+
+        for sid, session in active_sessions.items():
+            sessions_list.append({
+                "session_id": session.session_id,
+                "phone_number": session.phone_number,
+                "language": session.language,
+                "dialect": session.dialect,
+                "status": session.status.value,
+                "created_at": session.created_at.isoformat(),
+                "last_activity": session.last_activity.isoformat() if session.last_activity else None
+            })
+
+        return SessionsResponse(sessions=sessions_list)
+
+    except Exception as e:
+        logger.error(f"❌ Sessions list error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/ivr/configurations", response_model=IVRConfigurationsResponse)
+async def get_ivr_configurations():
+    """Get IVR configurations"""
+    try:
+        configs = {}
+        for key, config in DEFAULT_CONFIGS.items():
+            configs[key] = config.to_dict()
+
+        return IVRConfigurationsResponse(configurations=configs)
+
+    except Exception as e:
+        logger.error(f"❌ IVR configurations error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/voice/process", response_model=VoiceProcessResponse)
+async def process_voice(request: VoiceProcessRequest):
+    """Process voice input for a session"""
+    assert session_manager is not None, "Session manager not initialized"
+    assert ai_engine is not None, "AI engine not initialized"
+    try:
+        session = await session_manager.get_session(request.session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+
+        assert session is not None  # Type hint for mypy
+
+        user_input = request.input_text or "voice input processed"  # Placeholder for actual voice processing
+
+        if not ai_engine:
+            raise HTTPException(status_code=503, detail="AI engine not available")
+
+        ai_response = await ai_engine.process_conversation(
+            session_id=session.session_id,
+            user_input=user_input,
+            language=session.language,
+            dialect=session.dialect
+        )
+
+        return VoiceProcessResponse(
+            response_text=ai_response.response_text,
+            actions=ai_response.actions
+        )
+
+    except Exception as e:
+        logger.error(f"❌ Voice processing error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

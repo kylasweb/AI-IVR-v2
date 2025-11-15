@@ -197,6 +197,8 @@ class VocodeConnector:
         except Exception as e:
             logger.error(f"Vocode conversation processing error: {e}")
             self.error_count += 1
+            # Return fallback response on error
+            return await self._fallback_conversation_response(text, language, dialect)
     async def _fallback_conversation_response(
         self,
         text: str,
@@ -324,9 +326,8 @@ class VocodeConnector:
                 # Use Azure synthesizer (most reliable for Vocode)
                 synthesizer_config = AzureSynthesizerConfig(
                     sampling_rate=16000,
-                    audio_encoding="linear16",
                     voice_name=self._get_voice_for_language(language, dialect),
-                    pitch=voice_config.get('pitch', 0.0) if voice_config else 0.0,
+                    pitch=int(voice_config.get('pitch', 0.0)) if voice_config else 0,
                     rate=voice_config.get('rate', 15) if voice_config else 15
                 )
                 synthesizer = AzureSynthesizer(
@@ -336,8 +337,8 @@ class VocodeConnector:
                 )
 
                 # In real implementation, this would synthesize audio
-                # For now, simulate the response
-                audio_data = await self._simulate_tts_synthesis(synthesizer, text)
+                # For now, simulate the response with mock audio data
+                audio_data = f"mock_audio_data_for_{text[:20]}"  # Mock audio data
 
                 return {
                     "audio_data": audio_data,
@@ -398,14 +399,12 @@ class VocodeConnector:
                 # Use Deepgram transcriber (recommended for Vocode)
                 transcriber_config = DeepgramTranscriberConfig(
                     sampling_rate=16000,
-                    audio_encoding="linear16",
                     chunk_size=1024,
                     model="nova-2",
                     language=self._map_language_code(language, dialect)
                 )
                 transcriber = DeepgramTranscriber(
-                    transcriber_config,
-                    api_key=self.deepgram_api_key
+                    transcriber_config
                 )
 
                 # In real implementation, this would transcribe audio

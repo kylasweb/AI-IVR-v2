@@ -2,46 +2,17 @@
 // These are intentionally permissive. For a robust dev setup, install proper
 // @types packages (e.g., @types/react) and remove or shrink these declarations.
 
-// Minimal React types
-declare module 'react' {
-    export type ReactNode = any
-    export type ReactElement<P = any> = any
-    export type FC<P = object> = (props: P & { children?: ReactNode }) => ReactElement
-    export type ComponentType<P = object> = FC<P>
-    export type CSSProperties = { [key: string]: string | number }
 
-    export function useState<S = any>(initialState?: S | (() => S)): [S, (s: S | ((prev: S) => S)) => void]
-    export function useRef<T = any>(initial?: T | null): { current: T | null }
-    export function useCallback<T extends (...args: any[]) => any>(fn: T, deps?: any[]): T
-    export function useEffect(fn: () => void | (() => void), deps?: any[]): void
-    export function useContext<T = any>(context: any): T
-    export function createContext<T = any>(defaultValue: T): { Provider: any; Consumer: any }
-    export function useMemo<T = any>(fn: () => T, deps?: any[]): T
-    export function useId(): string
-    export function forwardRef<T = any, P = any>(render: (props: P, ref: any) => ReactElement): any
 
-    // Common utility types
-    export type ComponentProps<T> = any
-    export type ComponentPropsWithoutRef<T> = any
-    export type ComponentPropsWithRef<T> = any
-    export type ElementRef<T> = any
-    export type RefAttributes<T> = any
-
-    export interface HTMLAttributes<T> {
-        [key: string]: any
-    }
-
-    export type DragEvent<T = any> = any
-    export type KeyboardEvent<T = any> = any
-
-    export function createElement(tag: any, props?: any, ...children: any[]): any
-    const React: any
-    export default React
-}
-
+// Extend JSX namespace for Three.js elements
 declare namespace JSX {
     interface IntrinsicElements {
-        [elemName: string]: any
+        // Additional Three.js JSX elements
+        boxGeometry: any;
+        sphereGeometry: any;
+        cylinderGeometry: any;
+        coneGeometry: any;
+        torusGeometry: any;
     }
 }
 
@@ -457,9 +428,49 @@ declare module '@radix-ui/react-toggle-group' { const content: any; export = con
 declare module '@radix-ui/react-aspect-ratio' { const content: any; export = content }
 
 // Utility packages used in the repo
-declare module 'clsx' { export function clsx(...args: any[]): string; export type ClassValue = any }
+declare namespace clsx {
+    export type ClassValue = any;
+}
+
+declare module 'clsx' {
+    export function clsx(...args: any[]): string;
+    export type ClassValue = any;
+    const _default: typeof clsx;
+    export default _default;
+}
 declare module 'tailwind-merge' { export function twMerge(...args: any[]): string }
 declare module 'class-variance-authority' { export function cva(...args: any[]): any; export type VariantProps<T> = any }
+
+// motion/react (framer-motion)
+declare module 'motion/react' {
+    export const motion: any
+    export function useInView(...args: any[]): any
+    export type HTMLMotionProps<T = any> = any
+    export function useScroll(...args: any[]): any
+    export function useSpring(...args: any[]): any
+    export function useTransform(...args: any[]): any
+    export function useVelocity(...args: any[]): any
+    export function useAnimationFrame(...args: any[]): any
+    export function useMotionValue(...args: any[]): any
+}
+
+// react-day-picker
+declare module 'react-day-picker' {
+    export const DayPicker: any
+    export type DateRange = any
+}
+
+// @react-three/fiber
+declare module '@react-three/fiber' {
+    export const Canvas: any
+    export function useFrame(...args: any[]): any
+    export function useThree(): any
+}
+
+// @motionone/utils
+declare module '@motionone/utils' {
+    export const wrap: any
+}
 
 // Resizable panels
 declare module 'react-resizable-panels' { const content: any; export = content }
@@ -614,6 +625,22 @@ declare module 'lucide-react' {
     export const Award: any
     export const LucideIcon: any
 
+    // Additional missing icons
+    export const CircleXIcon: any
+    export const GripVertical: any
+    export const ChevronLeft: any
+    export const Github: any
+    export const Dices: any
+    export const Heart: any
+    export const Trophy: any
+    export const Loader2: any
+    export const Dot: any
+    export const MoveUpRight: any
+
+    // Additional missing icons
+    export const Paperclip: any
+    export const Send: any
+
     // Icon variants (some UI components use *Icon suffix)
     export const ChevronDownIcon: any
     export const ChevronLeftIcon: any
@@ -737,4 +764,79 @@ declare module 'next/font/google' {
     export const Geist: any
     export const Geist_Mono: any
     const content: any; export = content
+}
+
+declare module 'lightswind' {
+    export const Card: any;
+    export const CardContent: any;
+    export const CardDescription: any;
+    export const CardHeader: any;
+    export const CardTitle: any;
+    export const Button: any;
+    export const Input: any;
+    export const Label: any;
+    export const Textarea: any;
+    export const Select: any;
+    export const SelectContent: any;
+    export const SelectItem: any;
+    export const SelectTrigger: any;
+    export const SelectValue: any;
+    export const Badge: any;
+    export const Progress: any;
+    export const Slider: any;
+    export const Switch: any;
+    export const Alert: any;
+    export const AlertDescription: any;
+    export const AlertTitle: any;
+    export const Tabs: any;
+    export const TabsContent: any;
+    export const TabsList: any;
+    export const TabsTrigger: any;
+    export const Dialog: any;
+    export const DialogContent: any;
+    export const DialogDescription: any;
+    export const DialogFooter: any;
+    export const DialogHeader: any;
+    export const DialogTitle: any;
+    export const DialogTrigger: any;
+    export const Table: any;
+    export const TableBody: any;
+    export const TableCell: any;
+    export const TableHead: any;
+    export const TableHeader: any;
+    export const TableRow: any;
+    const content: any;
+    export = content;
+}
+
+declare module '@react-three/fiber' {
+    export const Canvas: any;
+    export const useFrame: any;
+    export const useLoader: any;
+    const content: any;
+    export = content;
+}
+
+declare module '@react-three/drei' {
+    export const OrbitControls: any;
+    export const useGLTF: any;
+    export const useFBX: any;
+    export const useProgress: any;
+    export const Html: any;
+    export const Environment: any;
+    export const ContactShadows: any;
+    export const Center: any;
+    const content: any;
+    export = content;
+}
+
+declare module 'three/examples/jsm/loaders/OBJLoader' {
+    export const OBJLoader: any;
+    const content: any;
+    export = content;
+}
+
+declare module 'animejs' {
+    const anime: any;
+    export default anime;
 }

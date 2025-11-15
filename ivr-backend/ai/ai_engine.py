@@ -92,6 +92,8 @@ class AIEngine:
         """
         if not self.is_initialized:
             raise RuntimeError("AI Engine not initialized")
+    
+        assert self.router is not None
 
         try:
             # Route the request
@@ -212,9 +214,13 @@ class AIEngine:
         if not self.is_initialized:
             raise RuntimeError("AI Engine not initialized")
 
+        router = self.router
+        if router is None:
+            raise RuntimeError("Router not initialized")
+
         try:
             # Route the request
-            routing_decision = await self.router.route_request(
+            routing_decision = await router.route_request(
                 language=language,
                 dialect=dialect,
                 model_type=AIModelType.SPEECH_TO_TEXT,
@@ -222,7 +228,7 @@ class AIEngine:
             )
 
             # Get the connector
-            connector = await self.router.get_provider_connector(routing_decision.selected_provider)
+            connector = await router.get_provider_connector(routing_decision.selected_provider)
             if not connector:
                 raise RuntimeError(f"No connector available for {routing_decision.selected_provider}")
 
@@ -279,9 +285,13 @@ class AIEngine:
         if not self.is_initialized:
             raise RuntimeError("AI Engine not initialized")
 
+        router = self.router
+        if router is None:
+            raise RuntimeError("Router not initialized")
+
         try:
             # Route the request
-            routing_decision = await self.router.route_request(
+            routing_decision = await router.route_request(
                 language=language,
                 dialect=dialect,
                 model_type=AIModelType.TEXT_TO_SPEECH,
@@ -289,7 +299,7 @@ class AIEngine:
             )
 
             # Get the connector
-            connector = await self.router.get_provider_connector(routing_decision.selected_provider)
+            connector = await router.get_provider_connector(routing_decision.selected_provider)
             if not connector:
                 raise RuntimeError(f"No connector available for {routing_decision.selected_provider}")
 
@@ -329,9 +339,13 @@ class AIEngine:
         if not self.is_initialized:
             return {'status': 'not_initialized'}
 
+        router = self.router
+        if router is None:
+            return {'status': 'router_not_initialized'}
+
         try:
             # Get router stats
-            router_stats = await self.router.get_routing_stats()
+            router_stats = await router.get_routing_stats()
 
             # Get connector health
             connector_health = {}
@@ -362,7 +376,7 @@ class AIEngine:
 
     async def update_model_health(self, provider: AIProvider, model_name: str, is_healthy: bool) -> None:
         """Update health status of a specific model"""
-        if self.router:
+        if self.router is not None:
             await self.router.update_model_health(model_name, is_healthy)
             logger.info(f"Updated health status for {provider.value}:{model_name} to {is_healthy}")
 
@@ -457,14 +471,14 @@ class AIEngine:
 
     async def get_routing_stats(self) -> Dict[str, Any]:
         """Get routing statistics"""
-        if self.router:
+        if self.router is not None:
             return await self.router.get_routing_stats()
         return {}
 
     async def reload_config(self) -> bool:
         """Reload routing configuration"""
         try:
-            if self.router:
+            if self.router is not None:
                 # Reinitialize router (this will reload config)
                 await self.router.initialize()
                 logger.info("Routing configuration reloaded")

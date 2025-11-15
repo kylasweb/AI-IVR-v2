@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import Pusher from 'pusher-js';
 
-// Type definition for Socket
-type Socket = any;
+// Type definition for Pusher
+type PusherInstance = any;
 
 export interface WorkflowExecutionStatus {
     workflowId: string;
@@ -57,54 +57,94 @@ export function useRealTimeWorkflowData() {
     });
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const socketRef = useRef<Socket | null>(null);
+    const [isPolling, setIsPolling] = useState(false);
+    const [reconnectAttempts, setReconnectAttempts] = useState(0);
+    const [notification, setNotification] = useState<string | null>(null);
+    const pusherRef = useRef<PusherInstance | null>(null);
+    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const maxReconnectAttempts = 3;
+
+    const startPolling = useCallback(() => {
+        setIsPolling(true);
+        pollingIntervalRef.current = setInterval(async () => {
+            try {
+                const response = await fetch('/api/workflow/live-data');
+                if (response.ok) {
+                    const data = await response.json();
+                    setData(data);
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 5000);
+    }, []);
+
+    const attemptReconnect = useCallback(() => {
+        setReconnectAttempts(prev => prev + 1);
+        if (reconnectAttempts < maxReconnectAttempts) {
+            setTimeout(() => {
+                if (pusherRef.current) {
+                    pusherRef.current.connect();
+                }
+            }, 2000 * (reconnectAttempts + 1)); // Exponential backoff
+        } else {
+            startPolling();
+            setNotification('Connection lost. Switching to polling mode.');
+        }
+    }, [reconnectAttempts, maxReconnectAttempts, startPolling]);
 
     useEffect(() => {
-        // Initialize WebSocket connection to backend
-        const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000', {
-            transports: ['websocket'],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+        // Initialize Pusher connection
+        const pusher = new Pusher('598aeab4b16c7e656997', {
+            cluster: 'ap2',
         });
 
-        socketRef.current = socket;
+        pusherRef.current = pusher;
 
-        socket.on('connect', () => {
+        pusher.connection.bind('connected', () => {
             setIsConnected(true);
             setError(null);
-            console.log('Connected to workflow WebSocket');
-
-            // Subscribe to workflow updates
-            socket.emit('subscribe', { room: 'workflows' });
-            socket.emit('subscribe', { room: 'executions' });
-            socket.emit('subscribe', { room: 'system-metrics' });
+            setReconnectAttempts(0);
+            setIsPolling(false);
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+                pollingIntervalRef.current = null;
+            }
+            setNotification(null);
+            console.log('Connected to Pusher');
         });
 
-        socket.on('disconnect', () => {
+        pusher.connection.bind('disconnected', () => {
             setIsConnected(false);
-            console.log('Disconnected from workflow WebSocket');
+            attemptReconnect();
+            console.log('Disconnected from Pusher');
         });
 
-        socket.on('connect_error', (err) => {
+        pusher.connection.bind('error', (err: any) => {
             setError(`Connection error: ${err.message}`);
             setIsConnected(false);
+            attemptReconnect();
         });
 
+        // Subscribe to channels
+        const workflowsChannel = pusher.subscribe('workflows');
+        const executionsChannel = pusher.subscribe('executions');
+        const systemMetricsChannel = pusher.subscribe('system-metrics');
+
         // Real-time workflow updates
-        socket.on('workflows_updated', (workflows: any[]) => {
+        workflowsChannel.bind('workflows_updated', (workflows: any[]) => {
             setData(prev => ({ ...prev, workflows }));
         });
 
         // Real-time execution updates
-        socket.on('execution_started', (execution: WorkflowExecutionStatus) => {
+        executionsChannel.bind('execution_started', (execution: WorkflowExecutionStatus) => {
             setData(prev => ({
                 ...prev,
                 executions: [...prev.executions.filter(e => e.workflowId !== execution.workflowId), execution]
             }));
         });
 
-        socket.on('execution_progress', (update: {
+        executionsChannel.bind('execution_progress', (update: {
             workflowId: string;
             nodeId: string;
             status: 'running' | 'success' | 'error';
@@ -158,7 +198,7 @@ export function useRealTimeWorkflowData() {
             });
         });
 
-        socket.on('execution_completed', (result: {
+        executionsChannel.bind('execution_completed', (result: {
             workflowId: string;
             status: 'completed' | 'failed';
             endTime: Date;
@@ -181,12 +221,12 @@ export function useRealTimeWorkflowData() {
         });
 
         // System metrics updates
-        socket.on('system_metrics', (metrics: LiveWorkflowData['systemMetrics']) => {
+        systemMetricsChannel.bind('system_metrics', (metrics: LiveWorkflowData['systemMetrics']) => {
             setData(prev => ({ ...prev, systemMetrics: metrics }));
         });
 
         // Node performance updates
-        socket.on('node_metrics', (nodeMetrics: {
+        systemMetricsChannel.bind('node_metrics', (nodeMetrics: {
             nodeId: string;
             averageTime: number;
             successRate: number;
@@ -211,37 +251,57 @@ export function useRealTimeWorkflowData() {
         });
 
         return () => {
-            socket.disconnect();
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+            }
+            pusher.disconnect();
         };
     }, []);
 
     // Functions to interact with workflows
     const executeWorkflow = async (workflowId: string, inputData?: any) => {
-        if (!socketRef.current?.connected) {
-            throw new Error('Not connected to server');
+        const response = await fetch('/api/workflow/execute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ workflowId, inputData }),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to execute workflow');
         }
+        const result = await response.json();
+        return result.data;
+    };
 
-        return new Promise((resolve, reject) => {
-            socketRef.current?.emit('execute_workflow', { workflowId, inputData }, (response: any) => {
-                if (response.success) {
-                    resolve(response.data);
-                } else {
-                    reject(new Error(response.error));
-                }
-            });
+    const pauseExecution = async (workflowId: string) => {
+        await fetch('/api/workflow/pause', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ workflowId }),
         });
     };
 
-    const pauseExecution = (workflowId: string) => {
-        socketRef.current?.emit('pause_execution', { workflowId });
+    const resumeExecution = async (workflowId: string) => {
+        await fetch('/api/workflow/resume', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ workflowId }),
+        });
     };
 
-    const resumeExecution = (workflowId: string) => {
-        socketRef.current?.emit('resume_execution', { workflowId });
-    };
-
-    const stopExecution = (workflowId: string) => {
-        socketRef.current?.emit('stop_execution', { workflowId });
+    const stopExecution = async (workflowId: string) => {
+        await fetch('/api/workflow/stop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ workflowId }),
+        });
     };
 
     const getNodeStatus = (nodeId: string) => {
@@ -256,6 +316,8 @@ export function useRealTimeWorkflowData() {
         data,
         isConnected,
         error,
+        notification,
+        isPolling,
         executeWorkflow,
         pauseExecution,
         resumeExecution,

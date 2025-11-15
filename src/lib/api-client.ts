@@ -189,6 +189,49 @@ class ApiClient {
     async getVoiceDataProcessingPipelines(): Promise<ApiResponse> {
         return this.request('/api/voice-data-processing-pipeline');
     }
+
+    // IVR configurations
+    async getIVRConfigurations(): Promise<ApiResponse> {
+        return this.request('/api/ivr/configurations');
+    }
+
+    async getIVRConfigurationTemplates(): Promise<ApiResponse> {
+        return this.request('/api/ivr/configurations?action=templates');
+    }
+
+    async createIVRConfiguration(config: any): Promise<ApiResponse> {
+        return this.request('/api/ivr/configurations', {
+            method: 'POST',
+            body: JSON.stringify(config),
+        });
+    }
+
+    async updateIVRConfiguration(configId: string, config: any): Promise<ApiResponse> {
+        return this.request(`/api/ivr/configurations?config_id=${configId}`, {
+            method: 'PUT',
+            body: JSON.stringify(config),
+        });
+    }
+
+    async deleteIVRConfiguration(configId: string): Promise<ApiResponse> {
+        return this.request(`/api/ivr/configurations?config_id=${configId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async createIVRConfigurationTemplate(template: any): Promise<ApiResponse> {
+        return this.request('/api/ivr/configurations?action=template', {
+            method: 'POST',
+            body: JSON.stringify(template),
+        });
+    }
+
+    async testIVRConfiguration(configId: string): Promise<ApiResponse> {
+        return this.request('/api/ivr/configurations?action=test', {
+            method: 'POST',
+            body: JSON.stringify({ config_id: configId }),
+        });
+    }
 }
 
 // Export singleton instance
@@ -221,4 +264,11 @@ export const api = {
     getVideoCalls: () => apiClient.getVideoCalls(),
     getVideoWorkflows: () => apiClient.getVideoWorkflows(),
     getVoiceDataProcessingPipelines: () => apiClient.getVoiceDataProcessingPipelines(),
+    getIVRConfigurations: () => apiClient.getIVRConfigurations(),
+    getIVRConfigurationTemplates: () => apiClient.getIVRConfigurationTemplates(),
+    createIVRConfiguration: (config: any) => apiClient.createIVRConfiguration(config),
+    updateIVRConfiguration: (configId: string, config: any) => apiClient.updateIVRConfiguration(configId, config),
+    deleteIVRConfiguration: (configId: string) => apiClient.deleteIVRConfiguration(configId),
+    createIVRConfigurationTemplate: (template: any) => apiClient.createIVRConfigurationTemplate(template),
+    testIVRConfiguration: (configId: string) => apiClient.testIVRConfiguration(configId),
 };

@@ -159,9 +159,10 @@ export class AdminDashboardPage {
   async navigateToMockPosts() {
     await this.mockDataMenu.click();
     await this.mockPostsLink.click();
+  }
+
   async navigateToMockData() {
     await this.mockDataMenu.click();
-  }
   }
 
   async createSiteContent(title: string, content: string) {

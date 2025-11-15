@@ -102,7 +102,7 @@ class MalayalamSpeechToTextService:
             google_lang = self.malayalam_variants.get(language.lower(), 'ml-IN')
 
             try:
-                text = self.recognizer.recognize_google(audio, language=google_lang)
+                text = self.recognizer.recognize_google(audio, language=google_lang)  # type: ignore
                 if text.strip():
                     return text, "malayalam"
             except sr.RequestError:
@@ -110,7 +110,7 @@ class MalayalamSpeechToTextService:
 
             # Try with English and then translate to Malayalam patterns
             try:
-                english_text = self.recognizer.recognize_google(audio, language="en-US")
+                english_text = self.recognizer.recognize_google(audio, language="en-US")  # type: ignore
                 if english_text.strip():
                     # Check if it's Manglish
                     manglish_text = self._convert_to_malayalam(english_text)
@@ -122,7 +122,7 @@ class MalayalamSpeechToTextService:
 
             # Fallback to Sphinx (offline)
             try:
-                text = self.recognizer.recognize_sphinx(audio)
+                text = self.recognizer.recognize_sphinx(audio)  # type: ignore
                 return self._convert_to_malayalam(text), "malayalam"
             except sr.UnknownValueError:
                 logger.warning("Sphinx offline recognition could not understand audio")

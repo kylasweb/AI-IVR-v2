@@ -1,16 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+import React, { useState, useEffect, useRef } from 'react';
+import anime from 'animejs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, Slider } from 'lightswind';
 import {
     Phone,
     PhoneCall,
@@ -40,6 +32,7 @@ import {
     Eye,
     Bot
 } from 'lucide-react';
+import { api } from '@/lib/api-client';
 
 interface IVRConfig {
     id: string;
@@ -85,6 +78,13 @@ export default function IVRManagement() {
     const [activeTab, setActiveTab] = useState('configurations');
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingConfig, setEditingConfig] = useState<IVRConfig | null>(null);
+
+    // Refs for animations
+    const configsListRef = useRef<HTMLDivElement>(null);
+    const templatesListRef = useRef<HTMLDivElement>(null);
+    const analyticsRef = useRef<HTMLDivElement>(null);
+    const createFormRef = useRef<HTMLDivElement>(null);
+    const summaryCardsRef = useRef<HTMLDivElement>(null);
 
     // Form state for creating/editing configurations
     const [formData, setFormData] = useState({
@@ -163,13 +163,77 @@ export default function IVRManagement() {
         loadTemplates();
     }, []);
 
+    // Animation effects
+    useEffect(() => {
+        // Mount fade-ins
+        if (summaryCardsRef.current) {
+            anime({
+                targets: summaryCardsRef.current,
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutExpo'
+            });
+        }
+        if (analyticsRef.current) {
+            anime({
+                targets: analyticsRef.current,
+                opacity: [0, 1],
+                duration: 800,
+                delay: 200,
+                easing: 'easeOutExpo'
+            });
+        }
+        if (configsListRef.current) {
+            anime({
+                targets: configsListRef.current.children,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                delay: anime.stagger(100),
+                easing: 'easeOutExpo'
+            });
+        }
+        if (templatesListRef.current) {
+            anime({
+                targets: templatesListRef.current.children,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 600,
+                delay: anime.stagger(100),
+                easing: 'easeOutExpo'
+            });
+        }
+    }, [configs, templates]);
+
+    // Hover animations
+    const handleCardHover = (ref: React.RefObject<HTMLElement>, isHover: boolean) => {
+        if (ref.current) {
+            anime({
+                targets: ref.current,
+                scale: isHover ? 1.05 : 1,
+                duration: 200,
+                easing: 'easeOutExpo'
+            });
+        }
+    };
+
+    const handleButtonHover = (ref: React.RefObject<HTMLElement>, isHover: boolean) => {
+        if (ref.current) {
+            anime({
+                targets: ref.current,
+                scale: isHover ? 1.02 : 1,
+                duration: 150,
+                easing: 'easeOutExpo'
+            });
+        }
+    };
+
     const loadConfigurations = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/ivr/configurations');
-            if (response.ok) {
-                const data = await response.json();
-                setConfigs(data.configs || []);
+            const response = await api.getIVRConfigurations();
+            if (response.success && response.data) {
+                setConfigs(response.data.configs || []);
             }
         } catch (error) {
             console.error('Error loading IVR configurations:', error);
@@ -180,10 +244,9 @@ export default function IVRManagement() {
 
     const loadTemplates = async () => {
         try {
-            const response = await fetch('/api/ivr/configurations?action=templates');
-            if (response.ok) {
-                const data = await response.json();
-                setTemplates(data.templates || []);
+            const response = await api.getIVRConfigurationTemplates();
+            if (response.success && response.data) {
+                setTemplates(response.data.templates || []);
             }
         } catch (error) {
             console.error('Error loading IVR templates:', error);
@@ -192,18 +255,12 @@ export default function IVRManagement() {
 
     const createConfiguration = async () => {
         try {
-            const response = await fetch('/api/ivr/configurations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
+            const response = await api.createIVRConfiguration(formData);
+            if (response.success) {
                 await loadConfigurations();
                 setShowCreateForm(false);
                 resetForm();
-                console.log('Configuration created successfully:', result);
+                console.log('Configuration created successfully:', response.data);
             }
         } catch (error) {
             console.error('Error creating configuration:', error);
@@ -212,13 +269,8 @@ export default function IVRManagement() {
 
     const updateConfiguration = async (configId: string) => {
         try {
-            const response = await fetch(`/api/ivr/configurations?config_id=${configId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
+            const response = await api.updateIVRConfiguration(configId, formData);
+            if (response.success) {
                 await loadConfigurations();
                 setEditingConfig(null);
                 resetForm();
@@ -234,11 +286,8 @@ export default function IVRManagement() {
         }
 
         try {
-            const response = await fetch(`/api/ivr/configurations?config_id=${configId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
+            const response = await api.deleteIVRConfiguration(configId);
+            if (response.success) {
                 await loadConfigurations();
             }
         } catch (error) {
@@ -248,13 +297,8 @@ export default function IVRManagement() {
 
     const toggleConfigurationStatus = async (config: IVRConfig) => {
         try {
-            const response = await fetch(`/api/ivr/configurations?config_id=${config.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ is_active: !config.is_active })
-            });
-
-            if (response.ok) {
+            const response = await api.updateIVRConfiguration(config.id, { is_active: !config.is_active });
+            if (response.success) {
                 await loadConfigurations();
             }
         } catch (error) {
@@ -264,17 +308,13 @@ export default function IVRManagement() {
 
     const createFromTemplate = async (templateId: string) => {
         try {
-            const response = await fetch('/api/ivr/configurations?action=template', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    template_id: templateId,
-                    name: `New Config from ${templates.find(t => t.id === templateId)?.name}`,
-                    customizations: {}
-                })
-            });
-
-            if (response.ok) {
+            const templateData = {
+                template_id: templateId,
+                name: `New Config from ${templates.find(t => t.id === templateId)?.name}`,
+                customizations: {}
+            };
+            const response = await api.createIVRConfigurationTemplate(templateData);
+            if (response.success) {
                 await loadConfigurations();
             }
         } catch (error) {
@@ -284,17 +324,11 @@ export default function IVRManagement() {
 
     const testConfiguration = async (configId: string) => {
         try {
-            const response = await fetch('/api/ivr/configurations?action=test', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ config_id: configId })
-            });
-
-            if (response.ok) {
-                const results = await response.json();
-                console.log('Test results:', results);
+            const response = await api.testIVRConfiguration(configId);
+            if (response.success && response.data) {
+                console.log('Test results:', response.data);
                 // You can show test results in a modal or alert
-                alert(`Test completed. ${results.test_results.results.passed} passed, ${results.test_results.results.failed} failed.`);
+                alert(`Test completed. ${response.data.test_results.results.passed} passed, ${response.data.test_results.results.failed} failed.`);
             }
         } catch (error) {
             console.error('Error testing configuration:', error);

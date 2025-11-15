@@ -5,19 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { MockDataProvider } from "@/hooks/use-mock-data";
 import { UserProvider } from "@/hooks/use-user";
 import * as Sentry from "@sentry/nextjs";
+import { TwentyFirstToolbar } from '@21st-extension/toolbar-next';
+import { ReactPlugin } from '@21st-extension/react';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: 1.0,
   environment: process.env.NODE_ENV,
-  integrations: [
-    new Sentry.BrowserTracing({
-      tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
-    }),
-    new Sentry.Replay(),
-  ],
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
 });
 
 const geistSans = Geist({
@@ -63,6 +57,9 @@ export default function RootLayout({
           <MockDataProvider>
             {children}
             <Toaster />
+            {process.env.NODE_ENV === 'development' && (
+              <TwentyFirstToolbar config={{ plugins: [ReactPlugin] }} />
+            )}
           </MockDataProvider>
         </UserProvider>
       </body>
