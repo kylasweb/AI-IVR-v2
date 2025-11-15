@@ -97,24 +97,19 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         avatar: 'AU'
     });
 
-    // Responsive sidebar state
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Remove custom sidebar state management - let SidebarProvider handle it
+    // const [sidebarOpen, setSidebarOpen] = useState(true);
 
     // Handle responsive behavior
     useEffect(() => {
         const handleResize = () => {
-            const isMobile = window.innerWidth < 768;
-            if (isMobile && sidebarOpen) {
-                setSidebarOpen(false);
-            } else if (!isMobile && !sidebarOpen) {
-                setSidebarOpen(true);
-            }
+            // Responsive behavior is now handled by the SidebarProvider internally
         };
 
         handleResize(); // Check initial size
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [sidebarOpen]);
+    }, []);
 
     const navigationSections: NavigationSection[] = [
         {
@@ -436,7 +431,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     };
 
     return (
-        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SidebarProvider defaultOpen={true}>
             <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
                 <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200">
                     <SidebarHeader className="border-b border-gray-200 bg-white">
