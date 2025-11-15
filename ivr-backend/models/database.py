@@ -3,7 +3,7 @@ Database configuration and connection for AI IVR Platform
 """
 
 import os
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, JSON
 from sqlalchemy.sql import func
@@ -25,7 +25,7 @@ engine = create_async_engine(
 )
 
 # Create async session factory
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass

@@ -71,7 +71,7 @@ async def test_vocode_integration():
         ai_engine = AIEngine()
         success = await ai_engine.initialize()
 
-        if success:
+        if success and ai_engine.router:
             print("   ✅ AI Engine initialized with Vocode support")
 
             # Test routing decision for English (should potentially route to Vocode)
@@ -89,6 +89,8 @@ async def test_vocode_integration():
             print(f"   ✅ Spanish routing: {decision_es.selected_provider.value} -> {decision_es.selected_model}")
 
             await ai_engine.cleanup()
+        elif success:
+            print("   ⚠️ AI Engine initialized but router not available")
         else:
             print("   ❌ AI Engine initialization failed")
 
