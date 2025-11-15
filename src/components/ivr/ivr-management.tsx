@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, Slider } from 'lightswind';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger, Input, Label, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, Slider } from '@/components/ui';
 import {
     Phone,
     PhoneCall,

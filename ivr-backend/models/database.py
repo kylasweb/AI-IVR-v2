@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, JSON
 from sqlalchemy.sql import func
-from typing import Optional
+from typing import AsyncGenerator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -71,6 +71,8 @@ class VoiceProfile(Base):
     isActive = Column(Boolean, default=True)
     gdprConsent = Column(Boolean, default=False)
     dataRetentionExpiry = Column(DateTime)
+    createdAt = Column(DateTime, default=func.now())
+    updatedAt = Column(DateTime, default=func.now(), onupdate=func.now())
 
 class Workflow(Base):
     __tablename__ = "workflow"
@@ -107,11 +109,10 @@ async def init_db():
         logger.error(f"Failed to initialize database: {e}")
         raise
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Get database session"""
-    async with async_session() as session:
+    async with AsyncSession(engine) as session:
         try:
             yield session
         finally:
-            await session.close()</content>
-<parameter name="filePath">d:\Development\AI IVR v2\AI IVR v2~\ivr-backend\models\database.py
+            await session.close()

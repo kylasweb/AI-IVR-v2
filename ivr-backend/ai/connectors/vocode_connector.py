@@ -320,6 +320,7 @@ class VocodeConnector:
             import vocode
             from vocode.streaming.synthesizer.azure_synthesizer import AzureSynthesizer
             from vocode.streaming.models.synthesizer import AzureSynthesizerConfig
+            from vocode.streaming.models.audio import AudioEncoding
 
             # Configure synthesizer based on available providers
             if self.azure_speech_key and self.azure_speech_region:
@@ -328,7 +329,8 @@ class VocodeConnector:
                     sampling_rate=16000,
                     voice_name=self._get_voice_for_language(language, dialect),
                     pitch=int(voice_config.get('pitch', 0.0)) if voice_config else 0,
-                    rate=voice_config.get('rate', 15) if voice_config else 15
+                    rate=voice_config.get('rate', 15) if voice_config else 15,
+                    audio_encoding=AudioEncoding.LINEAR16
                 )
                 synthesizer = AzureSynthesizer(
                     synthesizer_config,
@@ -393,6 +395,7 @@ class VocodeConnector:
             import vocode
             from vocode.streaming.transcriber.deepgram_transcriber import DeepgramTranscriber
             from vocode.streaming.models.transcriber import DeepgramTranscriberConfig
+            from vocode.streaming.models.audio import AudioEncoding
 
             # Configure transcriber based on available providers
             if self.deepgram_api_key:
@@ -401,7 +404,8 @@ class VocodeConnector:
                     sampling_rate=16000,
                     chunk_size=1024,
                     model="nova-2",
-                    language=self._map_language_code(language, dialect)
+                    language=self._map_language_code(language, dialect),
+                    audio_encoding=AudioEncoding.LINEAR16
                 )
                 transcriber = DeepgramTranscriber(
                     transcriber_config

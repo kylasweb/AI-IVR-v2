@@ -10,16 +10,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // Turbopack configuration (replaces experimental.turbo)
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
-
   // Memory optimization settings
   experimental: {
     // Disable webpack build worker to prevent chunk loading issues

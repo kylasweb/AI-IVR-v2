@@ -401,7 +401,7 @@ async def get_workflows(db: AsyncSession = Depends(get_db)):
                 "description": workflow.description,
                 "category": workflow.category,
                 "isActive": workflow.isActive,
-                "createdAt": workflow.createdAt.isoformat() if workflow.createdAt else None
+                "createdAt": workflow.createdAt.isoformat() if workflow.createdAt is not None else None
             })
 
         return {"workflows": workflow_list}
@@ -448,7 +448,7 @@ async def get_voice_profiles(db: AsyncSession = Depends(get_db)):
                 "voiceType": profile.voiceType,
                 "gender": profile.gender,
                 "isActive": profile.isActive,
-                "createdAt": profile.createdAt.isoformat() if profile.createdAt else None
+                "createdAt": profile.createdAt.isoformat() if profile.createdAt is not None else None
             })
 
         return {"profiles": profile_list}

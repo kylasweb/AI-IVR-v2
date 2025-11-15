@@ -195,8 +195,8 @@ async def twilio_voice_processing(request: Request, background_tasks: Background
         form_data = await request.form()
         data = dict(form_data)
 
-        call_sid = data.get("CallSid")
-        speech_result = data.get("SpeechResult")
+        call_sid = str(data.get("CallSid", ""))
+        speech_result = str(data.get("SpeechResult", "")) if data.get("SpeechResult") else None
 
         if not call_sid:
             raise HTTPException(status_code=400, detail="Missing CallSid")
@@ -209,7 +209,7 @@ async def twilio_voice_processing(request: Request, background_tasks: Background
             raise HTTPException(status_code=404, detail="Session not found")
 
         # Process with AI engine
-        if speech_result and ai_engine is not None:
+        if speech_result and ai_engine is not None and ai_engine.router is not None:
             # Route to appropriate AI model
             from ai.models.ai_model_router import AIModelType
 
@@ -313,10 +313,10 @@ async def get_session_info(session_id: str):
             "phone_number": session.phone_number,
             "language": session.language,
             "dialect": session.dialect,
-            "transport_type": session.transport_metadata.transport_type.value,
+            "transport_type": session.transport_metadata.transport_type.value if session.transport_metadata else None,
             "status": session.status.value,
-            "created_at": session.created_at.isoformat(),
-            "last_activity": session.last_activity.isoformat()
+            "created_at": session.created_at.isoformat() if session.created_at else None,
+            "last_activity": session.last_activity.isoformat() if session.last_activity else None
         }
 
     except Exception as e:

@@ -247,7 +247,7 @@ export const ScrollCarousel = forwardRef<HTMLDivElement, ScrollCarouselProps>(
 
           <div
             ref={scrollContainerRef2}
-            className="flex flex-col md:flex-row gap-8 items-center h-full px-6 md:px-0 hidden xl:flex"
+            className="flex-col md:flex-row gap-8 items-center h-full px-6 md:px-0 hidden xl:flex"
           >
             {renderFeatureCards(features2, cardRefs2)}
           </div>
