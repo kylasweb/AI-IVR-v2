@@ -149,8 +149,7 @@ async def start_call(request: CallRequest):
         }
 
         logger.info(
-            f"Started new call session: {session_id} for {
-                request.phone_number}")
+            f"Started new call session: {session_id} for {request.phone_number}")
         return response
 
     except Exception as e:
