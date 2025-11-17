@@ -77,8 +77,7 @@ class NLPService:
                 best_confidence = 0.5
 
             logger.info(
-                f"Intent detected: {best_intent} (confidence: {
-                    best_confidence:.2f})")
+                f"Intent detected: {best_intent} (confidence: {best_confidence:.2f})")
             return best_intent, best_entities, best_confidence
 
         except Exception as e:
