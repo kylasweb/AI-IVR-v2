@@ -469,15 +469,15 @@ export default function MainDashboard() {
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-blue-700">Total Calls</span>
-                              <span className="font-bold text-blue-900">{stats.totalCalls.toLocaleString()}</span>
+                              <span className="font-bold text-blue-900">{(stats.totalCalls ?? 0).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-blue-700">Active Calls</span>
-                              <span className="font-bold text-blue-900">{stats.activeCalls}</span>
+                              <span className="font-bold text-blue-900">{stats.activeCalls ?? 0}</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-blue-700">Active Agents</span>
-                              <span className="font-bold text-blue-900">{stats.activeAgents}</span>
+                              <span className="font-bold text-blue-900">{stats.activeAgents ?? 0}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -494,7 +494,7 @@ export default function MainDashboard() {
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
                               <div className={`w-3 h-3 rounded-full ${health.overall === 'healthy' ? 'bg-green-500' :
-                                  health.overall === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                                health.overall === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                                 }`}></div>
                               <span className="text-sm capitalize">{health.overall}</span>
                             </div>
@@ -558,16 +558,16 @@ export default function MainDashboard() {
                             <div>
                               <div className="flex justify-between text-sm mb-1">
                                 <span>Uptime</span>
-                                <span>{stats.uptime}%</span>
+                                <span>{stats.uptime ?? 0}%</span>
                               </div>
-                              <Progress value={stats.uptime} className="h-2" />
+                              <Progress value={stats.uptime ?? 0} className="h-2" />
                             </div>
                             <div>
                               <div className="flex justify-between text-sm mb-1">
                                 <span>Satisfaction</span>
-                                <span>{stats.satisfaction}%</span>
+                                <span>{stats.satisfaction ?? 0}%</span>
                               </div>
-                              <Progress value={stats.satisfaction} className="h-2" />
+                              <Progress value={stats.satisfaction ?? 0} className="h-2" />
                             </div>
                           </div>
                         </CardContent>
@@ -801,7 +801,7 @@ export default function MainDashboard() {
                 {loading ? (
                   <div className="h-9 w-16 bg-blue-200 animate-pulse rounded mt-1"></div>
                 ) : (
-                  <p className="text-3xl font-bold text-blue-900">{stats.activeCalls}</p>
+                  <p className="text-3xl font-bold text-blue-900">{stats.activeCalls ?? 0}</p>
                 )}
                 <p className="text-xs text-blue-600">Across all trunks</p>
               </div>

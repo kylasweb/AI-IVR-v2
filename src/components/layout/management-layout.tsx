@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import MobileBottomNav from './mobile-bottom-nav';
 import {
@@ -21,21 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useMockData } from '@/hooks/use-mock-data';
 import {
     Phone,
     Users,
@@ -72,11 +58,10 @@ import {
     FileText as BookIcon,
     Settings as CommandIcon,
     Globe as WifiIcon,
-    Search,
-    ChevronRight,
-    ChevronDown,
-    GripVertical
+    Menu,
+    ChevronRight
 } from 'lucide-react';
+import { useMockData } from '@/hooks/use-mock-data';
 
 interface ManagementLayoutProps {
     children: React.ReactNode;
@@ -107,72 +92,65 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         avatar: 'AU'
     });
 
-    // Add back controlled state for sidebar with persistence
+    // Sidebar state with auto-hide functionality
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+    const autoHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Load sidebar state from localStorage on mount
-    useEffect(() => {
-        const savedState = localStorage.getItem('sidebar-open');
-        if (savedState !== null) {
-            setSidebarOpen(JSON.parse(savedState));
-        } else {
-            // Default to open on desktop
-            setSidebarOpen(window.innerWidth >= 768);
+    // Auto-hide sidebar after 3 seconds when not hovered
+    const startAutoHideTimer = () => {
+        if (autoHideTimeoutRef.current) {
+            clearTimeout(autoHideTimeoutRef.current);
         }
-    }, []);
+        autoHideTimeoutRef.current = setTimeout(() => {
+            if (!isHovered) {
+                setSidebarOpen(false);
+            }
+        }, 3000);
+    };
 
-    // Save sidebar state to localStorage when it changes
+    // Handle mouse enter/leave for auto-hide
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+        if (autoHideTimeoutRef.current) {
+            clearTimeout(autoHideTimeoutRef.current);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+        startAutoHideTimer();
+    };
+
+    // Toggle sidebar manually
+    const toggleSidebar = () => {
+        setSidebarOpen(prev => !prev);
+        if (!sidebarOpen) {
+            // When opening, start the auto-hide timer
+            startAutoHideTimer();
+        }
+    };
+
+    // Handle clicks outside sidebar to close it
     useEffect(() => {
-        localStorage.setItem('sidebar-open', JSON.stringify(sidebarOpen));
+        const handleClickOutside = (event: MouseEvent) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && sidebarOpen) {
+                setSidebarOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [sidebarOpen]);
 
-    // Keyboard shortcut to toggle sidebar (Ctrl+B / Cmd+B)
+    // Cleanup timeout on unmount
     useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
-                event.preventDefault();
-                setSidebarOpen(prev => !prev);
+        return () => {
+            if (autoHideTimeoutRef.current) {
+                clearTimeout(autoHideTimeoutRef.current);
             }
         };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-        'Core Systems': true,
-        'Management': true,
-        'Voice & AI': true,
-        'Testing & QA': false,
-        'Configuration': false,
-        'Analytics & Monitoring': false,
-        'Administration': false
-    });
-
-    // Handle responsive behavior with persistence
-    useEffect(() => {
-        const handleResize = () => {
-            const isMobile = window.innerWidth < 768;
-            const savedState = localStorage.getItem('sidebar-open');
-
-            if (isMobile) {
-                // On mobile, always collapse unless explicitly set to open
-                if (savedState === null || !JSON.parse(savedState)) {
-                    setSidebarOpen(false);
-                }
-            } else {
-                // On desktop, use saved state or default to open
-                if (savedState === null) {
-                    setSidebarOpen(true);
-                } else {
-                    setSidebarOpen(JSON.parse(savedState));
-                }
-            }
-        };
-
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const navigationSections: NavigationSection[] = [
@@ -490,250 +468,118 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         }
     ];
 
-    // Filtered navigation based on search
-    const filteredNavigation = useMemo(() => {
-        if (!searchQuery.trim()) return navigationSections;
-
-        return navigationSections.map(section => ({
-            ...section,
-            items: section.items.filter(item =>
-                item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                section.title.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        })).filter(section => section.items.length > 0);
-    }, [navigationSections, searchQuery]);
-
-    // All navigation items for command palette
-    const allNavigationItems = useMemo(() => {
-        return navigationSections.flatMap(section =>
-            section.items.map(item => ({
-                ...item,
-                section: section.title
-            }))
-        );
-    }, [navigationSections]);
-
     const handleNavigation = (url: string) => {
         router.push(url);
+        // Close sidebar after navigation on mobile
+        if (window.innerWidth < 768) {
+            setSidebarOpen(false);
+        }
     };
 
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <div className="min-h-screen w-full bg-gray-50">
-                <Sidebar collapsible="icon" className="border-r border-gray-200" style={{ "--sidebar-width": "14rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
-                    <SidebarHeader className="border-b border-gray-200 bg-white p-4">
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                                <Bot className="h-5 w-5 text-white" />
-                            </div>
-                            {sidebarOpen && (
-                                <div>
-                                    <h1 className="text-sm font-bold text-gray-900">FairGo IMOS</h1>
-                                    <p className="text-xs text-gray-600">Management Portal</p>
+            <div className="min-h-screen w-full bg-gray-50 flex">
+                {/* Sidebar */}
+                <div
+                    ref={sidebarRef}
+                    className={`fixed left-0 top-0 z-40 h-full transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'w-0'
+                        }`}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <Sidebar className="h-full border-r border-gray-200 bg-white shadow-lg">
+                        <SidebarHeader className="border-b border-gray-200 p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+                                    <Bot className="h-4 w-4 text-white" />
                                 </div>
-                            )}
-                        </div>
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900">AI IVR System</h2>
+                                    <p className="text-xs text-gray-600">Management Console</p>
+                                </div>
+                            </div>
+                        </SidebarHeader>
 
-                        {/* Search Bar */}
-                        {sidebarOpen && (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        className="w-full justify-start text-sm text-muted-foreground"
-                                    >
-                                        <Search className="mr-2 h-4 w-4" />
-                                        Search navigation...
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[300px] p-0" align="start">
-                                    <Command>
-                                        <CommandInput
-                                            placeholder="Search navigation..."
-                                            value={searchQuery}
-                                            onValueChange={setSearchQuery}
-                                        />
-                                        <CommandList>
-                                            <CommandEmpty>No results found.</CommandEmpty>
-                                            {allNavigationItems.map((item) => (
-                                                <CommandItem
-                                                    key={item.url}
-                                                    onSelect={() => {
-                                                        handleNavigation(item.url);
-                                                        setSearchQuery('');
-                                                    }}
-                                                    className="flex items-center gap-2"
-                                                >
-                                                    <item.icon className="h-4 w-4" />
-                                                    <div className="flex flex-col">
-                                                        <span>{item.title}</span>
-                                                        <span className="text-xs text-muted-foreground">{item.section}</span>
-                                                    </div>
-                                                    {item.badge && (
-                                                        <Badge variant="secondary" className="ml-auto text-xs">
-                                                            {item.badge}
-                                                        </Badge>
-                                                    )}
-                                                </CommandItem>
+                        <SidebarContent className="flex-1 overflow-y-auto">
+                            {navigationSections.map((section, sectionIndex) => (
+                                <SidebarGroup key={sectionIndex}>
+                                    <SidebarGroupLabel className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {section.title}
+                                    </SidebarGroupLabel>
+                                    <SidebarGroupContent>
+                                        <SidebarMenu>
+                                            {section.items.map((item, itemIndex) => (
+                                                <SidebarMenuItem key={itemIndex}>
+                                                    <SidebarMenuButton
+                                                        onClick={() => handleNavigation(item.url)}
+                                                        isActive={item.isActive}
+                                                        className="w-full justify-start gap-3 px-4 py-2 hover:bg-gray-50"
+                                                    >
+                                                        <item.icon className="h-4 w-4" />
+                                                        <span className="flex-1 text-left">{item.title}</span>
+                                                        {item.badge && (
+                                                            <Badge variant="secondary" className="text-xs">
+                                                                {item.badge}
+                                                            </Badge>
+                                                        )}
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
                                             ))}
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        )}
-                    </SidebarHeader>
-
-                    <SidebarContent className="bg-white">
-                        <AnimatePresence>
-                            {filteredNavigation.map((section, index) => (
-                                <motion.div
-                                    key={section.title}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <Collapsible
-                                        open={openSections[section.title]}
-                                        onOpenChange={(open) =>
-                                            setOpenSections(prev => ({ ...prev, [section.title]: open }))
-                                        }
-                                    >
-                                        <SidebarGroup>
-                                            <CollapsibleTrigger asChild>
-                                                <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
-                                                    {sidebarOpen && <span>{section.title}</span>}
-                                                    {sidebarOpen && (openSections[section.title] ? (
-                                                        <ChevronDown className="h-3 w-3" />
-                                                    ) : (
-                                                        <ChevronRight className="h-3 w-3" />
-                                                    ))}
-                                                </SidebarGroupLabel>
-                                            </CollapsibleTrigger>
-                                            <CollapsibleContent>
-                                                <SidebarGroupContent>
-                                                    <SidebarMenu>
-                                                        <AnimatePresence>
-                                                            {section.items.map((item) => {
-                                                                const Icon = item.icon;
-                                                                return (
-                                                                    <motion.div
-                                                                        key={item.url}
-                                                                        initial={{ opacity: 0, x: -10 }}
-                                                                        animate={{ opacity: 1, x: 0 }}
-                                                                        exit={{ opacity: 0, x: -10 }}
-                                                                        transition={{ duration: 0.15 }}
-                                                                    >
-                                                                        <SidebarMenuItem>
-                                                                            <SidebarMenuButton
-                                                                                asChild
-                                                                                className={`w-full justify-start px-4 py-2 text-sm transition-colors ${item.isActive
-                                                                                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                                                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                                                    }`}
-                                                                            >
-                                                                                <button
-                                                                                    onClick={() => handleNavigation(item.url)}
-                                                                                    className="flex items-center gap-3 w-full"
-                                                                                >
-                                                                                    <Icon className="h-4 w-4" />
-                                                                                    {sidebarOpen && <span className="flex-1 text-left">{item.title}</span>}
-                                                                                    {item.badge && sidebarOpen && (
-                                                                                        <Badge
-                                                                                            variant={
-                                                                                                item.badge === 'AI' || item.badge === 'ML'
-                                                                                                    ? 'default'
-                                                                                                    : item.badge === 'New'
-                                                                                                        ? 'secondary'
-                                                                                                        : 'outline'
-                                                                                            }
-                                                                                            className="text-xs"
-                                                                                        >
-                                                                                            {item.badge}
-                                                                                        </Badge>
-                                                                                    )}
-                                                                                </button>
-                                                                            </SidebarMenuButton>
-                                                                        </SidebarMenuItem>
-                                                                    </motion.div>
-                                                                );
-                                                            })}
-                                                        </AnimatePresence>
-                                                    </SidebarMenu>
-                                                </SidebarGroupContent>
-                                            </CollapsibleContent>
-                                        </SidebarGroup>
-                                    </Collapsible>
-                                </motion.div>
+                                        </SidebarMenu>
+                                    </SidebarGroupContent>
+                                </SidebarGroup>
                             ))}
-                        </AnimatePresence>
-                    </SidebarContent>
+                        </SidebarContent>
 
-                    <SidebarFooter className="border-t border-gray-200 bg-white">
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <SidebarMenuButton
-                                            size="lg"
-                                            className="data-[state=open]:bg-gray-50"
-                                        >
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarFallback className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs">
-                                                    {user.avatar}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                                <span className="truncate font-semibold">{user.name}</span>
-                                                <span className="truncate text-xs text-gray-600">{user.email}</span>
-                                            </div>
-                                            <ChevronUp className="ml-auto size-4" />
-                                        </SidebarMenuButton>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                                        side="right"
-                                        align="end"
-                                        sideOffset={4}
-                                    >
-                                        <DropdownMenuLabel className="p-0 font-normal">
-                                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                                <Avatar className="h-8 w-8 rounded-lg">
-                                                    <AvatarFallback className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs rounded-lg">
-                                                        {user.avatar}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                                    <span className="truncate font-semibold">{user.name}</span>
-                                                    <span className="truncate text-xs text-gray-600">{user.email}</span>
-                                                </div>
-                                            </div>
-                                        </DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => handleNavigation('/profile')}>
-                                            <User className="h-4 w-4 mr-2" />
-                                            Profile Settings
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleNavigation('/admin/settings')}>
-                                            <Settings className="h-4 w-4 mr-2" />
-                                            System Settings
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => router.push('/logout')}>
-                                            <LogOut className="h-4 w-4 mr-2" />
-                                            Log out
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarFooter>
-                </Sidebar>
+                        <SidebarFooter className="border-t border-gray-200 p-4">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="text-xs">{user.avatar}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                                    <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => router.push('/logout')}
+                                    className="h-8 w-8 p-0"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </SidebarFooter>
+                    </Sidebar>
+                </div>
 
-                <SidebarInset className="flex-1 overflow-hidden transition-all duration-300 ease-in-out ml-0">
+                {/* Floating toggle button when sidebar is hidden */}
+                {!sidebarOpen && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    onClick={toggleSidebar}
+                                    className="fixed left-4 top-20 z-50 h-10 w-10 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
+                                    size="sm"
+                                >
+                                    <Menu className="h-4 w-4 text-white" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                                <p>Open Navigation</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
+
+                {/* Main content area */}
+                <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
                         <div className="flex flex-1 items-center gap-2">
+                            {sidebarOpen && (
+                                <SidebarTrigger className="h-8 w-8" />
+                            )}
                             {title && (
                                 <div>
                                     <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
@@ -766,31 +612,10 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             {children}
                         </div>
                     </main>
-                </SidebarInset>
+                </div>
 
                 {/* Mobile Bottom Navigation */}
                 <MobileBottomNav />
-
-                {/* Floating Sidebar Toggle Button */}
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <button
-                                onClick={() => setSidebarOpen(prev => !prev)}
-                                className="fixed top-1/2 left-4 z-50 flex items-center justify-center w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-gray-50 group"
-                                style={{ transform: 'translateY(-50%)' }}
-                            >
-                                <ChevronRight
-                                    className={`h-5 w-5 text-gray-600 transition-transform duration-300 group-hover:text-gray-800 ${sidebarOpen ? 'rotate-180' : ''
-                                        }`}
-                                />
-                            </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-gray-900 text-white">
-                            <p>Toggle sidebar (Ctrl+B)</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
             </div>
         </SidebarProvider>
     );
