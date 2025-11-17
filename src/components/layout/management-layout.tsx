@@ -520,7 +520,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <div className="min-h-screen w-full bg-gray-50">
-                <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200" style={{ "--sidebar-width": "14rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
+                <Sidebar collapsible="icon" className="border-r border-gray-200" style={{ "--sidebar-width": "14rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
                     <SidebarHeader className="border-b border-gray-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
