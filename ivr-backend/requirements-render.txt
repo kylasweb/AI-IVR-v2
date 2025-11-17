@@ -19,3 +19,6 @@ gunicorn==21.2.0
 
 # Cloud audio processing
 google-cloud-speech==2.21.0
+
+# System monitoring
+psutil==5.9.0
