@@ -107,7 +107,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     });
 
     // Add back controlled state for sidebar
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         'Core Systems': true,
@@ -478,7 +478,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     return (
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <div className="min-h-screen w-full bg-gray-50">
-                <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200">
+                <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200" style={{ "--sidebar-width": "14rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
                     <SidebarHeader className="border-b border-gray-200 bg-white p-4">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -689,9 +689,9 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     </SidebarFooter>
                 </Sidebar>
 
-                <SidebarInset className="flex-1 overflow-hidden transition-all duration-300 ease-in-out">
+                <SidebarInset className="flex-1 overflow-hidden transition-all duration-300 ease-in-out ml-0">
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
-                        <SidebarTrigger className="mr-2 hover:bg-gray-100 transition-colors" />
+                        <SidebarTrigger className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors border border-gray-200" />
                         <div className="flex flex-1 items-center gap-2">
                             {title && (
                                 <div>
