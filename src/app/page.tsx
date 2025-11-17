@@ -1,10 +1,5 @@
-import ManagementLayout from '@/components/layout/management-layout';
-import MainDashboard from '@/components/dashboard/main-dashboard';
+import LandingPage from '@/components/landing/landing-page';
 
 export default function HomePage() {
-  return (
-    <ManagementLayout title="FairGo IMOS" subtitle="Malayalam AI Communication Platform">
-      <MainDashboard />
-    </ManagementLayout>
-  );
+  return <LandingPage />;
 }

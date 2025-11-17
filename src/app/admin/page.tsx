@@ -1,10 +1,10 @@
 import ManagementLayout from '@/components/layout/management-layout';
-import AdminDashboard from '@/components/admin/admin-dashboard';
+import AdminOverview from '@/components/admin/admin-overview';
 
 export default function AdminPage() {
   return (
     <ManagementLayout title="Administration" subtitle="System Administration & Management">
-      <AdminDashboard />
+      <AdminOverview />
     </ManagementLayout>
   );
 }

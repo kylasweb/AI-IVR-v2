@@ -3,21 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import MobileBottomNav from './mobile-bottom-nav';
-import {
-    SidebarProvider,
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarInset,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarTrigger,
-} from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -92,22 +77,25 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         avatar: 'AU'
     });
 
-    // Sidebar state with auto-hide functionality
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    // Sidebar state with responsive auto-hide functionality
+    const [sidebarOpen, setSidebarOpen] = useState(true); // Default open on desktop
     const [isHovered, setIsHovered] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const autoHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Auto-hide sidebar after 3 seconds when not hovered
+    // Auto-hide sidebar only on smaller screens
     const startAutoHideTimer = () => {
-        if (autoHideTimeoutRef.current) {
-            clearTimeout(autoHideTimeoutRef.current);
-        }
-        autoHideTimeoutRef.current = setTimeout(() => {
-            if (!isHovered) {
-                setSidebarOpen(false);
+        // Only auto-hide on screens smaller than lg (1024px)
+        if (window.innerWidth < 1024) {
+            if (autoHideTimeoutRef.current) {
+                clearTimeout(autoHideTimeoutRef.current);
             }
-        }, 3000);
+            autoHideTimeoutRef.current = setTimeout(() => {
+                if (!isHovered) {
+                    setSidebarOpen(false);
+                }
+            }, 3000);
+        }
     };
 
     // Handle mouse enter/leave for auto-hide
@@ -195,12 +183,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         {
             title: 'Management',
             items: [
-                {
-                    title: 'User Management',
-                    url: '/admin/users',
-                    icon: Users,
-                    isActive: pathname.includes('/admin/user')
-                },
                 {
                     title: 'Customer Management',
                     url: '/customers',
@@ -401,18 +383,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     icon: Activity,
                     badge: 'Pipeline',
                     isActive: pathname.includes('/voice-data-processing')
-                },
-                {
-                    title: 'Log Management',
-                    url: '/admin/logs',
-                    icon: FileText,
-                    isActive: pathname.includes('/log')
-                },
-                {
-                    title: 'System Monitoring',
-                    url: '/monitoring',
-                    icon: Activity,
-                    isActive: pathname.includes('/monitor')
                 }
             ]
         },
@@ -420,10 +390,53 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
             title: 'Administration',
             items: [
                 {
+                    title: 'User Management',
+                    url: '/admin/users',
+                    icon: Users,
+                    isActive: pathname.includes('/admin/user')
+                },
+                {
                     title: 'System Settings',
                     url: '/admin/settings',
                     icon: Settings,
                     isActive: pathname.includes('/admin/settings')
+                },
+                {
+                    title: 'System Monitoring',
+                    url: '/admin/monitoring',
+                    icon: Activity,
+                    isActive: pathname.includes('/admin/monitor')
+                },
+                {
+                    title: 'Log Management',
+                    url: '/admin/logs',
+                    icon: FileText,
+                    isActive: pathname.includes('/admin/log')
+                },
+                {
+                    title: 'Integrations',
+                    url: '/admin/integrations',
+                    icon: Code,
+                    isActive: pathname.includes('/admin/integration')
+                },
+                {
+                    title: 'Security & Permissions',
+                    url: '/admin/security',
+                    icon: Shield,
+                    isActive: pathname.includes('/admin/security')
+                },
+                {
+                    title: 'Database Management',
+                    url: '/admin/database',
+                    icon: Database,
+                    isActive: pathname.includes('/admin/database')
+                },
+                {
+                    title: 'Mock Data Manager',
+                    url: '/admin/mock-data',
+                    icon: Database,
+                    badge: 'Demo',
+                    isActive: pathname.includes('/admin/mock-data')
                 },
                 {
                     title: 'Pilot Program',
@@ -445,24 +458,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     icon: Shield,
                     badge: 'Security',
                     isActive: pathname.includes('/verification')
-                },
-                {
-                    title: 'Integrations',
-                    url: '/admin/integrations',
-                    icon: Code,
-                    isActive: pathname.includes('/admin/integration')
-                },
-                {
-                    title: 'Security & Permissions',
-                    url: '/admin/security',
-                    icon: Shield,
-                    isActive: pathname.includes('/admin/security')
-                },
-                {
-                    title: 'Database Management',
-                    url: '/admin/database',
-                    icon: Database,
-                    isActive: pathname.includes('/admin/database')
                 }
             ]
         }
@@ -477,84 +472,81 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     };
 
     return (
-        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <div className="min-h-screen w-full bg-gray-50 flex">
-                {/* Sidebar */}
-                <div
-                    ref={sidebarRef}
-                    className={`fixed left-0 top-0 z-40 h-full transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'w-0'
-                        }`}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    <Sidebar className="h-full border-r border-gray-200 bg-white shadow-lg">
-                        <SidebarHeader className="border-b border-gray-200 p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-                                    <Bot className="h-4 w-4 text-white" />
+        <div className="min-h-screen w-full bg-gray-50 flex">
+            {/* Sidebar */}
+            <div
+                ref={sidebarRef}
+                className={`fixed left-0 top-0 z-40 h-full transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'lg:w-64 w-0'
+                    }`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <div className="h-full border-r border-gray-200 bg-white shadow-lg flex flex-col">
+                    <div className="border-b border-gray-200 p-4 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+                                <Bot className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-semibold text-gray-900">AI IVR System</h2>
+                                <p className="text-xs text-gray-600">Management Console</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        {navigationSections.map((section, sectionIndex) => (
+                            <div key={sectionIndex} className="py-2">
+                                <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {section.title}
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-semibold text-gray-900">AI IVR System</h2>
-                                    <p className="text-xs text-gray-600">Management Console</p>
+                                    {section.items.map((item, itemIndex) => (
+                                        <button
+                                            key={itemIndex}
+                                            onClick={() => handleNavigation(item.url)}
+                                            className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${item.isActive ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+                                                }`}
+                                        >
+                                            <item.icon className="h-4 w-4 flex-shrink-0" />
+                                            <span className="flex-1 text-left text-sm">{item.title}</span>
+                                            {item.badge && (
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {item.badge}
+                                                </Badge>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                        </SidebarHeader>
+                        ))}
+                    </div>
 
-                        <SidebarContent className="flex-1 overflow-y-auto">
-                            {navigationSections.map((section, sectionIndex) => (
-                                <SidebarGroup key={sectionIndex}>
-                                    <SidebarGroupLabel className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        {section.title}
-                                    </SidebarGroupLabel>
-                                    <SidebarGroupContent>
-                                        <SidebarMenu>
-                                            {section.items.map((item, itemIndex) => (
-                                                <SidebarMenuItem key={itemIndex}>
-                                                    <SidebarMenuButton
-                                                        onClick={() => handleNavigation(item.url)}
-                                                        isActive={item.isActive}
-                                                        className="w-full justify-start gap-3 px-4 py-2 hover:bg-gray-50"
-                                                    >
-                                                        <item.icon className="h-4 w-4" />
-                                                        <span className="flex-1 text-left">{item.title}</span>
-                                                        {item.badge && (
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                {item.badge}
-                                                            </Badge>
-                                                        )}
-                                                    </SidebarMenuButton>
-                                                </SidebarMenuItem>
-                                            ))}
-                                        </SidebarMenu>
-                                    </SidebarGroupContent>
-                                </SidebarGroup>
-                            ))}
-                        </SidebarContent>
-
-                        <SidebarFooter className="border-t border-gray-200 p-4">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="text-xs">{user.avatar}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                                    <p className="text-xs text-gray-600 truncate">{user.email}</p>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => router.push('/logout')}
-                                    className="h-8 w-8 p-0"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                </Button>
+                    <div className="border-t border-gray-200 p-4 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                                <AvatarFallback className="text-xs">{user.avatar}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                                <p className="text-xs text-gray-600 truncate">{user.email}</p>
                             </div>
-                        </SidebarFooter>
-                    </Sidebar>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => router.push('/logout')}
+                                className="h-8 w-8 p-0"
+                            >
+                                <LogOut className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                {/* Floating toggle button when sidebar is hidden */}
-                {!sidebarOpen && (
+            {/* Floating toggle button when sidebar is hidden (only on smaller screens) */}
+            {!sidebarOpen && (
+                <div className="lg:hidden">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -571,52 +563,59 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                )}
-
-                {/* Main content area */}
-                <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
-                    <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
-                        <div className="flex flex-1 items-center gap-2">
-                            {sidebarOpen && (
-                                <SidebarTrigger className="h-8 w-8" />
-                            )}
-                            {title && (
-                                <div>
-                                    <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
-                                    {subtitle && (
-                                        <p className="text-sm text-gray-600">{subtitle}</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-600">Demo Mode</span>
-                                <Button
-                                    onClick={toggleMode}
-                                    variant={isDemoMode ? "default" : "outline"}
-                                    size="sm"
-                                    className="text-xs"
-                                >
-                                    {isDemoMode ? 'Demo Data' : 'Live Data'}
-                                </Button>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                                <Activity className="h-3 w-3 mr-1" />
-                                {isDemoMode ? 'Demo Active' : 'Live Active'}
-                            </Badge>
-                        </div>
-                    </header>
-                    <main className="flex-1 overflow-auto bg-gray-50">
-                        <div className="p-6 min-h-full">
-                            {children}
-                        </div>
-                    </main>
                 </div>
+            )}
 
-                {/* Mobile Bottom Navigation */}
-                <MobileBottomNav />
+            {/* Main content area */}
+            <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-64 ml-0' : 'lg:ml-64 ml-0'}`}>
+                <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
+                    <div className="flex flex-1 items-center gap-2">
+                        {sidebarOpen && (
+                            <Button
+                                onClick={toggleSidebar}
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 lg:hidden"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        )}
+                        {title && (
+                            <div>
+                                <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+                                {subtitle && (
+                                    <p className="text-sm text-gray-600">{subtitle}</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Demo Mode</span>
+                            <Button
+                                onClick={toggleMode}
+                                variant={isDemoMode ? "default" : "outline"}
+                                size="sm"
+                                className="text-xs"
+                            >
+                                {isDemoMode ? 'Demo Data' : 'Live Data'}
+                            </Button>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                            <Activity className="h-3 w-3 mr-1" />
+                            {isDemoMode ? 'Demo Active' : 'Live Active'}
+                        </Badge>
+                    </div>
+                </header>
+                <main className="flex-1 overflow-auto bg-gray-50">
+                    <div className="p-6 min-h-full">
+                        {children}
+                    </div>
+                </main>
             </div>
-        </SidebarProvider>
+
+            {/* Mobile Bottom Navigation */}
+            <MobileBottomNav />
+        </div>
     );
 }
