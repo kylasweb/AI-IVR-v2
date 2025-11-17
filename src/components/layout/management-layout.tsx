@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMockData } from '@/hooks/use-mock-data';
@@ -106,8 +107,37 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         avatar: 'AU'
     });
 
-    // Add back controlled state for sidebar
+    // Add back controlled state for sidebar with persistence
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Load sidebar state from localStorage on mount
+    useEffect(() => {
+        const savedState = localStorage.getItem('sidebar-open');
+        if (savedState !== null) {
+            setSidebarOpen(JSON.parse(savedState));
+        } else {
+            // Default to open on desktop
+            setSidebarOpen(window.innerWidth >= 768);
+        }
+    }, []);
+
+    // Save sidebar state to localStorage when it changes
+    useEffect(() => {
+        localStorage.setItem('sidebar-open', JSON.stringify(sidebarOpen));
+    }, [sidebarOpen]);
+
+    // Keyboard shortcut to toggle sidebar (Ctrl+B / Cmd+B)
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+                event.preventDefault();
+                setSidebarOpen(prev => !prev);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
     const [searchQuery, setSearchQuery] = useState('');
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         'Core Systems': true,
@@ -119,12 +149,24 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         'Administration': false
     });
 
-    // Handle responsive behavior
+    // Handle responsive behavior with persistence
     useEffect(() => {
         const handleResize = () => {
-            // Auto-collapse on mobile
-            if (window.innerWidth < 768) {
-                setSidebarOpen(false);
+            const isMobile = window.innerWidth < 768;
+            const savedState = localStorage.getItem('sidebar-open');
+
+            if (isMobile) {
+                // On mobile, always collapse unless explicitly set to open
+                if (savedState === null || !JSON.parse(savedState)) {
+                    setSidebarOpen(false);
+                }
+            } else {
+                // On desktop, use saved state or default to open
+                if (savedState === null) {
+                    setSidebarOpen(true);
+                } else {
+                    setSidebarOpen(JSON.parse(savedState));
+                }
             }
         };
 
@@ -484,7 +526,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                                 <Bot className="h-5 w-5 text-white" />
                             </div>
-                            {!sidebarOpen && (
+                            {sidebarOpen && (
                                 <div>
                                     <h1 className="text-sm font-bold text-gray-900">FairGo IMOS</h1>
                                     <p className="text-xs text-gray-600">Management Portal</p>
@@ -691,7 +733,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
 
                 <SidebarInset className="flex-1 overflow-hidden transition-all duration-300 ease-in-out ml-0">
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
-                        <SidebarTrigger className="flex items-center justify-center w-10 h-10 rounded-md hover:bg-gray-100 transition-colors border border-gray-200" />
                         <div className="flex flex-1 items-center gap-2">
                             {title && (
                                 <div>
@@ -729,6 +770,27 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
 
                 {/* Mobile Bottom Navigation */}
                 <MobileBottomNav />
+
+                {/* Floating Sidebar Toggle Button */}
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                onClick={() => setSidebarOpen(prev => !prev)}
+                                className="fixed top-1/2 left-4 z-50 flex items-center justify-center w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-gray-50 group"
+                                style={{ transform: 'translateY(-50%)' }}
+                            >
+                                <ChevronRight
+                                    className={`h-5 w-5 text-gray-600 transition-transform duration-300 group-hover:text-gray-800 ${sidebarOpen ? 'rotate-180' : ''
+                                        }`}
+                                />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-gray-900 text-white">
+                            <p>Toggle sidebar (Ctrl+B)</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
         </SidebarProvider>
     );
