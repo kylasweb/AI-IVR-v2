@@ -7,7 +7,7 @@
     "dev:next": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "build:analyze": "cross-env NODE_OPTIONS=--max-old-space-size=4096 ANALYZE=true next build",
-    "start": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=4096 tsx server.ts",
+    "start": "next start",
     "lint": "next lint",
     "type-check": "cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit",
     "test": "vitest",
