@@ -484,58 +484,62 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                                 <Bot className="h-5 w-5 text-white" />
                             </div>
-                            <div>
-                                <h1 className="text-sm font-bold text-gray-900">FairGo IMOS</h1>
-                                <p className="text-xs text-gray-600">Management Portal</p>
-                            </div>
+                            {!sidebarOpen && (
+                                <div>
+                                    <h1 className="text-sm font-bold text-gray-900">FairGo IMOS</h1>
+                                    <p className="text-xs text-gray-600">Management Portal</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Search Bar */}
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    className="w-full justify-start text-sm text-muted-foreground"
-                                >
-                                    <Search className="mr-2 h-4 w-4" />
-                                    Search navigation...
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0" align="start">
-                                <Command>
-                                    <CommandInput
-                                        placeholder="Search navigation..."
-                                        value={searchQuery}
-                                        onValueChange={setSearchQuery}
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty>No results found.</CommandEmpty>
-                                        {allNavigationItems.map((item) => (
-                                            <CommandItem
-                                                key={item.url}
-                                                onSelect={() => {
-                                                    handleNavigation(item.url);
-                                                    setSearchQuery('');
-                                                }}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <item.icon className="h-4 w-4" />
-                                                <div className="flex flex-col">
-                                                    <span>{item.title}</span>
-                                                    <span className="text-xs text-muted-foreground">{item.section}</span>
-                                                </div>
-                                                {item.badge && (
-                                                    <Badge variant="secondary" className="ml-auto text-xs">
-                                                        {item.badge}
-                                                    </Badge>
-                                                )}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
+                        {sidebarOpen && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        className="w-full justify-start text-sm text-muted-foreground"
+                                    >
+                                        <Search className="mr-2 h-4 w-4" />
+                                        Search navigation...
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[300px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput
+                                            placeholder="Search navigation..."
+                                            value={searchQuery}
+                                            onValueChange={setSearchQuery}
+                                        />
+                                        <CommandList>
+                                            <CommandEmpty>No results found.</CommandEmpty>
+                                            {allNavigationItems.map((item) => (
+                                                <CommandItem
+                                                    key={item.url}
+                                                    onSelect={() => {
+                                                        handleNavigation(item.url);
+                                                        setSearchQuery('');
+                                                    }}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <item.icon className="h-4 w-4" />
+                                                    <div className="flex flex-col">
+                                                        <span>{item.title}</span>
+                                                        <span className="text-xs text-muted-foreground">{item.section}</span>
+                                                    </div>
+                                                    {item.badge && (
+                                                        <Badge variant="secondary" className="ml-auto text-xs">
+                                                            {item.badge}
+                                                        </Badge>
+                                                    )}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        )}
                     </SidebarHeader>
 
                     <SidebarContent className="bg-white">
@@ -557,12 +561,12 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                                         <SidebarGroup>
                                             <CollapsibleTrigger asChild>
                                                 <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
-                                                    <span>{section.title}</span>
-                                                    {openSections[section.title] ? (
+                                                    {sidebarOpen && <span>{section.title}</span>}
+                                                    {sidebarOpen && (openSections[section.title] ? (
                                                         <ChevronDown className="h-3 w-3" />
                                                     ) : (
                                                         <ChevronRight className="h-3 w-3" />
-                                                    )}
+                                                    ))}
                                                 </SidebarGroupLabel>
                                             </CollapsibleTrigger>
                                             <CollapsibleContent>
@@ -592,8 +596,8 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                                                                                     className="flex items-center gap-3 w-full"
                                                                                 >
                                                                                     <Icon className="h-4 w-4" />
-                                                                                    <span className="flex-1 text-left">{item.title}</span>
-                                                                                    {item.badge && (
+                                                                                    {sidebarOpen && <span className="flex-1 text-left">{item.title}</span>}
+                                                                                    {item.badge && sidebarOpen && (
                                                                                         <Badge
                                                                                             variant={
                                                                                                 item.badge === 'AI' || item.badge === 'ML'
@@ -687,7 +691,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
 
                 <SidebarInset className="flex-1 overflow-hidden transition-all duration-300 ease-in-out">
                     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
-                        <SidebarTrigger className="-ml-1" />
+                        <SidebarTrigger className="mr-2 hover:bg-gray-100 transition-colors" />
                         <div className="flex flex-1 items-center gap-2">
                             {title && (
                                 <div>
