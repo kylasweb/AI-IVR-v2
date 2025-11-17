@@ -26,21 +26,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "FairGo IVR System - AI-Powered Communication Platform",
+  description: "Advanced AI-powered Interactive Voice Response system for Malayalam communication. Built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui.",
+  keywords: ["FairGo IVR", "AI IVR", "Voice Response", "Malayalam AI", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI Communication", "React"],
+  authors: [{ name: "FairGo IVR Team" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "FairGo IVR System",
+    description: "AI-powered communication platform for modern voice interactions",
+    url: "https://fairgo-ivr.com",
+    siteName: "FairGo IVR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "FairGo IVR System",
+    description: "AI-powered communication platform for modern voice interactions",
   },
 };
 
