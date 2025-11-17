@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Pusher from 'pusher-js';
 
 // Type definition for Pusher
@@ -80,18 +80,27 @@ export function useRealTimeWorkflowData() {
     }, []);
 
     const attemptReconnect = useCallback(() => {
-        setReconnectAttempts(prev => prev + 1);
-        if (reconnectAttempts < maxReconnectAttempts) {
-            setTimeout(() => {
-                if (pusherRef.current) {
-                    pusherRef.current.connect();
-                }
-            }, 2000 * (reconnectAttempts + 1)); // Exponential backoff
-        } else {
-            startPolling();
-            setNotification('Connection lost. Switching to polling mode.');
-        }
-    }, [reconnectAttempts, maxReconnectAttempts, startPolling]);
+        setReconnectAttempts(prev => {
+            const newAttempts = prev + 1;
+            if (newAttempts >= maxReconnectAttempts) {
+                // Start polling when max attempts reached
+                setIsPolling(true);
+                pollingIntervalRef.current = setInterval(async () => {
+                    try {
+                        const response = await fetch('/api/workflow/live-data');
+                        if (response.ok) {
+                            const data = await response.json();
+                            setData(data);
+                        }
+                    } catch (error) {
+                        console.error('Polling error:', error);
+                    }
+                }, 5000);
+                setNotification('Connection lost. Switching to polling mode.');
+            }
+            return newAttempts;
+        });
+    }, []); // Remove dependencies that could cause loops
 
     useEffect(() => {
         // Initialize Pusher connection
@@ -116,14 +125,20 @@ export function useRealTimeWorkflowData() {
 
         pusher.connection.bind('disconnected', () => {
             setIsConnected(false);
-            attemptReconnect();
+            // Add a small delay before attempting reconnect to prevent rapid reconnection attempts
+            setTimeout(() => {
+                attemptReconnect();
+            }, 1000);
             console.log('Disconnected from Pusher');
         });
 
         pusher.connection.bind('error', (err: any) => {
             setError(`Connection error: ${err.message}`);
             setIsConnected(false);
-            attemptReconnect();
+            // Add a small delay before attempting reconnect to prevent rapid reconnection attempts
+            setTimeout(() => {
+                attemptReconnect();
+            }, 1000);
         });
 
         // Subscribe to channels
@@ -259,7 +274,7 @@ export function useRealTimeWorkflowData() {
     }, []);
 
     // Functions to interact with workflows
-    const executeWorkflow = async (workflowId: string, inputData?: any) => {
+    const executeWorkflow = useCallback(async (workflowId: string, inputData?: any) => {
         const response = await fetch('/api/workflow/execute', {
             method: 'POST',
             headers: {
@@ -272,9 +287,9 @@ export function useRealTimeWorkflowData() {
         }
         const result = await response.json();
         return result.data;
-    };
+    }, []);
 
-    const pauseExecution = async (workflowId: string) => {
+    const pauseExecution = useCallback(async (workflowId: string) => {
         await fetch('/api/workflow/pause', {
             method: 'POST',
             headers: {
@@ -282,9 +297,9 @@ export function useRealTimeWorkflowData() {
             },
             body: JSON.stringify({ workflowId }),
         });
-    };
+    }, []);
 
-    const resumeExecution = async (workflowId: string) => {
+    const resumeExecution = useCallback(async (workflowId: string) => {
         await fetch('/api/workflow/resume', {
             method: 'POST',
             headers: {
@@ -292,9 +307,9 @@ export function useRealTimeWorkflowData() {
             },
             body: JSON.stringify({ workflowId }),
         });
-    };
+    }, []);
 
-    const stopExecution = async (workflowId: string) => {
+    const stopExecution = useCallback(async (workflowId: string) => {
         await fetch('/api/workflow/stop', {
             method: 'POST',
             headers: {
@@ -302,17 +317,18 @@ export function useRealTimeWorkflowData() {
             },
             body: JSON.stringify({ workflowId }),
         });
-    };
+    }, []);
 
-    const getNodeStatus = (nodeId: string) => {
+    const getNodeStatus = useCallback((nodeId: string) => {
         return data.nodeStatuses.get(nodeId) || {
             status: 'idle' as const,
             executionCount: 0,
             averageTime: 0,
         };
-    };
+    }, [data.nodeStatuses]);
 
-    return {
+    // Memoize the returned data to prevent unnecessary re-renders
+    const memoizedData = useMemo(() => ({
         data,
         isConnected,
         error,
@@ -323,7 +339,9 @@ export function useRealTimeWorkflowData() {
         resumeExecution,
         stopExecution,
         getNodeStatus,
-    };
+    }), [data, isConnected, error, notification, isPolling, executeWorkflow, pauseExecution, resumeExecution, stopExecution, getNodeStatus]);
+
+    return memoizedData;
 }
 
 export function useLiveWorkflowExecution(workflowId: string) {

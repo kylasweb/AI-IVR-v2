@@ -11,10 +11,10 @@ const nextConfig: NextConfig = {
   },
 
   // Memory optimization settings
-  experimental: {
-    // Disable webpack build worker to prevent chunk loading issues
-    webpackBuildWorker: false,
-  },
+  // experimental: {
+  //   // Disable webpack build worker to prevent chunk loading issues
+  //   webpackBuildWorker: false,
+  // },
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
   },
 
   // Output configuration for custom server
-  output: 'standalone',
+  // output: 'standalone',
 
   // Performance optimizations
   images: {

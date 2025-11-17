@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 // GET /api/cooperative/strategies/[id] - Get a specific cooperative strategy
 export async function GET(
@@ -9,7 +7,7 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const strategy = await prisma.cooperativeStrategy.findUnique({
+        const strategy = await db.cooperativeStrategy.findUnique({
             where: { id: params.id },
             include: {
                 society: {
@@ -90,7 +88,7 @@ export async function PUT(
         const body = await request.json();
         const { title, description, category, priority, status, targetDate, budget, assignedTo } = body;
 
-        const strategy = await prisma.cooperativeStrategy.update({
+        const strategy = await db.cooperativeStrategy.update({
             where: { id: params.id },
             data: {
                 ...(title && { title }),
@@ -144,7 +142,7 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.cooperativeStrategy.delete({
+        await db.cooperativeStrategy.delete({
             where: { id: params.id }
         });
 

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 // GET /api/cooperative/societies - Get all cooperative societies
 export async function GET(request: NextRequest) {
@@ -16,7 +14,7 @@ export async function GET(request: NextRequest) {
         if (region) where.region = region;
         if (status) where.status = status;
 
-        const societies = await prisma.cooperativeSociety.findMany({
+        const societies = await db.cooperativeSociety.findMany({
             where,
             include: {
                 members: {
@@ -75,7 +73,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const society = await prisma.cooperativeSociety.create({
+        const society = await db.cooperativeSociety.create({
             data: {
                 name,
                 description,

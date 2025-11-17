@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
     try {
@@ -24,7 +22,7 @@ export async function GET(request: NextRequest) {
             where.role = role;
         }
 
-        const members = await prisma.cooperativeMember.findMany({
+        const members = await db.cooperativeMember.findMany({
             where,
             include: {
                 user: {
@@ -75,7 +73,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if user exists
-        const user = await prisma.user.findUnique({
+        const user = await db.user.findUnique({
             where: { id: userId }
         });
 
@@ -87,7 +85,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if society exists
-        const society = await prisma.cooperativeSociety.findUnique({
+        const society = await db.cooperativeSociety.findUnique({
             where: { id: societyId }
         });
 
@@ -99,7 +97,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if member already exists
-        const existingMember = await prisma.cooperativeMember.findFirst({
+        const existingMember = await db.cooperativeMember.findFirst({
             where: {
                 userId,
                 societyId
@@ -113,7 +111,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const member = await prisma.cooperativeMember.create({
+        const member = await db.cooperativeMember.create({
             data: {
                 userId,
                 societyId,

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 // GET /api/cooperative/strategies - Get all cooperative strategies
 export async function GET(request: NextRequest) {
@@ -18,7 +16,7 @@ export async function GET(request: NextRequest) {
         if (status) where.status = status;
         if (priority) where.priority = priority;
 
-        const strategies = await prisma.cooperativeStrategy.findMany({
+        const strategies = await db.cooperativeStrategy.findMany({
             where,
             include: {
                 society: {
@@ -84,7 +82,7 @@ export async function POST(request: NextRequest) {
         // Get the current user (in a real app, this would come from authentication)
         const createdBy = 'user-1'; // Placeholder - replace with actual user ID from auth
 
-        const strategy = await prisma.cooperativeStrategy.create({
+        const strategy = await db.cooperativeStrategy.create({
             data: {
                 societyId,
                 title,

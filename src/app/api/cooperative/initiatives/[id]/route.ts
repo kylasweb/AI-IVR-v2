@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const initiative = await prisma.cooperativeInitiative.findUnique({
+        const initiative = await db.cooperativeInitiative.findUnique({
             where: { id: params.id },
             include: {
                 strategy: {
@@ -64,7 +62,7 @@ export async function PUT(
         const body = await request.json();
         const { title, description, status, priority, progress, startDate, endDate, budget, assignedTo } = body;
 
-        const initiative = await prisma.cooperativeInitiative.update({
+        const initiative = await db.cooperativeInitiative.update({
             where: { id: params.id },
             data: {
                 ...(title && { title }),
@@ -116,7 +114,7 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.cooperativeInitiative.delete({
+        await db.cooperativeInitiative.delete({
             where: { id: params.id }
         });
 

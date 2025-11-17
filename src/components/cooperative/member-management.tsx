@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertCircle, Plus, Users, UserCheck, UserX, Phone, Mail, MapPin, Calendar, DollarSign, Star } from 'lucide-react';
+import { AlertCircle, Plus, Users, UserCheck, UserMinus as UserX, Phone, Mail, MapPin, Calendar, TrendingUp as DollarSign, Star } from 'lucide-react';
 
 interface CooperativeMember {
     id: string;

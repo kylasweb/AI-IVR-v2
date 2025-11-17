@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const member = await prisma.cooperativeMember.findUnique({
+        const member = await db.cooperativeMember.findUnique({
             where: { id: params.id },
             include: {
                 user: {
@@ -58,7 +56,7 @@ export async function PUT(
         const body = await request.json();
         const { role, status, contributionAmount, performanceRating } = body;
 
-        const member = await prisma.cooperativeMember.update({
+        const member = await db.cooperativeMember.update({
             where: { id: params.id },
             data: {
                 ...(role && { role }),
@@ -104,7 +102,7 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.cooperativeMember.delete({
+        await db.cooperativeMember.delete({
             where: { id: params.id }
         });
 

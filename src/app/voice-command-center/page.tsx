@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ManagementLayout from '@/components/layout/management-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -145,6 +146,7 @@ export default function VoiceCommandCenterPage() {
     ]);
 
     const [selectedTab, setSelectedTab] = useState('overview');
+    const router = useRouter();
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -339,27 +341,27 @@ export default function VoiceCommandCenterPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="grid grid-cols-2 gap-3">
-                                    <Button className="h-20 flex-col gap-2">
+                                    <Button className="h-20 flex-col gap-2" onClick={() => router.push('/speech-synthesizer')}>
                                         <Mic className="h-6 w-6" />
                                         <span className="text-sm">Start Recording</span>
                                     </Button>
-                                    <Button variant="outline" className="h-20 flex-col gap-2">
+                                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/speech-synthesizer')}>
                                         <Volume2 className="h-6 w-6" />
                                         <span className="text-sm">Generate Speech</span>
                                     </Button>
-                                    <Button variant="outline" className="h-20 flex-col gap-2">
+                                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/voice-cloning')}>
                                         <Users className="h-6 w-6" />
                                         <span className="text-sm">Clone Voice</span>
                                     </Button>
-                                    <Button variant="outline" className="h-20 flex-col gap-2">
+                                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/voice-testing-suite')}>
                                         <TestTube className="h-6 w-6" />
                                         <span className="text-sm">Run Tests</span>
                                     </Button>
-                                    <Button variant="outline" className="h-20 flex-col gap-2">
+                                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/voice-data-management')}>
                                         <Database className="h-6 w-6" />
                                         <span className="text-sm">Manage Data</span>
                                     </Button>
-                                    <Button variant="outline" className="h-20 flex-col gap-2">
+                                    <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => router.push('/analytics')}>
                                         <Monitor className="h-6 w-6" />
                                         <span className="text-sm">View Analytics</span>
                                     </Button>
@@ -414,9 +416,11 @@ export default function VoiceCommandCenterPage() {
                                     <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                     <h3 className="text-lg font-medium mb-2">Model Management Interface</h3>
                                     <p className="text-muted-foreground mb-4">
-                                        Comprehensive voice model management system coming soon
+                                        Comprehensive voice model management system
                                     </p>
-                                    <Button>Access Model Manager</Button>
+                                    <Button onClick={() => router.push('/voice-model-management')}>
+                                        Access Model Manager
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -437,7 +441,9 @@ export default function VoiceCommandCenterPage() {
                                     <p className="text-muted-foreground mb-4">
                                         Advanced text-to-speech synthesis with multiple voices and languages
                                     </p>
-                                    <Button>Launch Synthesizer</Button>
+                                    <Button onClick={() => router.push('/speech-synthesizer')}>
+                                        Launch Synthesizer
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -458,7 +464,9 @@ export default function VoiceCommandCenterPage() {
                                     <p className="text-muted-foreground mb-4">
                                         Professional voice cloning with quality analysis and model training
                                     </p>
-                                    <Button>Access Voice Cloning</Button>
+                                    <Button onClick={() => router.push('/voice-cloning')}>
+                                        Access Voice Cloning
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -479,7 +487,9 @@ export default function VoiceCommandCenterPage() {
                                     <p className="text-muted-foreground mb-4">
                                         Comprehensive voice data management and processing platform
                                     </p>
-                                    <Button>Enter Data Foundry</Button>
+                                    <Button onClick={() => router.push('/voice-data-management')}>
+                                        Enter Data Foundry
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -523,7 +533,9 @@ export default function VoiceCommandCenterPage() {
                                     <p className="text-muted-foreground mb-4">
                                         Comprehensive testing tools for voice quality, accuracy, and performance
                                     </p>
-                                    <Button>Run Test Suite</Button>
+                                    <Button onClick={() => router.push('/voice-testing-suite')}>
+                                        Run Test Suite
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>

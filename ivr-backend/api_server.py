@@ -9,7 +9,6 @@ import os
 from contextlib import asynccontextmanager
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from pusher import Pusher
 
@@ -17,6 +16,28 @@ from transport.call_session_manager import CallSessionManager, TransportType, Tr
 from ai import AIEngine
 import uuid
 from models.ivr_config import DEFAULT_CONFIGS
+
+# Mobile Application Models
+class MobileConnectRequest(BaseModel):
+    device_id: str
+    app_version: str
+    platform: str  # "ios" or "android"
+    push_token: Optional[str] = None
+
+class MobileConnectResponse(BaseModel):
+    session_token: str
+    websocket_url: str
+    api_version: str
+
+class MobileSessionRequest(BaseModel):
+    session_token: str
+    action: str  # "start_call", "end_call", "send_message"
+    data: Optional[Dict[str, Any]] = None
+
+class MobileSessionResponse(BaseModel):
+    status: str
+    session_id: Optional[str] = None
+    message: str
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -526,6 +547,120 @@ async def process_voice(request: VoiceProcessRequest):
     except Exception as e:
         logger.error(f"❌ Voice processing error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Mobile Application Endpoints
+@app.post("/api/mobile/connect", response_model=MobileConnectResponse)
+async def mobile_connect(request: MobileConnectRequest):
+    """Connect mobile application to API Gateway"""
+    try:
+        # Generate session token
+        session_token = str(uuid.uuid4())
+
+        # Store mobile session (in a real app, use database)
+        logger.info(f"📱 Mobile app connected: {request.device_id} ({request.platform})")
+
+        return MobileConnectResponse(
+            session_token=session_token,
+            websocket_url="ws://localhost:8000/ws/mobile",  # Placeholder
+            api_version="1.0.0"
+        )
+    except Exception as e:
+        logger.error(f"❌ Mobile connect error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/mobile/session", response_model=MobileSessionResponse)
+async def mobile_session(request: MobileSessionRequest, background_tasks: BackgroundTasks):
+    """Handle mobile application session actions"""
+    try:
+        if not session_manager:
+            raise HTTPException(status_code=503, detail="Session manager not available")
+
+        data = request.data or {}
+
+        if request.action == "start_call":
+            # Start a new IVR call session for mobile
+            session_id = str(uuid.uuid4())
+            metadata = TransportMetadata(
+                transport_type=TransportType.WEBRTC,
+                provider_id="mobile_app",
+                connection_id=request.session_token,
+                raw_data={"mobile_session_token": request.session_token}
+            )
+
+            success = await session_manager.create_session(session_id, metadata)
+            if success:
+                # Start AI processing in background
+                background_tasks.add_task(process_mobile_call, session_id, data)
+                return MobileSessionResponse(
+                    status="success",
+                    session_id=session_id,
+                    message="Call session started"
+                )
+            else:
+                raise HTTPException(status_code=500, detail="Failed to create session")
+
+        elif request.action == "end_call":
+            session_id = data.get("session_id")
+            if session_id:
+                await session_manager.end_session(session_id)
+                return MobileSessionResponse(
+                    status="success",
+                    message="Call session ended"
+                )
+            else:
+                raise HTTPException(status_code=400, detail="Session ID required")
+
+        elif request.action == "send_message":
+            # Handle text message from mobile app
+            session_id = data.get("session_id")
+            message = data.get("message", "")
+            if session_id and message:
+                # Process message through AI engine
+                if ai_engine:
+                    response = await ai_engine.process_conversational_request(
+                        text=message,
+                        language="en",
+                        session_context={"session_id": session_id, "source": "mobile_app"}
+                    )
+                    return MobileSessionResponse(
+                        status="success",
+                        session_id=session_id,
+                        message=response.get("response_text", "Message processed")
+                    )
+                else:
+                    raise HTTPException(status_code=503, detail="AI engine not available")
+            else:
+                raise HTTPException(status_code=400, detail="Session ID and message required")
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown action: {request.action}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Mobile session error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def process_mobile_call(session_id: str, data: Dict[str, Any]):
+    """Process mobile call in background"""
+    try:
+        logger.info(f"📱 Processing mobile call: {session_id}")
+
+        # Initialize AI conversation
+        if ai_engine:
+            initial_message = data.get("initial_message", "Hello, how can I help you?")
+            response = await ai_engine.process_conversational_request(
+                text=initial_message,
+                language="en",
+                session_context={"session_id": session_id, "source": "mobile_app"}
+            )
+
+            # Send response back to mobile via WebSocket or push notification
+            if response:
+                logger.info(f"📱 AI Response for mobile: {response.get('response_text', 'No response')}")
+
+    except Exception as e:
+        logger.error(f"❌ Mobile call processing error: {e}")
 
 if __name__ == "__main__":
     import uvicorn

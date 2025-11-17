@@ -12,6 +12,7 @@ const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
 // Custom server with Socket.IO integration
 async function createCustomServer() {
   try {
+    console.log('Creating Next.js app...');
     // Create Next.js app
     // next() here is typed as a module; cast to any to call at runtime.
     const nextApp = (next as any)({
@@ -21,7 +22,10 @@ async function createCustomServer() {
       conf: dev ? undefined : { distDir: './.next' }
     });
 
+    console.log('Preparing Next.js app...');
     await nextApp.prepare();
+    console.log('Next.js app prepared.');
+
     const handle = nextApp.getRequestHandler();
 
     // Create HTTP server that will handle both Next.js and Socket.IO

@@ -1307,6 +1307,17 @@ function NodePropertyPanel({ selectedNode, onNodeUpdate, onClose }: NodeProperty
 };
 
 const WorkflowBuilder: React.FC = () => {
+  // Real-time data integration (temporarily disabled to test for infinite loop)
+  /*
+  const {
+    data: liveData,
+    isConnected,
+    error: wsError,
+    executeWorkflow,
+    getNodeStatus
+  } = useRealTimeWorkflowData();
+  */
+
   // Real-time data integration
   const {
     data: liveData,
@@ -1373,30 +1384,39 @@ const WorkflowBuilder: React.FC = () => {
 
   // Sync workflows with real-time data
   useEffect(() => {
-    if (liveData.workflows.length > 0) {
+    if (liveData.workflows.length > 0 && JSON.stringify(liveData.workflows) !== JSON.stringify(workflows)) {
       setWorkflows(liveData.workflows);
     }
     // Don't replace initial mock data if real-time data is empty
-  }, [liveData.workflows]);
+  }, [liveData.workflows, workflows]);
 
   // Update node statuses with real-time data
   useEffect(() => {
-    setNodes(currentNodes =>
-      currentNodes.map(node => {
+    setNodes(currentNodes => {
+      const updatedNodes = currentNodes.map(node => {
         const liveStatus = getNodeStatus(node.id);
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            executionStatus: liveStatus.status === 'idle' ? undefined : liveStatus.status,
-            lastExecuted: liveStatus.lastExecuted,
-            executionCount: liveStatus.executionCount,
-            averageTime: liveStatus.averageTime,
-          }
+        const newData = {
+          ...node.data,
+          executionStatus: liveStatus.status === 'idle' ? undefined : liveStatus.status,
+          lastExecuted: liveStatus.lastExecuted,
+          executionCount: liveStatus.executionCount,
+          averageTime: liveStatus.averageTime,
         };
-      })
-    );
-  }, [liveData.nodeStatuses, getNodeStatus, setNodes]);
+
+        // Only update if data actually changed
+        if (JSON.stringify(newData) !== JSON.stringify(node.data)) {
+          return {
+            ...node,
+            data: newData
+          };
+        }
+        return node;
+      });
+
+      // Only update state if nodes actually changed
+      return updatedNodes.some((node, index) => node !== currentNodes[index]) ? updatedNodes : currentNodes;
+    });
+  }, [liveData.nodeStatuses, getNodeStatus]);
 
   // Node selection handler
   const onNodeClick = useCallback((event: any, node: Node<WorkflowNodeData>) => {
@@ -1798,7 +1818,7 @@ const WorkflowBuilder: React.FC = () => {
                 </div>
 
                 {/* Node List */}
-                <div className="space-y-2 max-h-96 overflow-y-auto">
+                <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
                   {getFilteredNodeTypes().map(([type, config]) => {
                     const Icon = config.icon;
                     return (
@@ -1885,7 +1905,7 @@ const WorkflowBuilder: React.FC = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="h-[700px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
+                      <div className="h-[calc(100vh-350px)] min-h-[500px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
                         <ReactFlow
                           nodes={nodes}
                           edges={edges}

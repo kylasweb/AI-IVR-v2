@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Plus, Users, Target, TrendingUp, Building2, MapPin, Calendar, DollarSign, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { AlertCircle, Plus, Users, Target, TrendingUp, Building, MapPin, Calendar, TrendingUp as DollarSign, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import MemberManagement from '@/components/cooperative/member-management';
 import InitiativeManagement from '@/components/cooperative/initiative-management';
 import ManagementLayout from '@/components/layout/management-layout';
@@ -226,7 +226,7 @@ const StrategyPlannerPage: React.FC = () => {
                         <Dialog open={showSocietyDialog} onOpenChange={setShowSocietyDialog}>
                             <DialogTrigger asChild>
                                 <Button>
-                                    <Building2 className="h-4 w-4 mr-2" />
+                                    <Building className="h-4 w-4 mr-2" />
                                     Add Society
                                 </Button>
                             </DialogTrigger>
@@ -425,7 +425,7 @@ const StrategyPlannerPage: React.FC = () => {
                                     <CardContent>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Building2 className="h-4 w-4 text-blue-500" />
+                                                <Building className="h-4 w-4 text-blue-500" />
                                                 <span>{society.type.replace('_', ' ').toUpperCase()}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
@@ -468,7 +468,7 @@ const StrategyPlannerPage: React.FC = () => {
                                     <CardContent>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Building2 className="h-4 w-4 text-blue-500" />
+                                                <Building className="h-4 w-4 text-blue-500" />
                                                 <span>{strategy.society.name}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 // GET /api/cooperative/societies/[id] - Get a specific cooperative society
 export async function GET(
@@ -9,7 +7,7 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const society = await prisma.cooperativeSociety.findUnique({
+        const society = await db.cooperativeSociety.findUnique({
             where: { id: params.id },
             include: {
                 members: {
@@ -93,7 +91,7 @@ export async function PUT(
         const body = await request.json();
         const { name, description, type, region, status } = body;
 
-        const society = await prisma.cooperativeSociety.update({
+        const society = await db.cooperativeSociety.update({
             where: { id: params.id },
             data: {
                 ...(name && { name }),
@@ -138,7 +136,7 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.cooperativeSociety.delete({
+        await db.cooperativeSociety.delete({
             where: { id: params.id }
         });
 

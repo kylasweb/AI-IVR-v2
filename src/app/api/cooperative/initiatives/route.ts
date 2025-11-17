@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
     try {
@@ -24,7 +22,7 @@ export async function GET(request: NextRequest) {
             where.priority = priority;
         }
 
-        const initiatives = await prisma.cooperativeInitiative.findMany({
+        const initiatives = await db.cooperativeInitiative.findMany({
             where,
             include: {
                 strategy: {
@@ -76,7 +74,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if strategy exists
-        const strategy = await prisma.cooperativeStrategy.findUnique({
+        const strategy = await db.cooperativeStrategy.findUnique({
             where: { id: strategyId }
         });
 
@@ -87,7 +85,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const initiative = await prisma.cooperativeInitiative.create({
+        const initiative = await db.cooperativeInitiative.create({
             data: {
                 strategyId,
                 title,

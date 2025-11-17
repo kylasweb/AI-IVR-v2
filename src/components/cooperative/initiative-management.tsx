@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, Plus, Target, CheckCircle, Clock, TrendingUp, Calendar, DollarSign, Users } from 'lucide-react';
+import { AlertCircle, Plus, Target, CheckCircle, Clock, TrendingUp, Calendar, TrendingUp as DollarSign, Users } from 'lucide-react';
 
 interface CooperativeInitiative {
     id: string;
