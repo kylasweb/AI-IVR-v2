@@ -9,13 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GripVertical, X } from 'lucide-react';
 import {
   Activity,
   Users,
@@ -50,53 +43,6 @@ import {
   Network,
   Router
 } from 'lucide-react';
-
-// Sortable Widget Component
-interface SortableWidgetProps {
-  id: string;
-  children: React.ReactNode;
-  onRemove?: () => void;
-}
-
-function SortableWidget({ id, children, onRemove }: SortableWidgetProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className="relative group">
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute -left-8 top-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10"
-      >
-        <GripVertical className="h-5 w-5 text-gray-400" />
-      </div>
-      {onRemove && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full bg-red-500 hover:bg-red-600"
-          onClick={onRemove}
-        >
-          <X className="h-3 w-3 text-white" />
-        </Button>
-      )}
-      {children}
-    </div>
-  );
-}
 
 // Import feature components
 import WorkflowBuilder from '@/components/ivr/workflow-builder';
@@ -157,41 +103,6 @@ export default function MainDashboard() {
     overall: 'healthy',
     services: []
   });
-
-  // Dashboard widgets state
-  const [widgets, setWidgets] = useState([
-    { id: 'stats', title: 'Key Metrics', visible: true },
-    { id: 'health', title: 'System Health', visible: true },
-    { id: 'recent-activity', title: 'Recent Activity', visible: true },
-    { id: 'quick-actions', title: 'Quick Actions', visible: true },
-    { id: 'performance', title: 'Performance Overview', visible: true }
-  ]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setWidgets((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
-
-  const toggleWidgetVisibility = (widgetId: string) => {
-    setWidgets(widgets.map(widget =>
-      widget.id === widgetId ? { ...widget, visible: !widget.visible } : widget
-    ));
-  };
 
   // Load dashboard data
   useEffect(() => {
@@ -382,50 +293,15 @@ export default function MainDashboard() {
   ];
 
   const renderClientAdminOverview = () => (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="space-y-6">
-        {/* Hero Section with Carousel */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white rounded-lg p-8"
-        >
-          <Carousel className="w-full max-w-4xl">
-            <CarouselContent>
-              <CarouselItem>
-                <div>
-                  <h1 className="text-4xl font-bold mb-4">Welcome to FairGo AI IVR</h1>
-                  <p className="text-xl mb-6 opacity-90">
-                    Manage your AI-powered dispatch operations with advanced voice automation
-                  </p>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div>
-                  <h1 className="text-4xl font-bold mb-4">Real-time Insights</h1>
-                  <p className="text-xl mb-6 opacity-90">
-                    Monitor performance and customer satisfaction in real-time
-                  </p>
-                </div>
-              </CarouselItem>
-              <CarouselItem>
-                <div>
-                  <h1 className="text-4xl font-bold mb-4">Advanced Analytics</h1>
-                  <p className="text-xl mb-6 opacity-90">
-                    Leverage AI-driven analytics for better decision making
-                  </p>
-                </div>
-              </CarouselItem>
-            </CarouselContent>
-            <CarouselPrevious className="text-white border-white/20 hover:bg-white/10" />
-            <CarouselNext className="text-white border-white/20 hover:bg-white/10" />
-          </Carousel>
-          <div className="flex flex-wrap gap-3 items-center mt-6">
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white rounded-lg p-8">
+        <div className="max-w-4xl">
+          <h1 className="text-4xl font-bold mb-4">Welcome to FairGo AI IVR</h1>
+          <p className="text-xl mb-6 opacity-90">
+            Manage your AI-powered dispatch operations with advanced voice automation and real-time insights
+          </p>
+          <div className="flex flex-wrap gap-3 items-center">
             <Badge variant="secondary" className="bg-white/20 text-white px-4 py-2">
               Professional Plan
             </Badge>
@@ -440,169 +316,157 @@ export default function MainDashboard() {
               <span>{loading ? 'Loading data...' : 'Live data • Updates every 30s'}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
+      </div>
 
-        {/* Draggable Widgets */}
-        <SortableContext items={widgets.map(w => w.id)} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            <AnimatePresence>
-              {widgets.filter(w => w.visible).map((widget) => (
-                <SortableWidget
-                  key={widget.id}
-                  id={widget.id}
-                  onRemove={() => toggleWidgetVisibility(widget.id)}
-                >
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {widget.id === 'stats' && (
-                      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-blue-900">Key Metrics</h3>
-                            <Phone className="h-6 w-6 text-blue-600" />
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-blue-700">Total Calls</span>
-                              <span className="font-bold text-blue-900">{stats.totalCalls.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-blue-700">Active Calls</span>
-                              <span className="font-bold text-blue-900">{stats.activeCalls}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-blue-700">Active Agents</span>
-                              <span className="font-bold text-blue-900">{stats.activeAgents}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Calls This Month</p>
+                {loading ? (
+                  <div className="h-9 w-20 bg-blue-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-900">{stats.totalCalls.toLocaleString()}</p>
+                )}
+                <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                  <TrendingUp className="h-3 w-3" />
+                  {loading ? 'Loading...' : '+12% from last month'}
+                </p>
+              </div>
+              <Phone className="h-10 w-10 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
 
-                    {widget.id === 'health' && (
-                      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-green-900">System Health</h3>
-                            <Activity className="h-6 w-6 text-green-600" />
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-3 h-3 rounded-full ${health.overall === 'healthy' ? 'bg-green-500' :
-                                  health.overall === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                                }`}></div>
-                              <span className="text-sm capitalize">{health.overall}</span>
-                            </div>
-                            <div className="text-xs text-green-700">
-                              {health.services.filter(s => s.status === 'online').length} of {health.services.length} services online
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700">Active Operators</p>
+                {loading ? (
+                  <div className="h-9 w-16 bg-green-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-green-900">{stats.activeAgents}</p>
+                )}
+                <p className="text-xs text-green-600">
+                  {loading ? 'Loading...' : 'Out of 25 licensed'}
+                </p>
+              </div>
+              <Users className="h-10 w-10 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
 
-                    {widget.id === 'recent-activity' && (
-                      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-purple-900">Recent Activity</h3>
-                            <Clock className="h-6 w-6 text-purple-600" />
-                          </div>
-                          <div className="space-y-2">
-                            <div className="text-xs text-purple-700">• Call completed - 2 min ago</div>
-                            <div className="text-xs text-purple-700">• Agent logged in - 5 min ago</div>
-                            <div className="text-xs text-purple-700">• Workflow updated - 10 min ago</div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-700">System Uptime</p>
+                {loading ? (
+                  <div className="h-9 w-16 bg-purple-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-purple-900">{stats.uptime}%</p>
+                )}
+                <p className="text-xs text-purple-600">Last 30 days</p>
+              </div>
+              <Activity className="h-10 w-10 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
 
-                    {widget.id === 'quick-actions' && (
-                      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-orange-900">Quick Actions</h3>
-                            <Zap className="h-6 w-6 text-orange-600" />
-                          </div>
-                          <div className="space-y-2">
-                            <Button size="sm" className="w-full justify-start" variant="outline">
-                              <Phone className="h-4 w-4 mr-2" />
-                              Start New Call
-                            </Button>
-                            <Button size="sm" className="w-full justify-start" variant="outline">
-                              <Users className="h-4 w-4 mr-2" />
-                              Add Agent
-                            </Button>
-                            <Button size="sm" className="w-full justify-start" variant="outline">
-                              <BarChart3 className="h-4 w-4 mr-2" />
-                              View Reports
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {widget.id === 'performance' && (
-                      <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-indigo-900">Performance</h3>
-                            <TrendingUp className="h-6 w-6 text-indigo-600" />
-                          </div>
-                          <div className="space-y-3">
-                            <div>
-                              <div className="flex justify-between text-sm mb-1">
-                                <span>Uptime</span>
-                                <span>{stats.uptime}%</span>
-                              </div>
-                              <Progress value={stats.uptime} className="h-2" />
-                            </div>
-                            <div>
-                              <div className="flex justify-between text-sm mb-1">
-                                <span>Satisfaction</span>
-                                <span>{stats.satisfaction}%</span>
-                              </div>
-                              <Progress value={stats.satisfaction} className="h-2" />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </motion.div>
-                </SortableWidget>
-              ))}
-            </AnimatePresence>
-          </div>
-        </SortableContext>
-
-        {/* Widget Controls */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Customize Dashboard</CardTitle>
-            <CardDescription>Show or hide dashboard widgets</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {widgets.map((widget) => (
-                <Button
-                  key={widget.id}
-                  variant={widget.visible ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleWidgetVisibility(widget.id)}
-                >
-                  {widget.title}
-                </Button>
-              ))}
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-700">Monthly Cost</p>
+                {loading ? (
+                  <div className="h-9 w-20 bg-orange-200 animate-pulse rounded mt-1"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-orange-900">₹9,999</p>
+                )}
+                <p className="text-xs text-orange-600">Next billing: Dec 15</p>
+              </div>
+              <CreditCard className="h-10 w-10 text-orange-600" />
             </div>
           </CardContent>
         </Card>
       </div>
-    </DndContext>
+
+      {/* Billing & Usage Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-6 w-6" />
+              Current Plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Professional Plan</span>
+                <Badge variant="default">Active</Badge>
+              </div>
+              <div className="text-2xl font-bold">₹9,999/month</div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Operators</span>
+                  <span>18 / 25</span>
+                </div>
+                <Progress value={72} className="h-2" />
+                <div className="flex justify-between text-sm">
+                  <span>Monthly Calls</span>
+                  <span>7,250 / 10,000</span>
+                </div>
+                <Progress value={72.5} className="h-2" />
+              </div>
+              <Button className="w-full" variant="outline">
+                Upgrade Plan
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Receipt className="h-6 w-6" />
+              Recent Invoices
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-3 border rounded">
+                <div>
+                  <div className="font-medium">Nov 15, 2024</div>
+                  <div className="text-sm text-gray-600">Professional Plan</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">₹9,999</div>
+                  <Button size="sm" variant="ghost">Download</Button>
+                </div>
+              </div>
+              <div className="flex justify-between items-center p-3 border rounded">
+                <div>
+                  <div className="font-medium">Oct 15, 2024</div>
+                  <div className="text-sm text-gray-600">Professional Plan</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">₹9,999</div>
+                  <Button size="sm" variant="ghost">Download</Button>
+                </div>
+              </div>
+            </div>
+            <Button className="w-full mt-4" variant="outline">
+              View All Invoices
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 
   const renderFairGoAdminOverview = () => (

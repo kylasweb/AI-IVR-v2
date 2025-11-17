@@ -13,12 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { MDXEditor, headingsPlugin, listsPlugin, quotePlugin, thematicBreakPlugin, markdownShortcutPlugin } from '@mdxeditor/editor';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings,
   Save,
@@ -33,10 +27,7 @@ import {
   CheckCircle,
   Info,
   GitBranch,
-  Tag,
-  GripVertical,
-  Edit,
-  X
+  Tag
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/lib/api-client';
@@ -59,121 +50,6 @@ interface SettingCategory {
   settings: SystemSetting[];
 }
 
-// Sortable Setting Component
-interface SortableSettingProps {
-  setting: SystemSetting;
-  onUpdate: (id: string, value: string) => void;
-  isEditing: boolean;
-  onToggleEdit: () => void;
-}
-
-function SortableSetting({ setting, onUpdate, isEditing, onToggleEdit }: SortableSettingProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: setting.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <motion.div
-      ref={setNodeRef}
-      style={style}
-      className="border rounded-lg p-4 bg-white"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          {...attributes}
-          {...listeners}
-          className="mt-1 cursor-grab active:cursor-grabbing"
-        >
-          <GripVertical className="h-4 w-4 text-gray-400" />
-        </div>
-
-        <div className="flex-1 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Label className="font-medium text-sm">{setting.key}</Label>
-              {setting.isEncrypted && <Badge variant="secondary" className="text-xs">Encrypted</Badge>}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleEdit}
-              className="h-6 w-6 p-0"
-            >
-              {isEditing ? <Save className="h-3 w-3" /> : <Edit className="h-3 w-3" />}
-            </Button>
-          </div>
-
-          {isEditing ? (
-            <div className="space-y-2">
-              <MDXEditor
-                markdown={setting.description || ''}
-                plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), markdownShortcutPlugin()]}
-                className="min-h-[100px] border rounded"
-                onChange={(markdown) => {
-                  // Update description
-                  setting.description = markdown;
-                }}
-              />
-            </div>
-          ) : (
-            <div className="text-sm text-gray-600 prose prose-sm max-w-none">
-              {setting.description ? (
-                <div dangerouslySetInnerHTML={{ __html: setting.description }} />
-              ) : (
-                <span className="text-gray-400 italic">No description</span>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs text-gray-500">Type</Label>
-              <Badge variant="outline" className="text-xs">{setting.type}</Badge>
-            </div>
-            <div>
-              <Label className="text-xs text-gray-500">Value</Label>
-              {setting.type === 'boolean' ? (
-                <Switch
-                  checked={setting.value === 'true'}
-                  onCheckedChange={(checked) => onUpdate(setting.id, checked.toString())}
-                />
-              ) : setting.type === 'number' ? (
-                <Input
-                  type="number"
-                  value={setting.value}
-                  onChange={(e) => onUpdate(setting.id, e.target.value)}
-                  className="h-8 text-sm"
-                />
-              ) : (
-                <Input
-                  value={setting.value}
-                  onChange={(e) => onUpdate(setting.id, e.target.value)}
-                  className="h-8 text-sm"
-                  type={setting.isEncrypted ? 'password' : 'text'}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function SystemSettings() {
   const { isDemoMode } = useMockData();
   const [settings, setSettings] = useState<SettingCategory[]>([]);
@@ -185,41 +61,6 @@ export default function SystemSettings() {
   const [releases, setReleases] = useState<any[]>([]);
   const [loadingCommits, setLoadingCommits] = useState(false);
   const [loadingReleases, setLoadingReleases] = useState(false);
-  const [editingDescriptions, setEditingDescriptions] = useState<Record<string, boolean>>({});
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent, categoryName: string) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setSettings(prevSettings =>
-        prevSettings.map(category => {
-          if (category.name === categoryName) {
-            const oldIndex = category.settings.findIndex(setting => setting.id === active.id);
-            const newIndex = category.settings.findIndex(setting => setting.id === over.id);
-            return {
-              ...category,
-              settings: arrayMove(category.settings, oldIndex, newIndex)
-            };
-          }
-          return category;
-        })
-      );
-    }
-  };
-
-  const toggleDescriptionEdit = (settingId: string) => {
-    setEditingDescriptions(prev => ({
-      ...prev,
-      [settingId]: !prev[settingId]
-    }));
-  };
 
   useEffect(() => {
     fetchSettings();
@@ -794,27 +635,36 @@ export default function SystemSettings() {
                     <CardDescription>{currentCategory.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={(event) => handleDragEnd(event, currentCategory.name)}
-                    >
-                      <SortableContext items={currentCategory.settings.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-4">
-                          <AnimatePresence>
-                            {currentCategory.settings.map((setting) => (
-                              <SortableSetting
-                                key={setting.id}
-                                setting={setting}
-                                onUpdate={updateSetting}
-                                isEditing={editingDescriptions[setting.id] || false}
-                                onToggleEdit={() => toggleDescriptionEdit(setting.id)}
-                              />
-                            ))}
-                          </AnimatePresence>
+                    <div className="space-y-6">
+                      {currentCategory.settings.map((setting) => (
+                        <div key={setting.id} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <Label className="text-base font-medium">
+                                {setting.key}
+                                {setting.isEncrypted && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">
+                                    Encrypted
+                                  </Badge>
+                                )}
+                              </Label>
+                              {setting.description && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {setting.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {setting.type}
+                              </Badge>
+                              {renderSettingInput(setting)}
+                            </div>
+                          </div>
+                          <Separator />
                         </div>
-                      </SortableContext>
-                    </DndContext>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -971,27 +821,36 @@ export default function SystemSettings() {
                   <CardDescription>{currentCategory.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event) => handleDragEnd(event, currentCategory.name)}
-                  >
-                    <SortableContext items={currentCategory.settings.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                      <div className="space-y-4">
-                        <AnimatePresence>
-                          {currentCategory.settings.map((setting) => (
-                            <SortableSetting
-                              key={setting.id}
-                              setting={setting}
-                              onUpdate={updateSetting}
-                              isEditing={editingDescriptions[setting.id] || false}
-                              onToggleEdit={() => toggleDescriptionEdit(setting.id)}
-                            />
-                          ))}
-                        </AnimatePresence>
+                  <div className="space-y-6">
+                    {currentCategory.settings.map((setting) => (
+                      <div key={setting.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <Label className="text-base font-medium">
+                              {setting.key}
+                              {setting.isEncrypted && (
+                                <Badge variant="secondary" className="ml-2 text-xs">
+                                  Encrypted
+                                </Badge>
+                              )}
+                            </Label>
+                            {setting.description && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                {setting.description}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {setting.type}
+                            </Badge>
+                            {renderSettingInput(setting)}
+                          </div>
+                        </div>
+                        <Separator />
                       </div>
-                    </SortableContext>
-                  </DndContext>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )

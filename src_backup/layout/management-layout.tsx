@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import MobileBottomNav from './mobile-bottom-nav';
 import {
@@ -29,11 +29,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useMockData } from '@/hooks/use-mock-data';
 import {
     Phone,
@@ -70,11 +65,7 @@ import {
     Globe as LangIcon,
     FileText as BookIcon,
     Settings as CommandIcon,
-    Globe as WifiIcon,
-    Search,
-    ChevronRight,
-    ChevronDown,
-    GripVertical
+    Globe as WifiIcon
 } from 'lucide-react';
 
 interface ManagementLayoutProps {
@@ -108,16 +99,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
 
     // Add back controlled state for sidebar
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-        'Core Systems': true,
-        'Management': true,
-        'Voice & AI': true,
-        'Testing & QA': false,
-        'Configuration': false,
-        'Analytics & Monitoring': false,
-        'Administration': false
-    });
 
     // Handle responsive behavior
     useEffect(() => {
@@ -448,29 +429,6 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         }
     ];
 
-    // Filtered navigation based on search
-    const filteredNavigation = useMemo(() => {
-        if (!searchQuery.trim()) return navigationSections;
-
-        return navigationSections.map(section => ({
-            ...section,
-            items: section.items.filter(item =>
-                item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                section.title.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        })).filter(section => section.items.length > 0);
-    }, [navigationSections, searchQuery]);
-
-    // All navigation items for command palette
-    const allNavigationItems = useMemo(() => {
-        return navigationSections.flatMap(section =>
-            section.items.map(item => ({
-                ...item,
-                section: section.title
-            }))
-        );
-    }, [navigationSections]);
-
     const handleNavigation = (url: string) => {
         router.push(url);
     };
@@ -479,8 +437,8 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
         <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <div className="min-h-screen w-full bg-gray-50">
                 <Sidebar variant="inset" collapsible="icon" className="border-r border-gray-200">
-                    <SidebarHeader className="border-b border-gray-200 bg-white p-4">
-                        <div className="flex items-center gap-2 mb-4">
+                    <SidebarHeader className="border-b border-gray-200 bg-white">
+                        <div className="flex items-center gap-2 px-4 py-3">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                                 <Bot className="h-5 w-5 text-white" />
                             </div>
@@ -489,139 +447,56 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                                 <p className="text-xs text-gray-600">Management Portal</p>
                             </div>
                         </div>
-
-                        {/* Search Bar */}
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    className="w-full justify-start text-sm text-muted-foreground"
-                                >
-                                    <Search className="mr-2 h-4 w-4" />
-                                    Search navigation...
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0" align="start">
-                                <Command>
-                                    <CommandInput
-                                        placeholder="Search navigation..."
-                                        value={searchQuery}
-                                        onValueChange={setSearchQuery}
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty>No results found.</CommandEmpty>
-                                        {allNavigationItems.map((item) => (
-                                            <CommandItem
-                                                key={item.url}
-                                                onSelect={() => {
-                                                    handleNavigation(item.url);
-                                                    setSearchQuery('');
-                                                }}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <item.icon className="h-4 w-4" />
-                                                <div className="flex flex-col">
-                                                    <span>{item.title}</span>
-                                                    <span className="text-xs text-muted-foreground">{item.section}</span>
-                                                </div>
-                                                {item.badge && (
-                                                    <Badge variant="secondary" className="ml-auto text-xs">
-                                                        {item.badge}
-                                                    </Badge>
-                                                )}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
                     </SidebarHeader>
 
                     <SidebarContent className="bg-white">
-                        <AnimatePresence>
-                            {filteredNavigation.map((section, index) => (
-                                <motion.div
-                                    key={section.title}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <Collapsible
-                                        open={openSections[section.title]}
-                                        onOpenChange={(open) =>
-                                            setOpenSections(prev => ({ ...prev, [section.title]: open }))
-                                        }
-                                    >
-                                        <SidebarGroup>
-                                            <CollapsibleTrigger asChild>
-                                                <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between">
-                                                    <span>{section.title}</span>
-                                                    {openSections[section.title] ? (
-                                                        <ChevronDown className="h-3 w-3" />
-                                                    ) : (
-                                                        <ChevronRight className="h-3 w-3" />
-                                                    )}
-                                                </SidebarGroupLabel>
-                                            </CollapsibleTrigger>
-                                            <CollapsibleContent>
-                                                <SidebarGroupContent>
-                                                    <SidebarMenu>
-                                                        <AnimatePresence>
-                                                            {section.items.map((item) => {
-                                                                const Icon = item.icon;
-                                                                return (
-                                                                    <motion.div
-                                                                        key={item.url}
-                                                                        initial={{ opacity: 0, x: -10 }}
-                                                                        animate={{ opacity: 1, x: 0 }}
-                                                                        exit={{ opacity: 0, x: -10 }}
-                                                                        transition={{ duration: 0.15 }}
-                                                                    >
-                                                                        <SidebarMenuItem>
-                                                                            <SidebarMenuButton
-                                                                                asChild
-                                                                                className={`w-full justify-start px-4 py-2 text-sm transition-colors ${item.isActive
-                                                                                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                                                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                                                    }`}
-                                                                            >
-                                                                                <button
-                                                                                    onClick={() => handleNavigation(item.url)}
-                                                                                    className="flex items-center gap-3 w-full"
-                                                                                >
-                                                                                    <Icon className="h-4 w-4" />
-                                                                                    <span className="flex-1 text-left">{item.title}</span>
-                                                                                    {item.badge && (
-                                                                                        <Badge
-                                                                                            variant={
-                                                                                                item.badge === 'AI' || item.badge === 'ML'
-                                                                                                    ? 'default'
-                                                                                                    : item.badge === 'New'
-                                                                                                        ? 'secondary'
-                                                                                                        : 'outline'
-                                                                                            }
-                                                                                            className="text-xs"
-                                                                                        >
-                                                                                            {item.badge}
-                                                                                        </Badge>
-                                                                                    )}
-                                                                                </button>
-                                                                            </SidebarMenuButton>
-                                                                        </SidebarMenuItem>
-                                                                    </motion.div>
-                                                                );
-                                                            })}
-                                                        </AnimatePresence>
-                                                    </SidebarMenu>
-                                                </SidebarGroupContent>
-                                            </CollapsibleContent>
-                                        </SidebarGroup>
-                                    </Collapsible>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
+                        {navigationSections.map((section, index) => (
+                            <SidebarGroup key={index}>
+                                <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-2">
+                                    {section.title}
+                                </SidebarGroupLabel>
+                                <SidebarGroupContent>
+                                    <SidebarMenu>
+                                        {section.items.map((item) => {
+                                            const Icon = item.icon;
+                                            return (
+                                                <SidebarMenuItem key={item.url}>
+                                                    <SidebarMenuButton
+                                                        asChild
+                                                        className={`w-full justify-start px-4 py-2 text-sm transition-colors ${item.isActive
+                                                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
+                                                            : 'text-gray-700 hover:bg-gray-50'
+                                                            }`}
+                                                    >
+                                                        <button
+                                                            onClick={() => handleNavigation(item.url)}
+                                                            className="flex items-center gap-3 w-full"
+                                                        >
+                                                            <Icon className="h-4 w-4" />
+                                                            <span className="flex-1 text-left">{item.title}</span>
+                                                            {item.badge && (
+                                                                <Badge
+                                                                    variant={
+                                                                        item.badge === 'AI' || item.badge === 'ML'
+                                                                            ? 'default'
+                                                                            : item.badge === 'New'
+                                                                                ? 'secondary'
+                                                                                : 'outline'
+                                                                    }
+                                                                    className="text-xs"
+                                                                >
+                                                                    {item.badge}
+                                                                </Badge>
+                                                            )}
+                                                        </button>
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
+                                            );
+                                        })}
+                                    </SidebarMenu>
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        ))}
                     </SidebarContent>
 
                     <SidebarFooter className="border-t border-gray-200 bg-white">
