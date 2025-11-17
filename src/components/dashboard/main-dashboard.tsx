@@ -198,7 +198,7 @@ export default function MainDashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       setLiveDataError(false);
-      
+
       if (isDemoMode) {
         // Use mock data in demo mode
         setStats(mockDataGenerators.generateDashboardStats());
@@ -442,15 +442,14 @@ export default function MainDashboard() {
               99.9% Uptime
             </Badge>
             <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
-              <div className={`w-2 h-2 rounded-full ${
-                loading ? 'bg-yellow-400 animate-pulse' : 
-                liveDataError ? 'bg-red-400' : 
-                'bg-green-400 animate-pulse'
-              }`}></div>
+              <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' :
+                  liveDataError ? 'bg-red-400' :
+                    'bg-green-400 animate-pulse'
+                }`}></div>
               <span>
-                {loading ? 'Loading data...' : 
-                 liveDataError ? 'Live data unavailable' : 
-                 'Live data • Updates every 30s'}
+                {loading ? 'Loading data...' :
+                  liveDataError ? 'Live data unavailable' :
+                    'Live data • Updates every 30s'}
               </span>
             </div>
           </div>
@@ -659,15 +658,14 @@ export default function MainDashboard() {
               Training Hub
             </Badge>
             <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
-              <div className={`w-2 h-2 rounded-full ${
-                loading ? 'bg-yellow-400 animate-pulse' : 
-                liveDataError ? 'bg-red-400' : 
-                'bg-green-400 animate-pulse'
-              }`}></div>
+              <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' :
+                  liveDataError ? 'bg-red-400' :
+                    'bg-green-400 animate-pulse'
+                }`}></div>
               <span>
-                {loading ? 'Loading data...' : 
-                 liveDataError ? 'Live data unavailable' : 
-                 'Live data • Updates every 30s'}
+                {loading ? 'Loading data...' :
+                  liveDataError ? 'Live data unavailable' :
+                    'Live data • Updates every 30s'}
               </span>
             </div>
           </div>
@@ -826,15 +824,14 @@ export default function MainDashboard() {
               Telephony Gateway
             </Badge>
             <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full">
-              <div className={`w-2 h-2 rounded-full ${
-                loading ? 'bg-yellow-400 animate-pulse' : 
-                liveDataError ? 'bg-red-400' : 
-                'bg-green-400 animate-pulse'
-              }`}></div>
+              <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' :
+                  liveDataError ? 'bg-red-400' :
+                    'bg-green-400 animate-pulse'
+                }`}></div>
               <span>
-                {loading ? 'Loading data...' : 
-                 liveDataError ? 'Live data unavailable' : 
-                 'Live data • Updates every 30s'}
+                {loading ? 'Loading data...' :
+                  liveDataError ? 'Live data unavailable' :
+                    'Live data • Updates every 30s'}
               </span>
             </div>
           </div>
@@ -1152,15 +1149,14 @@ export default function MainDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full border border-gray-200">
-                <div className={`w-2 h-2 rounded-full ${
-                  loading ? 'bg-yellow-400 animate-pulse' : 
-                  liveDataError ? 'bg-red-400' : 
-                  'bg-green-400 animate-pulse'
-                }`}></div>
+                <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' :
+                    liveDataError ? 'bg-red-400' :
+                      'bg-green-400 animate-pulse'
+                  }`}></div>
                 <span>
-                  {loading ? 'Loading data...' : 
-                   liveDataError ? 'Live data unavailable' : 
-                   'Live data • Updates every 30s'}
+                  {loading ? 'Loading data...' :
+                    liveDataError ? 'Live data unavailable' :
+                      'Live data • Updates every 30s'}
                 </span>
               </div>
               <Link href="/settings">

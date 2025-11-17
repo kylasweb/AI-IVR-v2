@@ -26,6 +26,13 @@ model User {
   UserRole        UserRole[]
   voiceProfile    VoiceProfile?
   operatorProfile OperatorProfile?
+
+  // Cooperative Relations
+  cooperativeMembers  CooperativeMember[]
+  createdStrategies   CooperativeStrategy[]   @relation("StrategyCreator")
+  assignedStrategies  CooperativeStrategy[]   @relation("StrategyAssignee")
+  createdInitiatives  CooperativeInitiative[] @relation("InitiativeCreator")
+  assignedInitiatives CooperativeInitiative[] @relation("InitiativeAssignee")
 }
 
 model Driver {
@@ -97,7 +104,7 @@ model Post {
 // Workflow Builder Models
 model Workflow {
   id          String   @id @default(cuid())
-  name        String
+  name        String   @unique
   description String?
   category    String   @default("CUSTOM")
   isActive    Boolean  @default(true)
@@ -1047,4 +1054,120 @@ model CallHandoff {
   @@index([priority])
   @@index([handoffType])
   @@index([requestedAt])
+}
+
+// Cooperative Strategy Models
+model CooperativeSociety {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  type        String // ride_hailing, delivery, services, etc.
+  region      String // geographical region
+  memberCount Int      @default(0)
+  status      String   @default("active") // active, inactive, suspended
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members     CooperativeMember[]
+  strategies  CooperativeStrategy[]
+  initiatives CooperativeInitiative[]
+
+  @@index([type])
+  @@index([region])
+  @@index([status])
+}
+
+model CooperativeMember {
+  id         String   @id @default(cuid())
+  societyId  String
+  userId     String
+  role       String // driver, rider, operator, admin, etc.
+  status     String   @default("active") // active, inactive, suspended
+  joinedAt   DateTime @default(now())
+  shareValue Float    @default(0.0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  society CooperativeSociety @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  user    User               @relation(fields: [userId], references: [id])
+
+  @@unique([societyId, userId])
+  @@index([role])
+  @@index([status])
+}
+
+model CooperativeStrategy {
+  id          String    @id @default(cuid())
+  societyId   String
+  title       String
+  description String?
+  category    String // revenue_sharing, workforce_development, technology_adoption, etc.
+  priority    String    @default("medium") // low, medium, high, critical
+  status      String    @default("planned") // planned, in_progress, implemented, cancelled
+  targetDate  DateTime?
+  budget      Float?
+  createdBy   String
+  assignedTo  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  society  CooperativeSociety @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  creator  User               @relation("StrategyCreator", fields: [createdBy], references: [id])
+  assignee User?              @relation("StrategyAssignee", fields: [assignedTo], references: [id])
+
+  // Relations
+  initiatives CooperativeInitiative[]
+  milestones  StrategyMilestone[]
+
+  @@index([societyId])
+  @@index([category])
+  @@index([priority])
+  @@index([status])
+}
+
+model CooperativeInitiative {
+  id          String    @id @default(cuid())
+  strategyId  String
+  societyId   String
+  title       String
+  description String?
+  type        String // training, technology, partnership, policy, etc.
+  status      String    @default("planned") // planned, in_progress, completed, cancelled
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float?
+  progress    Float     @default(0.0) // 0-100
+  createdBy   String
+  assignedTo  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  strategy CooperativeStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  society  CooperativeSociety  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  creator  User                @relation("InitiativeCreator", fields: [createdBy], references: [id])
+  assignee User?               @relation("InitiativeAssignee", fields: [assignedTo], references: [id])
+
+  @@index([strategyId])
+  @@index([societyId])
+  @@index([type])
+  @@index([status])
+}
+
+model StrategyMilestone {
+  id            String    @id @default(cuid())
+  strategyId    String
+  title         String
+  description   String?
+  targetDate    DateTime
+  completedDate DateTime?
+  status        String    @default("pending") // pending, completed, overdue
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  strategy CooperativeStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@index([strategyId])
+  @@index([status])
+  @@index([targetDate])
 }
