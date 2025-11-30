@@ -261,6 +261,13 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/speech-synthesizer')
                 },
                 {
+                    title: 'Malayalam TTS Demo',
+                    url: '/malayalam-tts-demo',
+                    icon: Cloud,
+                    badge: 'Cloud',
+                    isActive: pathname.includes('/malayalam-tts-demo')
+                },
+                {
                     title: 'Video IVR',
                     url: '/video-ivr',
                     icon: Camera,

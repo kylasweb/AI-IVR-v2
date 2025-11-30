@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  svara-tts:
+    build: .
+    image: svara-tts:local
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./model:/app/model:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 6G

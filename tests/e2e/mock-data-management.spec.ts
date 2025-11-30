@@ -7,7 +7,8 @@ test.describe('Mock Data Management CRUD and Scenarios', () => {
   test.beforeEach(async ({ page }) => {
     adminPage = new AdminDashboardPage(page);
     await page.goto('/admin/login');
-    await adminPage.login('admin@example.com', 'validpassword');
+    await page.evaluate(() => localStorage.clear());
+    await adminPage.login('admin@example.com', 'password');
     await adminPage.navigateToMockData();
   });
 
@@ -42,6 +43,7 @@ test.describe('Mock Data Management CRUD and Scenarios', () => {
   });
 
   test('should delete a mock post', async ({ page }) => {
+    page.on('dialog', dialog => dialog.accept());
     await adminPage.deleteMockPost(2);
     await adminPage.expectSuccessMessage('Mock post deleted successfully');
     await expect(page.locator('text=Sample Title')).not.toBeVisible();

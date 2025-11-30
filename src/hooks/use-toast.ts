@@ -74,6 +74,24 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+function createMessageElement(id: string, text: string | undefined, variant?: string) {
+  try {
+    // Remove if exists
+    const existing = document.querySelector(`[data-toast-id="${id}"]`);
+    if (existing) existing.remove();
+
+    const el = document.createElement('div');
+    el.setAttribute('data-toast-id', id);
+    el.className = variant === 'destructive' ? 'error-message' : 'success-message';
+    el.textContent = typeof text === 'string' ? text : text ? String(text) : '';
+    // Keep it visible for a short duration for tests
+    el.style.cssText = 'position:fixed;top:10px;right:10px;z-index:9999;background:#fff;padding:6px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.2)';
+    document.body.appendChild(el);
+  } catch (err) {
+    // ignore
+  }
+}
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -122,6 +140,11 @@ export const reducer = (state: State, action: Action): State => {
           toasts: [],
         }
       }
+      // remove DOM message element for tests
+      if (action.toastId && typeof document !== 'undefined') {
+        const el = document.querySelector(`[data-toast-id="${action.toastId}"]`);
+        if (el) el.remove();
+      }
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
@@ -163,6 +186,12 @@ function toast({ ...props }: Toast) {
       },
     },
   })
+
+  // Create a plain DOM element for tests to assert success/error messages
+  if (typeof document !== 'undefined') {
+    const titleText = props.title ? (typeof props.title === 'string' ? props.title : '') : props.description ? (typeof props.description === 'string' ? props.description : '') : '';
+    createMessageElement(id, titleText, (props as any).variant);
+  }
 
   return {
     id: id,

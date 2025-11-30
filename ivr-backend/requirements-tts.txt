@@ -1,0 +1,4 @@
+# Google Cloud Text-to-Speech dependencies
+google-cloud-texttospeech==2.14.1
+google-auth==2.23.0
+google-api-core==2.11.1

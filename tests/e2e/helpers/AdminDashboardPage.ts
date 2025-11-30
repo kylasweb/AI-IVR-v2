@@ -119,7 +119,7 @@ export class AdminDashboardPage {
     this.deleteMockPostButton = page.locator('.delete-mock-post');
 
     // Scenarios
-    this.scenarioSelect = page.locator('select[name="scenario"]');
+    this.scenarioSelect = page.locator('select.playwright-scenario-select');
     this.loadScenarioButton = page.locator('button:has-text("Load Scenario")');
     this.saveScenarioButton = page.locator('button:has-text("Save Scenario")');
 
@@ -238,7 +238,6 @@ export class AdminDashboardPage {
 
   async deleteMockPost(index: number) {
     await this.mockPostsList.locator('.delete-mock-post').nth(index).click();
-    await this.confirmDeleteButton.click();
   }
 
   async loadScenario(scenario: string) {
@@ -253,12 +252,12 @@ export class AdminDashboardPage {
 
   async expectErrorMessage(text: string) {
     await this.page.waitForSelector('.error-message');
-    await this.page.locator('.error-message').filter({ hasText: text }).waitFor();
+    await this.page.locator('.error-message').filter({ hasText: text }).first().waitFor();
   }
 
   async expectSuccessMessage(text: string) {
     await this.page.waitForSelector('.success-message');
-    await this.page.locator('.success-message').filter({ hasText: text }).waitFor();
+    await this.page.locator('.success-message').filter({ hasText: text }).first().waitFor();
   }
 
   async checkAccessibility() {

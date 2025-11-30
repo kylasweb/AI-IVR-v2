@@ -1,0 +1,228 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e11]:
+          - heading "AI IVR System" [level=2] [ref=e12]
+          - paragraph [ref=e13]: Management Console
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Core Systems
+          - generic [ref=e17]:
+            - button "Dashboard" [ref=e18] [cursor=pointer]:
+              - img [ref=e19]
+              - generic [ref=e21]: Dashboard
+            - button "IVR Management AI" [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+              - generic [ref=e25]: IVR Management
+              - generic [ref=e26]: AI
+            - button "Live Calls Live" [ref=e27] [cursor=pointer]:
+              - img [ref=e28]
+              - generic [ref=e32]: Live Calls
+              - generic [ref=e33]: Live
+            - button "Workflow Builder" [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+              - generic [ref=e39]: Workflow Builder
+            - button "AI Agents New" [ref=e40] [cursor=pointer]:
+              - img [ref=e41]
+              - generic [ref=e44]: AI Agents
+              - generic [ref=e45]: New
+        - generic [ref=e46]:
+          - generic [ref=e47]: Management
+          - generic [ref=e48]:
+            - button "Customer Management" [ref=e49] [cursor=pointer]:
+              - img [ref=e50]
+              - generic [ref=e53]: Customer Management
+            - button "Driver Management" [ref=e54] [cursor=pointer]:
+              - img [ref=e55]
+              - generic [ref=e59]: Driver Management
+            - button "Ride Management" [ref=e60] [cursor=pointer]:
+              - img [ref=e61]
+              - generic [ref=e65]: Ride Management
+            - button "CPaaS Management New" [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+              - generic [ref=e69]: CPaaS Management
+              - generic [ref=e70]: New
+        - generic [ref=e71]:
+          - generic [ref=e72]: Voice & AI
+          - generic [ref=e73]:
+            - button "Voice Cloning AI" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+              - generic [ref=e78]: Voice Cloning
+              - generic [ref=e79]: AI
+            - button "Voice AI Agents New" [ref=e80] [cursor=pointer]:
+              - img [ref=e81]
+              - generic [ref=e84]: Voice AI Agents
+              - generic [ref=e85]: New
+            - button "Voice Biometrics" [ref=e86] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e90]: Voice Biometrics
+            - button "Voice Model Management AI" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+              - generic [ref=e96]: Voice Model Management
+              - generic [ref=e97]: AI
+            - button "Voice Data Management" [ref=e98] [cursor=pointer]:
+              - img [ref=e99]
+              - generic [ref=e103]: Voice Data Management
+            - button "Voice Command Center New" [ref=e104] [cursor=pointer]:
+              - img [ref=e105]
+              - generic [ref=e108]: Voice Command Center
+              - generic [ref=e109]: New
+            - button "Speech Synthesizer TTS" [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - generic [ref=e115]: Speech Synthesizer
+              - generic [ref=e116]: TTS
+            - button "Video IVR Beta" [ref=e117] [cursor=pointer]:
+              - img [ref=e118]
+              - generic [ref=e120]: Video IVR
+              - generic [ref=e121]: Beta
+            - button "Cultural AI ML" [ref=e122] [cursor=pointer]:
+              - img [ref=e123]
+              - generic [ref=e126]: Cultural AI
+              - generic [ref=e127]: ML
+        - generic [ref=e128]:
+          - generic [ref=e129]: Testing & QA
+          - generic [ref=e130]:
+            - button "AI Testing Suite New" [ref=e131] [cursor=pointer]:
+              - img [ref=e132]
+              - generic [ref=e134]: AI Testing Suite
+              - generic [ref=e135]: New
+            - button "Automation Tests" [ref=e136] [cursor=pointer]:
+              - img [ref=e137]
+              - generic [ref=e140]: Automation Tests
+            - button "Voice AI Agent Tests Beta" [ref=e141] [cursor=pointer]:
+              - img [ref=e142]
+              - generic [ref=e146]: Voice AI Agent Tests
+              - generic [ref=e147]: Beta
+            - button "Voice Testing Suite New" [ref=e148] [cursor=pointer]:
+              - img [ref=e149]
+              - generic [ref=e152]: Voice Testing Suite
+              - generic [ref=e153]: New
+            - button "Performance Testing" [ref=e154] [cursor=pointer]:
+              - img [ref=e155]
+              - generic [ref=e157]: Performance Testing
+        - generic [ref=e158]:
+          - generic [ref=e159]: Configuration
+          - generic [ref=e160]:
+            - button "Language Settings New" [ref=e161] [cursor=pointer]:
+              - img [ref=e162]
+              - generic [ref=e165]: Language Settings
+              - generic [ref=e166]: New
+            - button "AI Knowledge Base AI" [ref=e167] [cursor=pointer]:
+              - img [ref=e168]
+              - generic [ref=e171]: AI Knowledge Base
+              - generic [ref=e172]: AI
+            - button "AI Task Builder New" [ref=e173] [cursor=pointer]:
+              - img [ref=e174]
+              - generic [ref=e176]: AI Task Builder
+              - generic [ref=e177]: New
+            - button "Command Centre New" [ref=e178] [cursor=pointer]:
+              - img [ref=e179]
+              - generic [ref=e182]: Command Centre
+              - generic [ref=e183]: New
+            - button "API Gateway API" [ref=e184] [cursor=pointer]:
+              - img [ref=e185]
+              - generic [ref=e188]: API Gateway
+              - generic [ref=e189]: API
+            - button "Sentinel Dashboard Security" [ref=e190] [cursor=pointer]:
+              - img [ref=e191]
+              - generic [ref=e193]: Sentinel Dashboard
+              - generic [ref=e194]: Security
+        - generic [ref=e195]:
+          - generic [ref=e196]: Analytics & Monitoring
+          - generic [ref=e197]:
+            - button "Analytics Dashboard" [ref=e198] [cursor=pointer]:
+              - img [ref=e199]
+              - generic [ref=e201]: Analytics Dashboard
+            - button "Data Foundry Management New" [ref=e202] [cursor=pointer]:
+              - img [ref=e203]
+              - generic [ref=e207]: Data Foundry Management
+              - generic [ref=e208]: New
+            - button "Voice Data Processing Pipeline" [ref=e209] [cursor=pointer]:
+              - img [ref=e210]
+              - generic [ref=e212]: Voice Data Processing
+              - generic [ref=e213]: Pipeline
+        - generic [ref=e214]:
+          - generic [ref=e215]: Administration
+          - generic [ref=e216]:
+            - button "User Management" [ref=e217] [cursor=pointer]:
+              - img [ref=e218]
+              - generic [ref=e223]: User Management
+            - button "System Settings" [ref=e224] [cursor=pointer]:
+              - img [ref=e225]
+              - generic [ref=e228]: System Settings
+            - button "System Monitoring" [ref=e229] [cursor=pointer]:
+              - img [ref=e230]
+              - generic [ref=e232]: System Monitoring
+            - button "Log Management" [ref=e233] [cursor=pointer]:
+              - img [ref=e234]
+              - generic [ref=e237]: Log Management
+            - button "Integrations" [ref=e238] [cursor=pointer]:
+              - img [ref=e239]
+              - generic [ref=e242]: Integrations
+            - button "Security & Permissions" [ref=e243] [cursor=pointer]:
+              - img [ref=e244]
+              - generic [ref=e246]: Security & Permissions
+            - button "Database Management" [ref=e247] [cursor=pointer]:
+              - img [ref=e248]
+              - generic [ref=e252]: Database Management
+            - button "Mock Data Manager Demo" [ref=e253] [cursor=pointer]:
+              - img [ref=e254]
+              - generic [ref=e258]: Mock Data Manager
+              - generic [ref=e259]: Demo
+            - button "Pilot Program Beta" [ref=e260] [cursor=pointer]:
+              - img [ref=e261]
+              - generic [ref=e263]: Pilot Program
+              - generic [ref=e264]: Beta
+            - button "Strategic Engines Demo Demo" [ref=e265] [cursor=pointer]:
+              - img [ref=e266]
+              - generic [ref=e274]: Strategic Engines Demo
+              - generic [ref=e275]: Demo
+            - button "Verification Security" [ref=e276] [cursor=pointer]:
+              - img [ref=e277]
+              - generic [ref=e279]: Verification
+              - generic [ref=e280]: Security
+      - generic [ref=e282]:
+        - generic [ref=e284]: AU
+        - generic [ref=e285]:
+          - paragraph [ref=e286]: Admin User
+          - paragraph [ref=e287]: admin@fairgo.com
+        - button "Logout" [ref=e289] [cursor=pointer]
+    - generic [ref=e290]:
+      - navigation [ref=e291]:
+        - link "CMS" [ref=e292] [cursor=pointer]:
+          - /url: /admin/cms
+        - link "Mock Data" [ref=e293] [cursor=pointer]:
+          - /url: /admin/mock-data
+      - banner [ref=e294]:
+        - generic [ref=e296]:
+          - heading "Admin Login" [level=1] [ref=e297]
+          - paragraph [ref=e298]: Sign in to the admin console
+        - generic [ref=e299]:
+          - generic [ref=e300]:
+            - generic [ref=e301]: Demo Mode
+            - button "Live Data" [ref=e302] [cursor=pointer]
+          - generic [ref=e303]:
+            - img
+            - text: Live Active
+      - main [ref=e304]:
+        - generic [ref=e307]:
+          - generic [ref=e308]:
+            - generic [ref=e309]: Email
+            - textbox "Email" [ref=e310]
+          - generic [ref=e311]:
+            - generic [ref=e312]: Password
+            - textbox "Password" [ref=e313]
+          - generic [ref=e314]:
+            - button "Login" [ref=e315] [cursor=pointer]
+            - button "Clear" [ref=e316] [cursor=pointer]
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e317]
+  - button "Open Next.js Dev Tools" [ref=e323] [cursor=pointer]:
+    - img [ref=e324]
+```

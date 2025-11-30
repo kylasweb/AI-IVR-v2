@@ -10,15 +10,29 @@ import os
 
 logger = logging.getLogger(__name__)
 
+# Import Google TTS service
+try:
+    from .google_tts_service import GoogleTTSService
+    GOOGLE_TTS_AVAILABLE = True
+except ImportError:
+    GOOGLE_TTS_AVAILABLE = False
+    logger.warning("Google TTS service not available")
+
 
 class MalayalamTextToSpeechService:
     def __init__(self):
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.voices_cache = {}
         self.malayalam_voice_id = None
+        
+        # Initialize Google Cloud TTS (priority)
+        self.google_tts = GoogleTTSService() if GOOGLE_TTS_AVAILABLE else None
+        self.use_cloud_tts = self.google_tts and self.google_tts.is_available()
 
-        # Initialize Malayalam TTS engine
+        # Initialize local Malayalam TTS engine (fallback)
         self._initialize_malayalam_engine()
+        
+        logger.info(f"TTS Service initialized - Cloud: {self.use_cloud_tts}, Local: {self.engine is not None}")
 
         # Malayalam pronunciation mappings
         self.pronunciation_map = {
@@ -89,14 +103,16 @@ class MalayalamTextToSpeechService:
             self,
             text: str,
             language: str = "ml",
-            emotion: str = "neutral") -> str:
+            emotion: str = "neutral",
+            voice_name: Optional[str] = None) -> str:
         """
-        Synthesize Malayalam text to speech
+        Synthesize Malayalam text to speech with cloud TTS (Google) or local fallback
 
         Args:
             text: Text to synthesize
             language: Language code (ml, manglish)
             emotion: Emotional tone
+            voice_name: Google Cloud voice name (e.g., 'ml-IN-Wavenet-A')
 
         Returns:
             Base64 encoded audio data
@@ -105,14 +121,46 @@ class MalayalamTextToSpeechService:
             if not text.strip():
                 return ""
 
-            if not self.engine:
-                logger.error("TTS engine not initialized")
-                return ""
-
             # Preprocess text for better Malayalam pronunciation
             processed_text = self._preprocess_malayalam_text(text, language)
+            
+            # Try Google Cloud TTS first
+            if self.use_cloud_tts and self.google_tts:
+                try:
+                    # Map emotion to speaking rate and pitch
+                    emotion_settings = self.emotion_params.get(
+                        emotion, self.emotion_params['neutral'])
+                    
+                    speaking_rate = emotion_settings['rate'] / 150.0  # Convert to Google's scale
+                    pitch = (emotion_settings['pitch'] - 1.0) * 10.0  # Convert to semitones
+                    
+                    # Use specified voice or default
+                    cloud_voice = voice_name or 'ml-IN-Wavenet-A'
+                    
+                    audio_data = await self.google_tts.synthesize(
+                        text=processed_text,
+                        voice_name=cloud_voice,
+                        speaking_rate=speaking_rate,
+                        pitch=pitch
+                    )
+                    
+                    if audio_data:
+                        logger.info(f"Successfully synthesized with Google Cloud TTS (voice: {cloud_voice})")
+                        return audio_data
+                    else:
+                        logger.warning("Google Cloud TTS returned empty audio, falling back to local TTS")
+                        
+                except Exception as e:
+                    logger.warning(f"Google Cloud TTS failed: {e}, falling back to local TTS")
 
-            # Apply emotion settings
+            # Fallback to local TTS
+            if not self.engine:
+                logger.error("Both cloud and local TTS engines unavailable")
+                return ""
+
+            logger.info("Using local TTS engine")
+            
+            # Apply emotion settings for local TTS
             emotion_settings = self.emotion_params.get(
                 emotion, self.emotion_params['neutral'])
 
@@ -342,3 +390,46 @@ class MalayalamTextToSpeechService:
                 logger.info(f"Updated Malayalam voice settings: {settings}")
         except Exception as e:
             logger.error(f"Error updating Malayalam voice settings: {e}")
+    
+    def get_all_available_voices(self) -> Dict:
+        """Get all available voices from cloud and local TTS"""
+        voices = {
+            'cloud_voices': [],
+            'local_voices': [],
+            'cloud_available': self.use_cloud_tts,
+            'local_available': self.engine is not None
+        }
+        
+        # Get Google Cloud voices
+        if self.google_tts and self.use_cloud_tts:
+            try:
+                voices['cloud_voices'] = self.google_tts.get_available_voices()
+            except Exception as e:
+                logger.error(f"Error getting cloud voices: {e}")
+        
+        # Get local voices
+        if self.engine:
+            try:
+                local_voices = self.engine.getProperty('voices')
+                voices['local_voices'] = [
+                    {
+                        'id': voice.id,
+                        'name': voice.name,
+                        'languages': voice.languages
+                    }
+                    for voice in local_voices
+                ]
+            except Exception as e:
+                logger.error(f"Error getting local voices: {e}")
+        
+        return voices
+    
+    def get_service_status(self) -> Dict:
+        """Get current TTS service status"""
+        return {
+            'cloud_tts_enabled': self.use_cloud_tts,
+            'cloud_tts_available': self.google_tts is not None and self.google_tts.is_available(),
+            'local_tts_available': self.engine is not None,
+            'malayalam_voice_id': self.malayalam_voice_id,
+            'primary_service': 'google_cloud' if self.use_cloud_tts else 'local_pyttsx3'
+        }

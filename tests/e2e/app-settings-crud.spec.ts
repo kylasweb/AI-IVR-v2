@@ -7,7 +7,8 @@ test.describe('App Settings CRUD Operations', () => {
   test.beforeEach(async ({ page }) => {
     adminPage = new AdminDashboardPage(page);
     await page.goto('/admin/login');
-    await adminPage.login('admin@example.com', 'validpassword');
+    await page.evaluate(() => localStorage.clear());
+    await adminPage.login('admin@example.com', 'password');
     await adminPage.navigateToAppSettings();
   });
 

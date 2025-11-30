@@ -41,56 +41,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Initialize with demo user based on localStorage or default to client_admin
+    // Initialize user from localStorage
     useEffect(() => {
-        const initializeUser = () => {
-            try {
-                const savedRole = localStorage.getItem('demo-user-role') as UserRole || 'client_admin';
-
-                // Demo users for different roles
-                const demoUsers: Record<UserRole, User> = {
-                    client_admin: {
-                        id: 'client-001',
-                        email: 'admin@company.com',
-                        name: 'John Smith',
-                        role: 'client_admin',
-                        tenantId: 'tenant-001',
-                        isActive: true
-                    },
-                    fairgo_admin: {
-                        id: 'fairgo-001',
-                        email: 'admin@fairgo.ai',
-                        name: 'Sarah Johnson',
-                        role: 'fairgo_admin',
-                        isActive: true
-                    },
-                    sysadmin: {
-                        id: 'sys-001',
-                        email: 'sysadmin@fairgo.ai',
-                        name: 'Mike Chen',
-                        role: 'sysadmin',
-                        isActive: true
-                    }
-                };
-
-                setUser(demoUsers[savedRole]);
-            } catch (error) {
-                console.error('Error initializing user:', error);
-                // Fallback to client admin
-                setUser({
-                    id: 'client-001',
-                    email: 'admin@company.com',
-                    name: 'John Smith',
-                    role: 'client_admin',
-                    tenantId: 'tenant-001',
-                    isActive: true
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        initializeUser();
+        const stored = localStorage.getItem('user');
+        if (stored) {
+            setUser(JSON.parse(stored));
+        }
+        setIsLoading(false);
     }, []);
 
     const login = async (email: string, password: string): Promise<boolean> => {
@@ -100,13 +57,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
 
+        if (!email.includes('@') || password !== 'password') {
+            setIsLoading(false);
+            return false;
+        }
+
         // Simple demo logic - determine role based on email domain
         let role: UserRole = 'client_admin';
         if (email.includes('@fairgo.ai')) {
             role = email.includes('sys') ? 'sysadmin' : 'fairgo_admin';
         }
 
-        const demoUser: User = {
+        const user: User = {
             id: `${role}-001`,
             email,
             name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -115,8 +77,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             isActive: true
         };
 
-        setUser(demoUser);
-        localStorage.setItem('demo-user-role', role);
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
         setIsLoading(false);
 
         return true;
@@ -124,7 +86,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('demo-user-role');
+        localStorage.removeItem('user');
     };
 
     const switchRole = (role: UserRole) => {
