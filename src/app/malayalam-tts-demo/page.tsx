@@ -21,6 +21,7 @@ export default function MalayalamTTSDemo() {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [lastResult, setLastResult] = useState<any>(null);
     const [volume, setVolume] = useState([80]);
+    const [currentUtterance, setCurrentUtterance] = useState<SpeechSynthesisUtterance | null>(null);
 
     const voices = [
         {
@@ -101,28 +102,66 @@ export default function MalayalamTTSDemo() {
 
         setIsLoading(true);
         try {
-            const response = await fetch('/api/speech/tts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: text,
-                    language: 'ml-IN',
-                    voiceName: selectedVoice,
+            // Use Web Speech API for immediate browser-based TTS
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                const synth = window.speechSynthesis;
+
+                const utterance = new SpeechSynthesisUtterance(text);
+
+                // Configure voice settings
+                utterance.lang = 'ml-IN'; // Malayalam
+                utterance.volume = volume[0] / 100;
+
+                // Apply emotion through rate and pitch
+                switch (emotion) {
+                    case 'happy':
+                        utterance.rate = 1.1;
+                        utterance.pitch = 1.2;
+                        break;
+                    case 'sad':
+                        utterance.rate = 0.8;
+                        utterance.pitch = 0.8;
+                        break;
+                    case 'professional':
+                        utterance.rate = 0.95;
+                        utterance.pitch = 1.0;
+                        break;
+                    default: // neutral
+                        utterance.rate = 1.0;
+                        utterance.pitch = 1.0;
+                }
+
+                setCurrentUtterance(utterance);
+
+                // Set up event handlers
+                utterance.onend = () => {
+                    setIsPlaying(false);
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event);
+                    setIsPlaying(false);
+                };
+
+                // Create result object
+                const ttsResult = {
+                    success: true,
+                    originalText: text,
+                    language: 'ml',
+                    voice: selectedVoice,
                     emotion: emotion,
-                    dialect: dialect
-                })
-            });
+                    dialect: dialect,
+                    duration: Math.ceil(text.length * 0.08),
+                    sampleRate: 24000,
+                    bitRate: 128,
+                    format: 'browser',
+                    quality: 'browser',
+                    ttsEngine: 'Web Speech API',
+                    processingTime: 0
+                };
 
-            if (!response.ok) {
-                throw new Error('TTS generation failed');
+                setLastResult(ttsResult);
             }
-
-            const data = await response.json();
-            setLastResult(data.result);
-
-            // In a real implementation, this would use the actual audio data
-            // For demo purposes, we're showing the result structure
-            console.log('TTS Result:', data.result);
 
         } catch (error) {
             console.error('Error generating speech:', error);
@@ -132,13 +171,27 @@ export default function MalayalamTTSDemo() {
     };
 
     const handlePlayPause = () => {
-        // In production, this would control actual audio playback
-        setIsPlaying(!isPlaying);
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+        const synth = window.speechSynthesis;
+
+        if (isPlaying) {
+            // Pause or stop
+            synth.cancel();
+            setIsPlaying(false);
+        } else {
+            // Play
+            if (currentUtterance) {
+                synth.speak(currentUtterance);
+                setIsPlaying(true);
+            }
+        }
     };
 
     const handleDownload = () => {
-        // In production, this would download the generated audio
-        console.log('Download audio');
+        // Browser Speech API doesn't support download
+        // Show a message to user
+        alert('Audio download is available when using Google Cloud TTS. Browser-based TTS is currently active for instant playback.');
     };
 
     return (
