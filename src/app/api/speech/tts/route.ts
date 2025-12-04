@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // HuggingFace TTS API Integration
-const HF_API_KEY = process.env.HUGGINGFACE_API_KEY || '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';
+const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
 const HF_MODEL = 'facebook/mms-tts-mal'; // Malayalam TTS model from Meta's Massively Multilingual Speech
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { text, language, voice, voiceName, emotion, dialect } = body;
+
+        if (!HF_API_KEY) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'HuggingFace API key not configured',
+                    details: 'Please set HUGGINGFACE_API_KEY environment variable'
+                },
+                { status: 500 }
+            );
+        }
 
         console.log('[HuggingFace TTS] Generating audio for:', text.substring(0, 50) + '...');
 
