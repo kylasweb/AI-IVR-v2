@@ -574,7 +574,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
             )}
 
             {/* Main content area */}
-            <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-64 ml-0' : 'lg:ml-64 ml-0'}`}>
+            <div className={`flex-1 flex flex-col h-screen transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-64 ml-0' : 'lg:ml-64 ml-0'}`}>
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-6">
                     <div className="flex flex-1 items-center gap-2">
                         {sidebarOpen && (
@@ -614,10 +614,8 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                         </Badge>
                     </div>
                 </header>
-                <main className="flex-1 overflow-auto bg-gray-50">
-                    <div className="p-6 min-h-full">
-                        {children}
-                    </div>
+                <main className="flex-1 overflow-auto bg-gray-50 min-h-0">
+                    {children}
                 </main>
             </div>
 

@@ -1704,8 +1704,8 @@ const WorkflowBuilder: React.FC = () => {
 
   return (
     <ManagementLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="h-full flex flex-col p-6 gap-4">
+        <div className="flex items-center justify-between flex-shrink-0">
           <div>
             <h1 className="text-3xl font-bold">AI Workflow Builder</h1>
             <p className="text-muted-foreground">
@@ -1714,9 +1714,9 @@ const WorkflowBuilder: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="lg:col-span-1 space-y-4 overflow-auto">
             {/* Workflow Management */}
             <Card>
               <CardHeader>
@@ -1853,12 +1853,12 @@ const WorkflowBuilder: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 flex flex-col h-full min-h-0">
             {isBuilding ? (
-              <div className="flex gap-4">
+              <div className="flex gap-4 flex-1 min-h-0">
                 {/* Workflow Canvas */}
-                <div className="flex-1">
-                  <Card>
+                <div className="flex-1 flex flex-col min-h-0">
+                  <Card className="flex-1 flex flex-col min-h-0">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -1904,8 +1904,8 @@ const WorkflowBuilder: React.FC = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="h-[calc(100vh-350px)] min-h-[500px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
+                    <CardContent className="flex-1 flex flex-col min-h-0">
+                      <div className="flex-1 min-h-[400px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
                         <ReactFlow
                           nodes={nodes}
                           edges={edges}
@@ -2081,8 +2081,8 @@ const WorkflowBuilder: React.FC = () => {
                 )}
               </div>
             ) : (
-              <Card>
-                <CardContent className="flex items-center justify-center h-96">
+              <Card className="flex-1 h-full">
+                <CardContent className="flex items-center justify-center h-full min-h-[400px]">
                   <div className="text-center space-y-4">
                     <Bot className="w-16 h-16 text-gray-400 mx-auto" />
                     <div>

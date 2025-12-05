@@ -25,6 +25,14 @@ from models.database import init_db, get_db, VoiceProfile, Workflow, SystemSetti
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+# Import extended routes
+try:
+    from routes.extended_api import include_extended_routes
+    from routes.whatsapp_api import include_whatsapp_routes
+    EXTENDED_ROUTES_AVAILABLE = True
+except ImportError:
+    EXTENDED_ROUTES_AVAILABLE = False
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,8 +40,16 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="AI IVR Platform",
     description="Interactive Voice Response platform with AI agents",
-    version="1.0.0"
+    version="2.0.0"
 )
+
+# Include extended API routes if available
+if EXTENDED_ROUTES_AVAILABLE:
+    include_extended_routes(app)
+    include_whatsapp_routes(app)
+    logger.info("✅ Extended API routes loaded")
+    logger.info("✅ WhatsApp API routes loaded")
+
 
 # CORS middleware
 app.add_middleware(

@@ -31,7 +31,10 @@ import {
     ArrowRight,
     GitBranch,
     Target,
-    Brain
+    Brain,
+    Send,
+    Layers,
+    Paperclip
 } from 'lucide-react';
 import CalendarDays from 'lucide-react/dist/esm/icons/calendar-days';
 
@@ -76,13 +79,24 @@ export default function AITaskBuilder() {
             ]
         },
         {
+            category: 'WhatsApp Triggers',
+            items: [
+                { type: 'trigger', name: 'WhatsApp Message', icon: MessageSquare, description: 'Triggered when WhatsApp message is received' },
+                { type: 'trigger', name: 'WhatsApp Status', icon: CheckCircle, description: 'Triggered on message delivery/read status' },
+                { type: 'trigger', name: 'WhatsApp Button Click', icon: Target, description: 'Triggered when user clicks interactive button' },
+                { type: 'trigger', name: 'WhatsApp List Selection', icon: Layers, description: 'Triggered when user selects from list menu' },
+                { type: 'trigger', name: 'WhatsApp Media Received', icon: Paperclip, description: 'Triggered when image/video/audio received' }
+            ]
+        },
+        {
             category: 'Conditions',
             items: [
                 { type: 'condition', name: 'Call Duration', icon: Clock, description: 'Check call duration criteria' },
                 { type: 'condition', name: 'Language Detected', icon: MessageSquare, description: 'Check detected language' },
                 { type: 'condition', name: 'Customer Type', icon: Users, description: 'Check customer category/type' },
                 { type: 'condition', name: 'Time of Day', icon: Clock, description: 'Check current time conditions' },
-                { type: 'condition', name: 'Sentiment Analysis', icon: Brain, description: 'Check customer sentiment' }
+                { type: 'condition', name: 'Sentiment Analysis', icon: Brain, description: 'Check customer sentiment' },
+                { type: 'condition', name: 'WhatsApp Opt-In', icon: CheckCircle, description: 'Check if user opted-in for WhatsApp' }
             ]
         },
         {
@@ -94,6 +108,17 @@ export default function AITaskBuilder() {
                 { type: 'action', name: 'Update Database', icon: Database, description: 'Update customer record' },
                 { type: 'action', name: 'AI Analysis', icon: Brain, description: 'Run AI analysis on call data' },
                 { type: 'action', name: 'Generate Report', icon: BarChart3, description: 'Generate analytics report' }
+            ]
+        },
+        {
+            category: 'WhatsApp Actions',
+            items: [
+                { type: 'action', name: 'Send WhatsApp', icon: Send, description: 'Send WhatsApp text message' },
+                { type: 'action', name: 'WhatsApp Template', icon: FileText, description: 'Send pre-approved template message' },
+                { type: 'action', name: 'WhatsApp Interactive', icon: Layers, description: 'Send interactive buttons/list menu' },
+                { type: 'action', name: 'WhatsApp Media', icon: Paperclip, description: 'Send image, video, or document' },
+                { type: 'action', name: 'WhatsApp Broadcast', icon: Users, description: 'Send message to multiple contacts' },
+                { type: 'action', name: 'WhatsApp Catalog', icon: Database, description: 'Send product catalog message' }
             ]
         },
         {
