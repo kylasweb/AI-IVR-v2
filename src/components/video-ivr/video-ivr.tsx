@@ -161,6 +161,10 @@ const VideoIVR: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogType, setDialogType] = useState<'workflow' | 'call'>('workflow');
 
+    // Permission states for camera/mic
+    const [permissionState, setPermissionState] = useState<'pending' | 'granted' | 'denied' | 'prompt'>('pending');
+    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -265,8 +269,17 @@ const VideoIVR: React.FC = () => {
 
     useEffect(() => {
         loadData();
-        setupWebRTC();
+        checkMediaPermissions();
     }, [isDemoMode]);
+
+    // Cleanup media stream on unmount
+    useEffect(() => {
+        return () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [mediaStream]);
 
     const loadData = async () => {
         try {
@@ -330,20 +343,92 @@ const VideoIVR: React.FC = () => {
         }
     };
 
+    // Check current permission state without triggering a prompt
+    const checkMediaPermissions = async () => {
+        try {
+            // Check if the Permissions API is available
+            if (navigator.permissions && navigator.permissions.query) {
+                const [cameraResult, micResult] = await Promise.all([
+                    navigator.permissions.query({ name: 'camera' as PermissionName }),
+                    navigator.permissions.query({ name: 'microphone' as PermissionName })
+                ]);
+
+                if (cameraResult.state === 'granted' && micResult.state === 'granted') {
+                    setPermissionState('granted');
+                    // Auto-setup if already granted
+                    await setupWebRTC();
+                } else if (cameraResult.state === 'denied' || micResult.state === 'denied') {
+                    setPermissionState('denied');
+                } else {
+                    setPermissionState('prompt');
+                }
+
+                // Listen for permission changes
+                cameraResult.onchange = () => checkMediaPermissions();
+                micResult.onchange = () => checkMediaPermissions();
+            } else {
+                // Permissions API not available, set to prompt
+                setPermissionState('prompt');
+            }
+        } catch (error) {
+            console.log('Permission check not supported, will request on interaction:', error);
+            setPermissionState('prompt');
+        }
+    };
+
+    // Request camera/microphone permissions - must be called from user gesture
+    const requestMediaPermissions = async () => {
+        try {
+            setPermissionState('pending');
+            await setupWebRTC();
+            setPermissionState('granted');
+            toast({
+                title: "Camera Enabled",
+                description: "Video preview is now active",
+            });
+        } catch (error: unknown) {
+            console.error('Failed to get media permissions:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            if (errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+                setPermissionState('denied');
+                toast({
+                    title: "Permission Denied",
+                    description: "Please allow camera and microphone access in your browser settings",
+                    variant: "destructive",
+                });
+            } else {
+                setPermissionState('prompt');
+                toast({
+                    title: "Camera Access Failed",
+                    description: "Could not access camera. Please check your device connections.",
+                    variant: "destructive",
+                });
+            }
+        }
+    };
+
     const setupWebRTC = async () => {
         try {
+            // Stop any existing stream first
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+
             // Initialize WebRTC for video calling capabilities
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 1280, height: 720 },
                 audio: true
             });
 
+            setMediaStream(stream);
+
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
             }
         } catch (error) {
             console.log('WebRTC setup failed:', error);
-            // Handle gracefully for demo purposes
+            throw error; // Re-throw to handle in calling function
         }
     };
 
@@ -584,9 +669,65 @@ const VideoIVR: React.FC = () => {
                                         ref={videoRef}
                                         autoPlay
                                         muted
+                                        playsInline
                                         className="w-full h-full object-cover"
                                     />
-                                    {!isVideoEnabled && (
+
+                                    {/* Permission Request Overlay - shows when permissions need to be requested */}
+                                    {(permissionState === 'prompt' || permissionState === 'pending') && (
+                                        <div className="absolute inset-0 bg-gray-800/95 flex flex-col items-center justify-center gap-4 z-10">
+                                            <Camera className="h-16 w-16 text-gray-400" />
+                                            <div className="text-center px-4">
+                                                <p className="text-white text-lg font-medium mb-2">Camera Access Required</p>
+                                                <p className="text-gray-400 text-sm mb-4">
+                                                    Click the button below to enable your camera and microphone for video calls.
+                                                </p>
+                                            </div>
+                                            <Button
+                                                onClick={requestMediaPermissions}
+                                                disabled={permissionState === 'pending'}
+                                                className="bg-blue-600 hover:bg-blue-700"
+                                            >
+                                                {permissionState === 'pending' ? (
+                                                    <>
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                                        Requesting Access...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Camera className="mr-2 h-4 w-4" />
+                                                        Enable Camera & Microphone
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Permission Denied Overlay */}
+                                    {permissionState === 'denied' && (
+                                        <div className="absolute inset-0 bg-gray-800/95 flex flex-col items-center justify-center gap-4 z-10">
+                                            <AlertTriangle className="h-16 w-16 text-yellow-500" />
+                                            <div className="text-center px-4">
+                                                <p className="text-white text-lg font-medium mb-2">Camera Access Blocked</p>
+                                                <p className="text-gray-400 text-sm mb-4">
+                                                    You have blocked camera/microphone access. Please update your browser settings to allow access for this site.
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={requestMediaPermissions}
+                                                    className="border-gray-600 text-white hover:bg-gray-700"
+                                                >
+                                                    <RotateCcw className="mr-2 h-4 w-4" />
+                                                    Try Again
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Video Disabled Overlay (when user manually disables) */}
+                                    {!isVideoEnabled && permissionState === 'granted' && (
                                         <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                                             <CameraOff className="h-16 w-16 text-gray-400" />
                                         </div>
@@ -598,6 +739,7 @@ const VideoIVR: React.FC = () => {
                                             size="sm"
                                             variant={isMuted ? "destructive" : "secondary"}
                                             onClick={toggleMute}
+                                            disabled={permissionState !== 'granted'}
                                         >
                                             {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                                         </Button>
@@ -606,6 +748,7 @@ const VideoIVR: React.FC = () => {
                                             size="sm"
                                             variant={!isVideoEnabled ? "destructive" : "secondary"}
                                             onClick={toggleVideo}
+                                            disabled={permissionState !== 'granted'}
                                         >
                                             {isVideoEnabled ? <Camera className="h-4 w-4" /> : <CameraOff className="h-4 w-4" />}
                                         </Button>
@@ -614,6 +757,7 @@ const VideoIVR: React.FC = () => {
                                             size="sm"
                                             variant={isRecording ? "destructive" : "secondary"}
                                             onClick={toggleRecording}
+                                            disabled={permissionState !== 'granted'}
                                         >
                                             <Circle className="h-4 w-4" />
                                         </Button>
@@ -623,7 +767,7 @@ const VideoIVR: React.FC = () => {
                                                 <PhoneOff className="h-4 w-4" />
                                             </Button>
                                         ) : (
-                                            <Button size="sm" variant="default" onClick={() => startCall()}>
+                                            <Button size="sm" variant="default" onClick={() => startCall()} disabled={permissionState !== 'granted'}>
                                                 <Phone className="h-4 w-4" />
                                             </Button>
                                         )}
