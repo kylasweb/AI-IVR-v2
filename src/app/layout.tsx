@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@/components/lightswind.css";
 import { Toaster } from "@/components/ui/toaster";
 import { MockDataProvider } from "@/hooks/use-mock-data";
 import { UserProvider } from "@/hooks/use-user";

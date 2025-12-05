@@ -48,6 +48,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/lib/api-client';
 import { useMockData } from '@/hooks/use-mock-data';
+import { useTTS } from '@/lib/tts/hooks/useTTS';
 
 interface VoiceModel {
     id: string;
@@ -214,14 +215,28 @@ function VoiceCloning() {
 
     const [selectedModel, setSelectedModel] = useState<VoiceModel | null>(null);
     const [isRecording, setIsRecording] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
     const [recordingDuration, setRecordingDuration] = useState(0);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isTraining, setIsTraining] = useState(false);
     const [generationText, setGenerationText] = useState('');
     const [filterType, setFilterType] = useState<string>('all');
     const [filterStatus, setFilterStatus] = useState<string>('all');
+
+    // Enterprise TTS integration
+    const {
+        synthesize,
+        voices,
+        loading: ttsLoading,
+        isPlaying,
+        audioUrl,
+        play,
+        stop,
+        download,
+        error: ttsError,
+        providerStatus,
+        selectedVoice,
+        setSelectedVoice
+    } = useTTS();
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -333,64 +348,66 @@ function VoiceCloning() {
         }
     };
 
-    const playAudio = (audioUrl: string) => {
-        if (currentAudio) {
-            currentAudio.pause();
-            setCurrentAudio(null);
-            setIsPlaying(false);
-        }
-
-        const audio = new Audio(audioUrl);
-        setCurrentAudio(audio);
-        setIsPlaying(true);
-
-        audio.onended = () => {
-            setIsPlaying(false);
-            setCurrentAudio(null);
-        };
-
-        audio.play();
+    const playAudio = (url: string) => {
+        // Use the TTS hook's play function for better audio management
+        play(url);
     };
 
     const stopAudio = () => {
-        if (currentAudio) {
-            currentAudio.pause();
-            setCurrentAudio(null);
-            setIsPlaying(false);
-        }
+        // Use the TTS hook's stop function
+        stop();
     };
 
     const generateVoice = async (text: string, modelId: string) => {
-        try {
-            setIsTraining(true);
-            // Simulate voice generation
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            const newGeneration: VoiceGeneration = {
-                id: Date.now().toString(),
-                modelId,
-                text,
-                audioUrl: '/api/placeholder-audio', // This would be a real audio URL
-                duration: text.length * 0.1, // Rough estimate
-                status: 'completed',
-                settings: selectedModel?.settings || {},
-                createdAt: new Date().toISOString(),
-                metadata: {
-                    wordCount: text.split(' ').length,
-                    charactersCount: text.length,
-                    estimatedCost: text.length * 0.0001
-                }
-            };
-
-            setGenerations(prev => [newGeneration, ...prev]);
-            toast({
-                title: "Voice Generated",
-                description: "Voice synthesis completed successfully",
-            });
-        } catch (error) {
+        if (!text.trim()) {
             toast({
                 title: "Error",
-                description: "Failed to generate voice",
+                description: "Please enter text to synthesize",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            setIsTraining(true);
+
+            // Use the enterprise TTS backend
+            const result = await synthesize(text, {
+                voiceId: selectedVoice?.voice_id || undefined,
+                languageCode: selectedModel?.language?.toLowerCase()?.includes('hindi') ? 'hi-IN' : 'en-US',
+                speed: selectedModel?.settings?.speed || 1.0,
+                pitch: selectedModel?.settings?.pitch || 0,
+                emotion: selectedModel?.settings?.emotion || 'neutral'
+            });
+
+            if (result) {
+                const newGeneration: VoiceGeneration = {
+                    id: Date.now().toString(),
+                    modelId,
+                    text,
+                    audioUrl: result.audio_url || '',
+                    duration: result.duration || text.length * 0.1,
+                    status: 'completed',
+                    settings: selectedModel?.settings || {},
+                    createdAt: new Date().toISOString(),
+                    metadata: {
+                        wordCount: text.split(' ').length,
+                        charactersCount: text.length,
+                        estimatedCost: result.cost || text.length * 0.0001
+                    }
+                };
+
+                setGenerations(prev => [newGeneration, ...prev]);
+                toast({
+                    title: "Voice Generated",
+                    description: `Speech synthesized using ${result.provider || 'TTS service'}`,
+                });
+            }
+        } catch (error) {
+            console.error('Voice generation failed:', error);
+            toast({
+                title: "Error",
+                description: ttsError || "Failed to generate voice. Check if backend is running.",
                 variant: "destructive",
             });
         } finally {

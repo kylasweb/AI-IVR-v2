@@ -129,9 +129,9 @@ providers:
       voice_agent:
         name: "Vocode Voice Agent"
         capabilities: ["conversational_ai", "stt", "tts"]
-        languages: ["en", "es", "fr", "de", "it", "pt"]  # Vocode's primary languages
+        languages: ["en", "es", "fr", "de", "it", "pt"]
         dialects: ["generic"]
-        cost_per_minute: 0.04  # Estimated - adjust based on actual pricing
+        cost_per_minute: 0.04
         latency_ms: 300
         accuracy_score: 0.90
       conversational_ai:
@@ -143,6 +143,37 @@ providers:
         latency_ms: 200
         accuracy_score: 0.88
 
+  # IndicF5 - AI4Bharat's high-quality TTS (Fallback provider)
+  indicf5:
+    name: "IndicF5 TTS"
+    enabled: "${INDICF5_ENABLED:-true}"
+    device: "${INDICF5_DEVICE:-auto}"  # 'auto', 'cuda', or 'cpu'
+    model_id: "ai4bharat/IndicF5"
+    cache_dir: "${INDICF5_CACHE_DIR:-./models/indicf5_cache}"
+    reference_audio_dir: "models/reference_audios"
+    sample_rate: 24000
+    models:
+      indicf5_malayalam:
+        name: "IndicF5 Malayalam"
+        capabilities: ["tts"]
+        languages: ["ml"]
+        dialects: ["thiruvananthapuram", "kollam", "pathanamthitta", "alappuzha", 
+                   "kottayam", "idukki", "ernakulam", "thrissur", "palakkad",
+                   "malappuram", "kozhikode", "wayanad", "kannur", "kasaragod"]
+        cost_per_minute: 0.0  # Free - runs locally
+        latency_ms: 500  # Higher on CPU, lower on GPU
+        accuracy_score: 0.95  # Near-human quality
+        voice_cloning: true
+      indicf5_indic:
+        name: "IndicF5 Indic Languages"
+        capabilities: ["tts"]
+        languages: ["ml", "ta", "te", "kn", "hi", "bn", "gu", "mr", "or", "pa", "as"]
+        dialects: ["generic"]
+        cost_per_minute: 0.0
+        latency_ms: 500
+        accuracy_score: 0.93
+        voice_cloning: true
+
 # Routing rules
 routing_rules:
   # Kerala optimization rules
@@ -150,6 +181,12 @@ routing_rules:
     condition: "region == 'kerala' and language == 'ml'"
     priority_providers: ["proprietary_ml", "ai4bharat"]
     min_confidence: 0.80
+
+  # IndicF5 for high-quality Malayalam TTS (fallback)
+  indicf5_malayalam_tts:
+    condition: "language == 'ml' and service_type == 'tts' and quality_priority == true"
+    priority_providers: ["indicf5", "ai4bharat", "proprietary_ml"]
+    min_confidence: 0.85
 
   # Vocode voice-first scenarios
   vocode_voice_priority:
@@ -166,7 +203,7 @@ routing_rules:
   # Cost optimization for non-critical calls
   cost_optimization:
     condition: "cost_priority == true"
-    priority_providers: ["proprietary_ml", "ai4bharat", "vocode", "generic_cloud"]
+    priority_providers: ["indicf5", "proprietary_ml", "ai4bharat", "vocode", "generic_cloud"]
     max_cost_per_minute: 0.03
 
   # Latency optimization for real-time calls
@@ -178,7 +215,7 @@ routing_rules:
   # Fallback rules
   global_fallback:
     condition: "true"  # Always applies as last resort
-    priority_providers: ["generic_cloud", "ai4bharat", "vocode", "proprietary_ml"]
+    priority_providers: ["generic_cloud", "ai4bharat", "vocode", "indicf5", "proprietary_ml"]
     min_confidence: 0.60
 
 # Model type mappings

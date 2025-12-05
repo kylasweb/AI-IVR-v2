@@ -1,198 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Pause, Volume2, Download } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ManagementLayout from '@/components/layout/management-layout';
+import { TextInput } from './components/TextInput';
+import { AudioPlayer } from './components/AudioPlayer';
+import { SamplePhrases } from './components/SamplePhrases';
+import { SettingsPanel } from './components/SettingsPanel';
+import { useMalayalamTTS } from './hooks/useMalayalamTTS';
+import { MALAYALAM_VOICES, type VoiceId, type DialectId, type EmotionId } from './constants';
 
 export default function MalayalamTTSDemo() {
+    // State management
     const [text, setText] = useState('നമസ്കാരം! എങ്ങനെയുണ്ട്? ഞാൻ മലയാളം സംസാരിക്കാൻ കഴിയുന്ന AI സഹായിയാണ്.');
-    const [selectedVoice, setSelectedVoice] = useState('ml-IN-Wavenet-A');
-    const [emotion, setEmotion] = useState('neutral');
-    const [dialect, setDialect] = useState('standard');
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [lastResult, setLastResult] = useState<any>(null);
+    const [selectedVoice, setSelectedVoice] = useState<VoiceId>('ml-IN-Wavenet-A');
+    const [emotion, setEmotion] = useState<EmotionId>('neutral');
+    const [dialect, setDialect] = useState<DialectId>('standard');
     const [volume, setVolume] = useState([80]);
-    const [currentUtterance, setCurrentUtterance] = useState<SpeechSynthesisUtterance | null>(null);
 
-    const voices = [
-        {
-            id: 'ml-IN-Wavenet-A',
-            name: 'മലയാളം (സ്ത്രീ) - Neural',
-            description: 'High-quality neural female voice',
-            gender: 'female',
-            quality: 'wavenet',
-            recommended: true
-        },
-        {
-            id: 'ml-IN-Wavenet-B',
-            name: 'മലയാളം (പുരുഷൻ) - Neural',
-            description: 'High-quality neural male voice',
-            gender: 'male',
-            quality: 'wavenet',
-            recommended: true
-        },
-        {
-            id: 'ml-IN-Standard-A',
-            name: 'മലയാളം (സ്ത്രീ) - Standard',
-            description: 'Standard female voice',
-            gender: 'female',
-            quality: 'standard'
-        },
-        {
-            id: 'ml-IN-Standard-B',
-            name: 'മലയാളം (പുരുഷൻ) - Standard',
-            description: 'Standard male voice',
-            gender: 'male',
-            quality: 'standard'
-        }
-    ];
+    // TTS hook
+    const { isLoading, isPlaying, lastResult, generateSpeech, playPause, download } = useMalayalamTTS();
 
-    const dialects = [
-        { id: 'standard', name: 'സ്റ്റാൻഡേർഡ് (Standard)', description: 'Neutral Malayalam' },
-        { id: 'travancore', name: 'തിരുവിതാംകൂർ (Travancore)', description: 'Southern dialect' },
-        { id: 'malabar', name: 'മലബാർ (Malabar)', description: 'Northern dialect' },
-        { id: 'cochin', name: 'കൊച്ചി (Cochin)', description: 'Central dialect' }
-    ];
-
-    const emotions = [
-        { id: 'neutral', name: 'സാധാരണം (Neutral)', icon: '😐' },
-        { id: 'happy', name: 'സന്തോഷം (Happy)', icon: '😊' },
-        { id: 'professional', name: 'പ്രൊഫഷണൽ (Professional)', icon: '💼' },
-        { id: 'sad', name: 'ദുഃഖം (Sad)', icon: '😢' }
-    ];
-
-    const samplePhrases = [
-        {
-            category: 'Greetings',
-            phrases: [
-                'നമസ്കാരം! എങ്ങനെയുണ്ട്?',
-                'സുഖമാണോ? എല്ലാം ശരിയാണോ?',
-                'വിളിച്ചതിന് നന്ദി. എങ്ങനെ സഹായിക്കാം?'
-            ]
-        },
-        {
-            category: 'Customer Service',
-            phrases: [
-                'ഞാൻ സഹായിക്കാൻ തയ്യാറാണ്. എന്താണ് ആവശ്യം?',
-                'നിങ്ങളുടെ അന്വേഷണം എനിക്ക് മനസ്സിലായി. ഒരു നിമിഷം കാത്തിരിക്കുക.',
-                'നിങ്ങളുടെ സഹകരണത്തിന് നന്ദി. വീണ്ടും കാണാം!'
-            ]
-        },
-        {
-            category: 'Manglish',
-            phrases: [
-                'Namaskaram! Phone cheyyunnathinu nanni.',
-                'Ningalude vishayam njan manassilaakki. Help cheyyam.',
-                'Enthu problem aanu? Parayamo?'
-            ]
-        }
-    ];
-
-    const handleGenerateSpeech = async () => {
-        if (!text.trim()) return;
-
-        setIsLoading(true);
-        try {
-            // Use Web Speech API for immediate browser-based TTS
-            if (typeof window !== 'undefined' && window.speechSynthesis) {
-                const synth = window.speechSynthesis;
-
-                const utterance = new SpeechSynthesisUtterance(text);
-
-                // Configure voice settings
-                utterance.lang = 'ml-IN'; // Malayalam
-                utterance.volume = volume[0] / 100;
-
-                // Apply emotion through rate and pitch
-                switch (emotion) {
-                    case 'happy':
-                        utterance.rate = 1.1;
-                        utterance.pitch = 1.2;
-                        break;
-                    case 'sad':
-                        utterance.rate = 0.8;
-                        utterance.pitch = 0.8;
-                        break;
-                    case 'professional':
-                        utterance.rate = 0.95;
-                        utterance.pitch = 1.0;
-                        break;
-                    default: // neutral
-                        utterance.rate = 1.0;
-                        utterance.pitch = 1.0;
-                }
-
-                setCurrentUtterance(utterance);
-
-                // Set up event handlers
-                utterance.onend = () => {
-                    setIsPlaying(false);
-                };
-
-                utterance.onerror = (event) => {
-                    console.error('Speech synthesis error:', event);
-                    setIsPlaying(false);
-                };
-
-                // Create result object
-                const ttsResult = {
-                    success: true,
-                    originalText: text,
-                    language: 'ml',
-                    voice: selectedVoice,
-                    emotion: emotion,
-                    dialect: dialect,
-                    duration: Math.ceil(text.length * 0.08),
-                    sampleRate: 24000,
-                    bitRate: 128,
-                    format: 'browser',
-                    quality: 'browser',
-                    ttsEngine: 'Web Speech API',
-                    processingTime: 0
-                };
-
-                setLastResult(ttsResult);
-            }
-
-        } catch (error) {
-            console.error('Error generating speech:', error);
-        } finally {
-            setIsLoading(false);
-        }
+    // Handlers
+    const handleGenerate = () => {
+        generateSpeech(text, emotion, volume[0], selectedVoice, dialect);
     };
 
-    const handlePlayPause = () => {
-        if (typeof window === 'undefined' || !window.speechSynthesis) return;
-
-        const synth = window.speechSynthesis;
-
-        if (isPlaying) {
-            // Pause or stop
-            synth.cancel();
-            setIsPlaying(false);
-        } else {
-            // Play
-            if (currentUtterance) {
-                synth.speak(currentUtterance);
-                setIsPlaying(true);
-            }
-        }
-    };
-
-    const handleDownload = () => {
-        // Browser Speech API doesn't support download
-        // Show a message to user
-        alert('Audio download is available when using Google Cloud TTS. Browser-based TTS is currently active for instant playback.');
-    };
+    const voiceName = MALAYALAM_VOICES.find(v => v.id === selectedVoice)?.name;
 
     return (
         <ManagementLayout
@@ -203,269 +36,35 @@ export default function MalayalamTTSDemo() {
                 <div className="grid lg:grid-cols-3 gap-6">
                     {/* Main Control Panel */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Text Input */}
-                        <Card className="shadow-lg border-2 border-purple-100">
-                            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
-                                <CardTitle>Text Input</CardTitle>
-                                <CardDescription>
-                                    Enter Malayalam, Manglish, or English text
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <Textarea
-                                    value={text}
-                                    onChange={(e) => setText(e.target.value)}
-                                    placeholder="നിങ്ങളുടെ ടെക്സ്റ്റ് ഇവിടെ ടൈപ്പ് ചെയ്യുക..."
-                                    className="min-h-[150px] text-lg font-malayalam"
-                                    dir="auto"
-                                />
-                                <div className="flex items-center justify-between mt-4">
-                                    <span className="text-sm text-gray-500">
-                                        {text.length} characters
-                                    </span>
-                                    <Button
-                                        onClick={handleGenerateSpeech}
-                                        disabled={isLoading || !text.trim()}
-                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                                                Generating...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Play className="mr-2 h-4 w-4" />
-                                                Generate Speech
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <TextInput
+                            text={text}
+                            onChange={setText}
+                            onGenerate={handleGenerate}
+                            isLoading={isLoading}
+                        />
 
-                        {/* Audio Player */}
-                        {lastResult && (
-                            <Card className="shadow-lg border-2 border-blue-100">
-                                <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-                                    <CardTitle>Audio Player</CardTitle>
-                                    <CardDescription>
-                                        Voice: {voices.find(v => v.id === selectedVoice)?.name}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        {/* Waveform Visualization Placeholder */}
-                                        <div className="h-24 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
-                                            <div className="flex items-end gap-1 h-16">
-                                                {[...Array(40)].map((_, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="w-1 bg-purple-600 rounded-full animate-pulse"
-                                                        style={{
-                                                            height: `${Math.random() * 100}%`,
-                                                            animationDelay: `${i * 0.05}s`
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </div>
+                        <AudioPlayer
+                            lastResult={lastResult}
+                            isPlaying={isPlaying}
+                            volume={volume}
+                            onPlayPause={playPause}
+                            onVolumeChange={setVolume}
+                            onDownload={download}
+                            voiceName={voiceName}
+                        />
 
-                                        {/* Playback Controls */}
-                                        <div className="flex items-center gap-4">
-                                            <Button
-                                                onClick={handlePlayPause}
-                                                size="lg"
-                                                className="bg-purple-600 hover:bg-purple-700"
-                                            >
-                                                {isPlaying ? (
-                                                    <Pause className="h-5 w-5" />
-                                                ) : (
-                                                    <Play className="h-5 w-5" />
-                                                )}
-                                            </Button>
-
-                                            <div className="flex-1 flex items-center gap-3">
-                                                <Volume2 className="h-5 w-5 text-gray-600" />
-                                                <Slider
-                                                    value={volume}
-                                                    onValueChange={setVolume}
-                                                    max={100}
-                                                    step={1}
-                                                    className="flex-1"
-                                                />
-                                                <span className="text-sm text-gray-600 w-12">
-                                                    {volume[0]}%
-                                                </span>
-                                            </div>
-
-                                            <Button
-                                                onClick={handleDownload}
-                                                variant="outline"
-                                                size="lg"
-                                            >
-                                                <Download className="h-5 w-5" />
-                                            </Button>
-                                        </div>
-
-                                        {/* Audio Info */}
-                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                                            <div>
-                                                <p className="text-sm text-gray-500">Duration</p>
-                                                <p className="text-lg font-semibold">
-                                                    {lastResult.duration}s
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Quality</p>
-                                                <p className="text-lg font-semibold capitalize">
-                                                    {lastResult.quality}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Engine</p>
-                                                <p className="text-lg font-semibold capitalize">
-                                                    {lastResult.ttsEngine?.replace('_', ' ')}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Processing Time</p>
-                                                <p className="text-lg font-semibold">
-                                                    {Math.round(lastResult.processingTime)}ms
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {/* Sample Phrases */}
-                        <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle>Sample Phrases</CardTitle>
-                                <CardDescription>
-                                    Click to try common Malayalam phrases
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Tabs defaultValue="Greetings">
-                                    <TabsList className="grid w-full grid-cols-3">
-                                        {samplePhrases.map((category) => (
-                                            <TabsTrigger key={category.category} value={category.category}>
-                                                {category.category}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-                                    {samplePhrases.map((category) => (
-                                        <TabsContent key={category.category} value={category.category} className="space-y-2">
-                                            {category.phrases.map((phrase, idx) => (
-                                                <Button
-                                                    key={idx}
-                                                    variant="outline"
-                                                    className="w-full justify-start text-left h-auto py-3"
-                                                    onClick={() => setText(phrase)}
-                                                >
-                                                    <Play className="mr-2 h-4 w-4 flex-shrink-0" />
-                                                    <span className="font-malayalam">{phrase}</span>
-                                                </Button>
-                                            ))}
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
-                            </CardContent>
-                        </Card>
+                        <SamplePhrases onSelectPhrase={setText} />
                     </div>
 
                     {/* Settings Panel */}
-                    <div className="space-y-6">
-                        {/* Voice Selection */}
-                        <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle>Voice Selection</CardTitle>
-                                <CardDescription>
-                                    Choose your preferred voice
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {voices.map((voice) => (
-                                    <Button
-                                        key={voice.id}
-                                        variant={selectedVoice === voice.id ? 'default' : 'outline'}
-                                        className={`w-full justify-start h-auto py-4 ${selectedVoice === voice.id
-                                            ? 'bg-purple-600 hover:bg-purple-700'
-                                            : ''
-                                            }`}
-                                        onClick={() => setSelectedVoice(voice.id)}
-                                    >
-                                        <div className="text-left w-full">
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-semibold">{voice.name}</p>
-                                                {voice.recommended && (
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        Recommended
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <p className="text-xs opacity-80">
-                                                {voice.description}
-                                            </p>
-                                        </div>
-                                    </Button>
-                                ))}
-                            </CardContent>
-                        </Card>
-
-                        {/* Dialect Selection */}
-                        <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle>Dialect</CardTitle>
-                                <CardDescription>
-                                    Regional variation
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Select value={dialect} onValueChange={setDialect}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {dialects.map((d) => (
-                                            <SelectItem key={d.id} value={d.id}>
-                                                {d.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </CardContent>
-                        </Card>
-
-                        {/* Emotion/Style */}
-                        <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle>Emotion Style</CardTitle>
-                                <CardDescription>
-                                    Voice tone and style
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                {emotions.map((e) => (
-                                    <Button
-                                        key={e.id}
-                                        variant={emotion === e.id ? 'default' : 'outline'}
-                                        className={`w-full justify-start ${emotion === e.id
-                                            ? 'bg-purple-600 hover:bg-purple-700'
-                                            : ''
-                                            }`}
-                                        onClick={() => setEmotion(e.id)}
-                                    >
-                                        <span className="mr-2 text-xl">{e.icon}</span>
-                                        {e.name}
-                                    </Button>
-                                ))}
-                            </CardContent>
-                        </Card>
-                    </div>
+                    <SettingsPanel
+                        selectedVoice={selectedVoice}
+                        onVoiceChange={setSelectedVoice}
+                        dialect={dialect}
+                        onDialectChange={setDialect}
+                        emotion={emotion}
+                        onEmotionChange={setEmotion}
+                    />
                 </div>
             </div>
         </ManagementLayout>

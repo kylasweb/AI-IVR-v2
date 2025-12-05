@@ -24,3 +24,9 @@ requests==2.32.4
 urllib3==2.5.0
 vocode==0.1.113
 pusher==3.3.1
+
+# IndicF5 TTS (AI4Bharat) - Optional dependencies
+# Install with: pip install transformers torch torchaudio
+transformers>=4.35.0
+torch>=2.0.0
+torchaudio>=2.0.0
