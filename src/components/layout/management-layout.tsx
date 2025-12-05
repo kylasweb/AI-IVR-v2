@@ -479,16 +479,16 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     };
 
     return (
-        <div className="min-h-screen w-full bg-gray-50 flex">
+        <div className="min-h-screen w-full bg-gray-50 flex overflow-hidden">
             {/* Sidebar */}
             <div
                 ref={sidebarRef}
-                className={`fixed left-0 top-0 z-40 h-full transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-64' : 'lg:w-64 w-0'
+                className={`fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out overflow-hidden ${sidebarOpen ? 'w-64' : 'lg:w-64 w-0'
                     }`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className="h-full border-r border-gray-200 bg-white shadow-lg flex flex-col">
+                <div className="h-screen border-r border-gray-200 bg-white shadow-lg flex flex-col overflow-hidden">
                     <div className="border-b border-gray-200 p-4 flex-shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
@@ -501,7 +501,7 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto min-h-0">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden">
                         {navigationSections.map((section, sectionIndex) => (
                             <div key={sectionIndex} className="py-2">
                                 <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
