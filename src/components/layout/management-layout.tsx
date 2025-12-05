@@ -211,6 +211,31 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
             ]
         },
         {
+            title: 'BPO & Enterprise',
+            items: [
+                {
+                    title: 'BPO Solutions',
+                    url: '/bpo-solutions',
+                    icon: Headphones,
+                    badge: 'New',
+                    isActive: pathname.includes('/bpo-solutions')
+                },
+                {
+                    title: 'BPO Management',
+                    url: '/bpo-management',
+                    icon: Users,
+                    isActive: pathname.includes('/bpo-management')
+                },
+                {
+                    title: 'Agent Assist',
+                    url: '/agent-assist',
+                    icon: Bot,
+                    badge: 'AI',
+                    isActive: pathname.includes('/agent-assist')
+                }
+            ]
+        },
+        {
             title: 'Voice & AI',
             items: [
                 {
