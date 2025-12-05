@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db as prisma } from '@/lib/db';
 import { redactPII } from '@/lib/security/pii-redaction';
 
 type RouteContext = {
