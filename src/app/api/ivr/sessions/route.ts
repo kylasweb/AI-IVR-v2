@@ -21,7 +21,6 @@ interface SessionsResponse {
   total_count: number;
   active_count: number;
   error?: string;
-  mock?: boolean;
 }
 
 export async function GET(request: NextRequest) {
@@ -49,17 +48,12 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       console.error('Backend response error:', response.status, response.statusText);
-
-      // Return realistic mock data structure for development
-      const mockResponse: SessionsResponse = {
+      return NextResponse.json({
         sessions: [],
         total_count: 0,
         active_count: 0,
-        error: 'Backend temporarily unavailable',
-        mock: true
-      };
-
-      return NextResponse.json(mockResponse);
+        error: `Backend error: ${response.status} ${response.statusText}`
+      }, { status: 503 });
     }
 
     const data = await response.json();
@@ -75,15 +69,12 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching sessions:', error);
 
-    const errorResponse: SessionsResponse = {
+    return NextResponse.json({
       sessions: [],
       total_count: 0,
       active_count: 0,
-      error: 'Failed to connect to IVR backend',
-      mock: true
-    };
-
-    return NextResponse.json(errorResponse);
+      error: 'Failed to connect to IVR backend'
+    }, { status: 503 });
   }
 }
 
@@ -129,20 +120,11 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text();
       console.error('Backend response error:', response.status, response.statusText, errorText);
 
-      // Return mock response with error indication
-      const mockResponse = {
-        session_id: `mock_${Date.now()}`,
-        message: "Welcome to our AI IVR system. How can I help you today?",
-        audio_data: "",
-        status: "ready",
-        phone_number: body.phone_number,
-        language: body.language || 'en',
-        mock: true,
-        backend_error: true,
-        error_details: `Backend responded with ${response.status}: ${response.statusText}`
-      };
-
-      return NextResponse.json(mockResponse);
+      return NextResponse.json({
+        error: 'Failed to start session',
+        message: `Backend responded with ${response.status}: ${response.statusText}`,
+        details: errorText
+      }, { status: response.status || 503 });
     }
 
     const data = await response.json();
@@ -155,8 +137,7 @@ export async function POST(request: NextRequest) {
       status: data.status || "ready",
       phone_number: body.phone_number,
       language: data.language || body.language || 'en',
-      start_time: data.start_time || new Date().toISOString(),
-      mock: false
+      start_time: data.start_time || new Date().toISOString()
     };
 
     console.log('Call session started successfully:', sessionResponse.session_id);
@@ -165,20 +146,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error starting session:', error);
 
-    // Return mock response for better UX with error indication
-    const mockResponse = {
-      session_id: `mock_${Date.now()}`,
-      message: "Welcome to our AI IVR system. How can I help you today?",
-      audio_data: "",
-      status: "ready",
-      phone_number: (await request.json()).phone_number || "unknown",
-      language: (await request.json()).language || 'en',
-      start_time: new Date().toISOString(),
-      mock: true,
-      connection_error: true,
-      error_details: error instanceof Error ? error.message : 'Unknown error'
-    };
-
-    return NextResponse.json(mockResponse);
+    return NextResponse.json({
+      error: 'Failed to connect to IVR backend',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 503 });
   }
 }

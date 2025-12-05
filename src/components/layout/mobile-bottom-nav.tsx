@@ -7,28 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    BarChart3 as Home,
+    BarChart3,
     Phone,
     Bot,
-    BarChart3,
     Settings,
     Grid3X3,
     PhoneCall,
-    GitBranch as Workflow,
+    GitBranch,
     Mic,
-    Play as Camera,
+    Play,
     Globe,
-    Activity as TestIcon,
     Users,
     Car,
     Shield,
-    Globe as WifiIcon,
     Activity,
     Database,
     FileText,
-    Settings as Command,
-    FileText as BookOpen,
-    Globe as Languages
+    Calendar,
+    Share2
 } from 'lucide-react';
 
 interface MobileNavItem {
@@ -53,7 +49,7 @@ export default function MobileBottomNav() {
         {
             title: 'Dashboard',
             url: '/dashboard',
-            icon: Home,
+            icon: BarChart3,
             isActive: pathname === '/dashboard'
         },
         {
@@ -82,10 +78,12 @@ export default function MobileBottomNav() {
         {
             title: 'Core Systems',
             items: [
-                { title: 'Dashboard', url: '/dashboard', icon: Home, isActive: pathname === '/dashboard' },
+                { title: 'Dashboard', url: '/dashboard', icon: BarChart3, isActive: pathname === '/dashboard' },
                 { title: 'IVR Management', url: '/ivr-management', icon: Phone, badge: 'AI', isActive: pathname.includes('/ivr') },
                 { title: 'Live Calls', url: '/call-management', icon: PhoneCall, badge: 'Live', isActive: pathname.includes('/call-management') },
-                { title: 'Workflow Builder', url: '/workflows', icon: Workflow, isActive: pathname.includes('/workflow') },
+                { title: 'Call Transfer', url: '/call-transfer', icon: Share2, badge: 'New', isActive: pathname.includes('/call-transfer') },
+                { title: 'Call Scheduler', url: '/call-scheduler', icon: Calendar, badge: 'New', isActive: pathname.includes('/call-scheduler') },
+                { title: 'Workflow Builder', url: '/workflows', icon: GitBranch, isActive: pathname.includes('/workflow') },
                 { title: 'AI Agents', url: '/ai-agents', icon: Bot, badge: 'New', isActive: pathname.includes('/ai-agent') }
             ]
         },
@@ -94,7 +92,7 @@ export default function MobileBottomNav() {
             items: [
                 { title: 'Voice Cloning', url: '/voice-cloning', icon: Mic, badge: 'AI', isActive: pathname.includes('/voice-cloning') },
                 { title: 'Voice AI Agents', url: '/voice-ai-agents', icon: Bot, badge: 'New', isActive: pathname.includes('/voice-ai-agent') },
-                { title: 'Video IVR', url: '/video-ivr', icon: Camera, badge: 'Beta', isActive: pathname.includes('/video') },
+                { title: 'Video IVR', url: '/video-ivr', icon: Play, badge: 'Beta', isActive: pathname.includes('/video') },
                 { title: 'Cultural AI', url: '/cultural-ai', icon: Globe, badge: 'ML', isActive: pathname.includes('/cultural') }
             ]
         },
@@ -118,10 +116,10 @@ export default function MobileBottomNav() {
         {
             title: 'Configuration',
             items: [
-                { title: 'Language Settings', url: '/config/languages', icon: Languages, badge: 'New', isActive: pathname.includes('/config/language') },
-                { title: 'AI Knowledge Base', url: '/ai-kb', icon: BookOpen, badge: 'AI', isActive: pathname.includes('/ai-kb') },
-                { title: 'Command Centre', url: '/command-centre', icon: Command, badge: 'New', isActive: pathname.includes('/command-centre') },
-                { title: 'API Gateway', url: '/api-gateway', icon: WifiIcon, badge: 'New', isActive: pathname.includes('/api-gateway') }
+                { title: 'Language Settings', url: '/config/languages', icon: Globe, badge: 'New', isActive: pathname.includes('/config/language') },
+                { title: 'AI Knowledge Base', url: '/ai-kb', icon: FileText, badge: 'AI', isActive: pathname.includes('/ai-kb') },
+                { title: 'Command Centre', url: '/command-centre', icon: Settings, badge: 'New', isActive: pathname.includes('/command-centre') },
+                { title: 'API Gateway', url: '/api-gateway', icon: Globe, badge: 'New', isActive: pathname.includes('/api-gateway') }
             ]
         },
         {
@@ -141,10 +139,8 @@ export default function MobileBottomNav() {
 
     return (
         <div className="md:hidden">
-            {/* Mobile Bottom Navigation Bar */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-1 z-50">
                 <div className="flex items-center justify-around">
-                    {/* Quick Access Items */}
                     {quickAccessItems.map((item) => {
                         const Icon = item.icon;
                         return (
@@ -169,7 +165,6 @@ export default function MobileBottomNav() {
                         );
                     })}
 
-                    {/* Central App Launcher Button */}
                     <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                         <SheetTrigger asChild>
                             <Button
@@ -245,8 +240,6 @@ export default function MobileBottomNav() {
                     </Sheet>
                 </div>
             </div>
-
-            {/* Spacer to prevent content from being hidden behind the bottom nav */}
             <div className="h-20"></div>
         </div>
     );

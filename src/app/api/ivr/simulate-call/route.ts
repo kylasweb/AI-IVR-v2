@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Get API URL from environment variables
-const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fairgo-imos-backend.onrender.com'
+const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,29 +18,19 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       console.error('Backend response error:', response.status, response.statusText)
-      // Return mock response for better UX
-      const mockResponse = {
-        session_id: `mock_${Date.now()}`,
-        message: "Welcome to our AI IVR system. How can I help you today?",
-        audio_data: "",
-        status: "ready",
-        mock: true
-      }
-      return NextResponse.json(mockResponse)
+      return NextResponse.json({
+        error: 'Failed to simulate call',
+        message: `Backend responded with ${response.status}: ${response.statusText}`
+      }, { status: response.status || 503 })
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error simulating call:', error)
-    // Return mock response for better UX
-    const mockResponse = {
-      session_id: `mock_${Date.now()}`,
-      message: "Welcome to our AI IVR system. How can I help you today?",
-      audio_data: "",
-      status: "ready",
-      mock: true
-    }
-    return NextResponse.json(mockResponse)
+    return NextResponse.json({
+      error: 'Failed to connect to IVR backend',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 503 })
   }
 }

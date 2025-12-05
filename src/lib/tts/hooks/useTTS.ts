@@ -1,7 +1,7 @@
 // Unified TTS Hook for Next.js Frontend
 // Connects to FastAPI backend
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 // Types
 export interface TTSOptions {
@@ -31,10 +31,14 @@ export interface TTSResult {
     cost?: number;
     voice_used: string;
     metadata?: Record<string, any>;
+    // Additional fields for voice-cloning compatibility
+    audio_url?: string;
+    duration?: number;
 }
 
 export interface Voice {
     id: string;
+    voice_id?: string;  // Alternative ID for some providers
     name: string;
     language: string;
     language_codes: string[];
@@ -44,11 +48,67 @@ export interface Voice {
     recommended: boolean;
 }
 
+export interface ProviderStatus {
+    google_cloud: boolean;
+    huggingface: boolean;
+    svara: boolean;
+    indicf5?: boolean;
+}
+
 export interface TTSHookOptions {
     backendUrl?: string;
     onError?: (error: Error) => void;
     onSuccess?: (result: TTSResult) => void;
+    autoLoadVoices?: boolean;
 }
+
+// Default voices for fallback when API is unavailable
+const DEFAULT_VOICES: Voice[] = [
+    {
+        id: 'en-US-Neural2-J',
+        voice_id: 'en-US-Neural2-J',
+        name: 'English Male (Neural)',
+        language: 'en-US',
+        language_codes: ['en-US'],
+        gender: 'male',
+        provider: 'google_cloud',
+        quality: 'premium',
+        recommended: true
+    },
+    {
+        id: 'en-US-Neural2-F',
+        voice_id: 'en-US-Neural2-F',
+        name: 'English Female (Neural)',
+        language: 'en-US',
+        language_codes: ['en-US'],
+        gender: 'female',
+        provider: 'google_cloud',
+        quality: 'premium',
+        recommended: true
+    },
+    {
+        id: 'ml-IN-Standard-A',
+        voice_id: 'ml-IN-Standard-A',
+        name: 'Malayalam Female',
+        language: 'ml-IN',
+        language_codes: ['ml-IN'],
+        gender: 'female',
+        provider: 'google_cloud',
+        quality: 'standard',
+        recommended: true
+    },
+    {
+        id: 'hi-IN-Neural2-A',
+        voice_id: 'hi-IN-Neural2-A',
+        name: 'Hindi Female (Neural)',
+        language: 'hi-IN',
+        language_codes: ['hi-IN'],
+        gender: 'female',
+        provider: 'google_cloud',
+        quality: 'premium',
+        recommended: false
+    }
+];
 
 export function useTTS(options?: TTSHookOptions) {
     const backendUrl = options?.backendUrl || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
@@ -59,14 +119,40 @@ export function useTTS(options?: TTSHookOptions) {
     const [lastResult, setLastResult] = useState<TTSResult | null>(null);
     const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [availableVoices, setAvailableVoices] = useState<Voice[]>([]);
+    const [availableVoices, setAvailableVoices] = useState<Voice[]>(DEFAULT_VOICES);
+    const [selectedVoice, setSelectedVoice] = useState<Voice | null>(DEFAULT_VOICES[0]);
+    const [providerStatus, setProviderStatus] = useState<ProviderStatus>({
+        google_cloud: true,
+        huggingface: false,
+        svara: false,
+        indicf5: false
+    });
 
-    // Synthesize speech
-    const synthesize = useCallback(async (ttsOptions: TTSOptions): Promise<TTSResult | null> => {
+    // Auto-load voices on mount
+    useEffect(() => {
+        if (options?.autoLoadVoices !== false) {
+            listVoices().catch(() => {
+                // Fallback to default voices is already handled
+                console.warn('Using default voices (backend unavailable)');
+            });
+        }
+    }, []);
+
+    // Synthesize speech with frontend fallback
+    const synthesize = useCallback(async (
+        textOrOptions: string | TTSOptions,
+        additionalOptions?: Partial<TTSOptions>
+    ): Promise<TTSResult | null> => {
         setIsLoading(true);
         setError(null);
 
+        // Handle both call signatures
+        const ttsOptions: TTSOptions = typeof textOrOptions === 'string'
+            ? { text: textOrOptions, voice: selectedVoice?.voice_id || 'en-US-Neural2-J', ...additionalOptions }
+            : textOrOptions;
+
         try {
+            // Try backend first
             const response = await fetch(`${backendUrl}/api/v1/tts/synthesize`, {
                 method: 'POST',
                 headers: {
@@ -91,13 +177,19 @@ export function useTTS(options?: TTSHookOptions) {
             }
 
             const result: TTSResult = await response.json();
+
+            // Normalize audio URL
+            result.audio_url = result.audio?.data || result.audio_url;
+            result.duration = result.audio?.duration || result.duration;
+
             setLastResult(result);
 
             // Create audio element
-            if (result.audio.data) {
-                const audio = new Audio(result.audio.data);
+            if (result.audio?.data || result.audio_url) {
+                const audioSrc = result.audio?.data || result.audio_url || '';
+                const audio = new Audio(audioSrc);
                 setAudioElement(audio);
-                setAudioUrl(result.audio.data);
+                setAudioUrl(audioSrc);
 
                 audio.onended = () => setIsPlaying(false);
                 audio.onerror = (e) => {
@@ -109,17 +201,69 @@ export function useTTS(options?: TTSHookOptions) {
             options?.onSuccess?.(result);
             return result;
         } catch (err) {
-            const error = err instanceof Error ? err : new Error('Unknown error');
-            setError(error);
-            options?.onError?.(error);
-            return null;
+            // Try frontend-only synthesis via browser API
+            console.warn('Backend TTS failed, trying browser fallback');
+
+            try {
+                const result = await synthesizeWithBrowserAPI(ttsOptions.text, ttsOptions);
+                return result;
+            } catch (fallbackError) {
+                const error = err instanceof Error ? err : new Error('TTS synthesis failed');
+                setError(error);
+                options?.onError?.(error);
+                return null;
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [backendUrl, options]);
+    }, [backendUrl, options, selectedVoice]);
+
+    // Browser Speech Synthesis fallback
+    const synthesizeWithBrowserAPI = useCallback(async (text: string, opts?: Partial<TTSOptions>): Promise<TTSResult> => {
+        return new Promise((resolve, reject) => {
+            if (!window.speechSynthesis) {
+                reject(new Error('Browser speech synthesis not supported'));
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = opts?.speed || 1.0;
+            utterance.pitch = (opts?.pitch || 0) / 10 + 1; // Convert -20,20 to 0,2
+            utterance.volume = opts?.volume || 1.0;
+
+            utterance.onend = () => {
+                const result: TTSResult = {
+                    success: true,
+                    audio: {
+                        data: '',
+                        format: 'browser',
+                        duration: text.length * 0.1,
+                        size: 0,
+                        sample_rate: 22050
+                    },
+                    provider: 'browser',
+                    processing_time: 0,
+                    characters: text.length,
+                    voice_used: 'browser-default',
+                    audio_url: '',
+                    duration: text.length * 0.1
+                };
+                setIsPlaying(false);
+                resolve(result);
+            };
+
+            utterance.onerror = (e) => {
+                setIsPlaying(false);
+                reject(new Error(`Speech synthesis error: ${e.error}`));
+            };
+
+            setIsPlaying(true);
+            window.speechSynthesis.speak(utterance);
+        });
+    }, []);
 
     // List available voices
-    const listVoices = useCallback(async (language?: string, provider?: string) => {
+    const listVoices = useCallback(async (language?: string, provider?: string): Promise<Voice[]> => {
         try {
             const params = new URLSearchParams();
             if (language) params.append('language', language);
@@ -132,16 +276,42 @@ export function useTTS(options?: TTSHookOptions) {
             }
 
             const data = await response.json();
-            setAvailableVoices(data.voices);
-            return data.voices;
+            const voices = data.voices || data.data?.voices || [];
+
+            if (voices.length > 0) {
+                setAvailableVoices(voices);
+                // Update provider status based on available voices
+                const providers = [...new Set(voices.map((v: Voice) => v.provider))];
+                setProviderStatus({
+                    google_cloud: providers.includes('google_cloud'),
+                    huggingface: providers.includes('huggingface'),
+                    svara: providers.includes('svara'),
+                    indicf5: providers.includes('indicf5')
+                });
+            }
+            return voices;
         } catch (err) {
-            console.error('Error fetching voices:', err);
-            return [];
+            console.warn('Error fetching voices, using defaults:', err);
+            return DEFAULT_VOICES;
         }
     }, [backendUrl]);
 
     // Playback controls
-    const play = useCallback(() => {
+    const play = useCallback((urlOrVoid?: string) => {
+        // Support both play() and play(url)
+        if (urlOrVoid && typeof urlOrVoid === 'string') {
+            const audio = new Audio(urlOrVoid);
+            audio.onended = () => setIsPlaying(false);
+            audio.play().catch(e => {
+                console.error('Failed to play audio:', e);
+                setError(new Error('Audio playback failed'));
+            });
+            setAudioElement(audio);
+            setAudioUrl(urlOrVoid);
+            setIsPlaying(true);
+            return;
+        }
+
         if (!audioElement) {
             console.warn('No audio to play');
             return;
@@ -191,11 +361,16 @@ export function useTTS(options?: TTSHookOptions) {
     return {
         // State
         isLoading,
+        loading: isLoading, // Alias for compatibility
         isPlaying,
         error,
         lastResult,
         audioUrl,
         availableVoices,
+        voices: availableVoices, // Alias for compatibility
+        selectedVoice,
+        setSelectedVoice,
+        providerStatus,
 
         // Methods
         synthesize,
