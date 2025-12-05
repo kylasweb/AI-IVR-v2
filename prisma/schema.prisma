@@ -33,6 +33,10 @@ model User {
   assignedStrategies  CooperativeStrategy[]   @relation("StrategyAssignee")
   createdInitiatives  CooperativeInitiative[] @relation("InitiativeCreator")
   assignedInitiatives CooperativeInitiative[] @relation("InitiativeAssignee")
+
+  // BPO Multi-Tenancy Relations
+  bpoClients          BPOClient[]             @relation("BPOClients")
+  agentAssistSessions AgentAssistSession[]    @relation("AgentSessions")
 }
 
 model Driver {
@@ -112,9 +116,10 @@ model Workflow {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  nodes      WorkflowNode[]
-  executions WorkflowExecution[]
-  versions   WorkflowVersion[]
+  nodes        WorkflowNode[]
+  executions   WorkflowExecution[]
+  versions     WorkflowVersion[]
+  bpoWorkflows BPOWorkflow[]
 }
 
 model WorkflowNode {
@@ -350,15 +355,25 @@ model CallRecord {
   culturalContext  Json? // Cultural metadata
   malayalamContent Boolean @default(false)
 
+  // BPO Contact Center Fields
+  transcriptionSnippet String?  // Last 2 minutes buffer for warm handoff
+  finalIntentLabel     String?  // e.g., "Refund Request", "Billing Inquiry"
+  finalSentimentScore  Float?   // 0.0-1.0 sentiment score
+  handoffStatus        String   @default("ai_resolved") // ai_resolved, warm_transfer, cold_transfer
+  bpoClientId          String?  // Associated BPO client for multi-tenancy
+
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   SpeakerDiarization SpeakerDiarization?
   CallHandoff        CallHandoff[]
+  AgentAssistSession AgentAssistSession[]
+  bpoClient          BPOClient?          @relation(fields: [bpoClientId], references: [id])
 
   @@index([callId])
   @@index([startTime])
   @@index([callType, primaryLanguage])
   @@index([retentionExpiry])
+  @@index([bpoClientId])
 }
 
 model CallTranscription {
@@ -1170,4 +1185,135 @@ model StrategyMilestone {
   @@index([strategyId])
   @@index([status])
   @@index([targetDate])
+}
+
+// ========================
+// BPO Multi-Tenancy & Agent Assist
+// ========================
+
+model BPOClient {
+  id              String   @id @default(cuid())
+  parentAccountId String
+  clientName      String
+  phoneNumbers    Json?    // Array of assigned phone numbers
+  configSettings  Json     @default("{}") // CRM keys, branding, custom settings
+  crmType         String?  // salesforce, hubspot, custom
+  crmApiEndpoint  String?  // CRM webhook/API endpoint
+  crmApiKey       String?  // Encrypted CRM API key
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  parentAccount   User         @relation("BPOClients", fields: [parentAccountId], references: [id], onDelete: Cascade)
+  callRecords     CallRecord[]
+  workflows       BPOWorkflow[]
+  templates       BPOTemplate[]
+
+  @@unique([parentAccountId, clientName])
+  @@index([parentAccountId])
+  @@index([isActive])
+}
+
+model BPOWorkflow {
+  id          String   @id @default(cuid())
+  bpoClientId String
+  workflowId  String
+  isDefault   Boolean  @default(false)
+  settings    Json?    // Client-specific workflow overrides
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bpoClient BPOClient @relation(fields: [bpoClientId], references: [id], onDelete: Cascade)
+  workflow  Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([bpoClientId, workflowId])
+  @@index([bpoClientId])
+  @@index([workflowId])
+}
+
+model BPOTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  category     String   // smart_triage, transactional_resolver, outbound_campaign, soft_collection, csat, agent_coaching
+  templateData Json     // Pre-configured workflow nodes and connections
+  isGlobal     Boolean  @default(false) // Available to all tenants
+  bpoClientId  String?  // Null if global template
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bpoClient BPOClient? @relation(fields: [bpoClientId], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([isGlobal])
+  @@index([bpoClientId])
+}
+
+model AgentAssistSession {
+  id            String    @id @default(cuid())
+  callRecordId  String
+  agentUserId   String
+  sessionStatus String    @default("active") // active, ended, transferred
+  triggerEvents Json      @default("[]") // Array of {type, timestamp, data} for scripts/warnings
+  scriptsShown  Json?     // Scripts displayed to agent
+  warningsShown Json?     // Cadence/sentiment warnings
+  coachingScore Float?    // Agent performance score for this session
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+
+  // Warm Handoff Context
+  handoffIntent     String?  // Intent at time of handoff
+  handoffSentiment  Float?   // Sentiment score at handoff
+  handoffTranscript String?  // Last 2 mins transcript
+
+  callRecord CallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+  agent      User       @relation("AgentSessions", fields: [agentUserId], references: [id])
+
+  @@index([callRecordId])
+  @@index([agentUserId])
+  @@index([sessionStatus])
+  @@index([startedAt])
+}
+
+// Audit log extension for handoff tracking
+model HandoffAuditLog {
+  id               String   @id @default(cuid())
+  callRecordId     String
+  fromSource       String   // ai, agent_id
+  toAgentId        String
+  handoffType      String   // warm_transfer, cold_transfer, escalation
+  contextProvided  Boolean  @default(true)
+  contextAccepted  Boolean? // Did agent accept with full context?
+  acceptanceTime   Int?     // Time to accept in seconds
+  resolutionStatus String?  // resolved, escalated, dropped
+  createdAt        DateTime @default(now())
+
+  @@index([callRecordId])
+  @@index([toAgentId])
+  @@index([handoffType])
+  @@index([createdAt])
+}
+
+// Seat-based billing for Agent Assist
+model AgentSeatBilling {
+  id              String   @id @default(cuid())
+  bpoClientId     String
+  billingPeriod   String   // YYYY-MM format
+  activeSeats     Int      @default(0)
+  maxSeats        Int      @default(0)
+  pricePerSeat    Float    @default(0)
+  totalAmount     Float    @default(0)
+  minutesUsed     Int      @default(0)
+  pricePerMinute  Float?
+  billingStatus   String   @default("pending") // pending, invoiced, paid
+  invoiceId       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([bpoClientId, billingPeriod])
+  @@index([bpoClientId])
+  @@index([billingPeriod])
+  @@index([billingStatus])
 }
