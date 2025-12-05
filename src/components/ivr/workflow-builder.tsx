@@ -18,7 +18,6 @@ import ReactFlow, {
   NodeProps,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import ManagementLayout from '@/components/layout/management-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -1703,404 +1702,402 @@ const WorkflowBuilder: React.FC = () => {
   );
 
   return (
-    <ManagementLayout>
-      <div className="h-full flex flex-col p-6 gap-4">
-        <div className="flex items-center justify-between flex-shrink-0">
-          <div>
-            <h1 className="text-3xl font-bold">AI Workflow Builder</h1>
-            <p className="text-muted-foreground">
-              Design and automate IVR workflows with chained AI agents
-            </p>
-          </div>
+    <div className="h-full flex flex-col p-6 gap-4">
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 className="text-3xl font-bold">AI Workflow Builder</h1>
+          <p className="text-muted-foreground">
+            Design and automate IVR workflows with chained AI agents
+          </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4 overflow-auto">
-            {/* Workflow Management */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Workflows</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Workflow name"
-                    value={newWorkflow.name}
-                    onChange={(e) =>
-                      setNewWorkflow({ ...newWorkflow, name: e.target.value })
-                    }
-                  />
-                  <Textarea
-                    placeholder="Description"
-                    value={newWorkflow.description}
-                    onChange={(e) =>
-                      setNewWorkflow({ ...newWorkflow, description: e.target.value })
-                    }
-                  />
-                  <Select
-                    value={newWorkflow.category}
-                    onValueChange={(value) =>
-                      setNewWorkflow({ ...newWorkflow, category: value })
-                    }
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-4 overflow-auto">
+          {/* Workflow Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Workflows</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  placeholder="Workflow name"
+                  value={newWorkflow.name}
+                  onChange={(e) =>
+                    setNewWorkflow({ ...newWorkflow, name: e.target.value })
+                  }
+                />
+                <Textarea
+                  placeholder="Description"
+                  value={newWorkflow.description}
+                  onChange={(e) =>
+                    setNewWorkflow({ ...newWorkflow, description: e.target.value })
+                  }
+                />
+                <Select
+                  value={newWorkflow.category}
+                  onValueChange={(value) =>
+                    setNewWorkflow({ ...newWorkflow, category: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CUSTOM">Custom</SelectItem>
+                    <SelectItem value="CUSTOMER_SERVICE">Customer Service</SelectItem>
+                    <SelectItem value="SALES">Sales</SelectItem>
+                    <SelectItem value="SUPPORT">Support</SelectItem>
+                    <SelectItem value="SURVEY">Survey</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={createWorkflow}
+                  disabled={!newWorkflow.name || isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? 'Creating...' : 'Create Workflow'}
+                </Button>
+              </div>
+
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {workflows.map((workflow) => (
+                  <div
+                    key={workflow.id}
+                    className={`p-2 border rounded cursor-pointer ${selectedWorkflow?.id === workflow.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200'
+                      }`}
+                    onClick={() => loadWorkflow(workflow.id)}
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CUSTOM">Custom</SelectItem>
-                      <SelectItem value="CUSTOMER_SERVICE">Customer Service</SelectItem>
-                      <SelectItem value="SALES">Sales</SelectItem>
-                      <SelectItem value="SUPPORT">Support</SelectItem>
-                      <SelectItem value="SURVEY">Survey</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    onClick={createWorkflow}
-                    disabled={!newWorkflow.name || isLoading}
-                    className="w-full"
-                  >
-                    {isLoading ? 'Creating...' : 'Create Workflow'}
-                  </Button>
-                </div>
-
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {workflows.map((workflow) => (
-                    <div
-                      key={workflow.id}
-                      className={`p-2 border rounded cursor-pointer ${selectedWorkflow?.id === workflow.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200'
-                        }`}
-                      onClick={() => loadWorkflow(workflow.id)}
-                    >
-                      <div className="font-medium text-sm">{workflow.name}</div>
-                      <div className="text-xs text-gray-500">{workflow.category}</div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Enhanced Node Palette */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Layers className="w-5 h-5" />
-                  Node Types
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Search and Filter */}
-                <div className="space-y-3 mb-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      placeholder="Search nodes..."
-                      value={nodeFilter}
-                      onChange={(e) => setNodeFilter(e.target.value)}
-                      className="pl-10"
-                    />
+                    <div className="font-medium text-sm">{workflow.name}</div>
+                    <div className="text-xs text-gray-500">{workflow.category}</div>
                   </div>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <Filter className="w-4 h-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getCategories().map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-                {/* Node List */}
-                <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
-                  {getFilteredNodeTypes().map(([type, config]) => {
-                    const Icon = config.icon;
-                    return (
-                      <div
-                        key={type}
-                        draggable
-                        onDragStart={(event) => onDragStart(event, type)}
-                        className="group flex items-center gap-2 p-3 border rounded-lg cursor-move hover:bg-gray-50 hover:border-blue-300 transition-all duration-200"
-                        title={config.description}
-                      >
-                        <div className={`p-1.5 rounded-md ${config.color} group-hover:scale-110 transition-transform duration-200`}>
-                          <Icon className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-800">{config.label}</div>
-                          <div className="text-xs text-gray-500 truncate">{config.category}</div>
-                        </div>
-                        <div className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Drag
-                        </div>
+          {/* Enhanced Node Palette */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Layers className="w-5 h-5" />
+                Node Types
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Search and Filter */}
+              <div className="space-y-3 mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search nodes..."
+                    value={nodeFilter}
+                    onChange={(e) => setNodeFilter(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getCategories().map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Node List */}
+              <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
+                {getFilteredNodeTypes().map(([type, config]) => {
+                  const Icon = config.icon;
+                  return (
+                    <div
+                      key={type}
+                      draggable
+                      onDragStart={(event) => onDragStart(event, type)}
+                      className="group flex items-center gap-2 p-3 border rounded-lg cursor-move hover:bg-gray-50 hover:border-blue-300 transition-all duration-200"
+                      title={config.description}
+                    >
+                      <div className={`p-1.5 rounded-md ${config.color} group-hover:scale-110 transition-transform duration-200`}>
+                        <Icon className="w-4 h-4 text-white" />
                       </div>
-                    );
-                  })}
-                  {getFilteredNodeTypes().length === 0 && (
-                    <div className="text-center py-4 text-gray-500">
-                      No nodes found
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-gray-800">{config.label}</div>
+                        <div className="text-xs text-gray-500 truncate">{config.category}</div>
+                      </div>
+                      <div className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Drag
+                      </div>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3 flex flex-col h-full min-h-0">
-            {isBuilding ? (
-              <div className="flex gap-4 flex-1 min-h-0">
-                {/* Workflow Canvas */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <Card className="flex-1 flex flex-col min-h-0">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CardTitle>
-                            {selectedWorkflow?.name || 'Untitled Workflow'}
-                          </CardTitle>
-                          <Badge variant="secondary">
-                            {nodes.length} nodes
-                          </Badge>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => setShowMiniMap(!showMiniMap)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {showMiniMap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </Button>
-                          <Button
-                            onClick={() => reactFlowInstance?.fitView()}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Maximize2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            onClick={saveWorkflow}
-                            disabled={isSaving}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Save className="w-4 h-4 mr-2" />
-                            {isSaving ? 'Saving...' : 'Save'}
-                          </Button>
-                          <Button
-                            onClick={executeWorkflowRealtime}
-                            disabled={isExecuting}
-                            size="sm"
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            {isExecuting ? 'Executing...' : 'Test Run'}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex-1 flex flex-col min-h-0">
-                      <div className="flex-1 min-h-[400px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
-                        <ReactFlow
-                          nodes={nodes}
-                          edges={edges}
-                          onNodesChange={onNodesChange}
-                          onEdgesChange={onEdgesChange}
-                          onConnect={onConnect}
-                          onNodeClick={onNodeClick}
-                          onInit={onInit}
-                          onDrop={onDrop}
-                          onDragOver={onDragOver}
-                          nodeTypes={{ custom: CustomNode }}
-                          fitView
-                          attributionPosition="bottom-left"
-                        >
-                          <Controls
-                            position="top-left"
-                            showFitView={true}
-                            showInteractive={true}
-                          />
-                          {showMiniMap && (
-                            <MiniMap
-                              position="bottom-right"
-                              nodeColor={(node) => {
-                                const nodeType = nodeTypes[node.data.type as keyof typeof nodeTypes];
-                                return nodeType?.color?.replace('bg-', '').replace('-500', '') || 'gray';
-                              }}
-                            />
-                          )}
-                          <Background
-                            variant="dots"
-                            gap={20}
-                            size={1}
-                            color="#e2e8f0"
-                          />
-                        </ReactFlow>
-                      </div>
-
-                      {/* Real-time Status Panel */}
-                      <div className="mt-4 grid grid-cols-2 gap-4">
-                        <div className="bg-white border rounded-lg p-3">
-                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                            Real-time Status
-                          </h4>
-                          <div className="space-y-1 text-xs text-gray-600">
-                            <div className="flex justify-between">
-                              <span>Connection:</span>
-                              <span className={isConnected ? 'text-green-600' : 'text-red-600'}>
-                                {isConnected ? 'Connected' : 'Disconnected'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Active Workflows:</span>
-                              <span className="text-blue-600">{liveData.systemMetrics.activeWorkflows}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Queue:</span>
-                              <span className="text-orange-600">{liveData.systemMetrics.queuedExecutions}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>System Load:</span>
-                              <span className="text-purple-600">{liveData.systemMetrics.systemLoad.toFixed(1)}%</span>
-                            </div>
-                          </div>
-                          {wsError && (
-                            <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
-                              {wsError}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="bg-white border rounded-lg p-3">
-                          <h4 className="font-semibold text-sm mb-2">Workflow Statistics</h4>
-                          <div className="space-y-1 text-xs text-gray-600">
-                            <div className="flex justify-between">
-                              <span>Total Nodes:</span>
-                              <span className="text-blue-600">{nodes.length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Connections:</span>
-                              <span className="text-green-600">{edges.length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Valid Nodes:</span>
-                              <span className="text-emerald-600">{nodes.filter(n => validateNode(n.data)).length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Active Executions:</span>
-                              <span className="text-orange-600">
-                                {liveData.executions.filter(e => e.status === 'running').length}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Current Execution Status */}
-                      {liveData.executions.length > 0 && (
-                        <div className="mt-4">
-                          <h4 className="font-semibold text-sm mb-2">Recent Executions</h4>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {liveData.executions.slice(0, 3).map((execution) => (
-                              <div
-                                key={execution.workflowId}
-                                className="bg-gray-50 p-2 rounded text-xs"
-                              >
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="font-medium">Workflow: {execution.workflowId}</span>
-                                  <Badge
-                                    variant={
-                                      execution.status === 'running' ? 'default' :
-                                        execution.status === 'completed' ? 'secondary' :
-                                          'destructive'
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {execution.status}
-                                  </Badge>
-                                </div>
-                                <div className="flex justify-between text-gray-600">
-                                  <span>Progress: {execution.progress.toFixed(0)}%</span>
-                                  <span>
-                                    {execution.currentNodeId && `Current: ${execution.currentNodeId}`}
-                                  </span>
-                                </div>
-                                {execution.executionLog.length > 0 && (
-                                  <div className="mt-1 text-gray-500 truncate">
-                                    Last: {execution.executionLog[execution.executionLog.length - 1].message}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {testResults && (
-                        <Alert className="mt-4">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium">Test Results</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setTestResults(null)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                            <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
-                              {JSON.stringify(testResults, null, 2)}
-                            </pre>
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Property Panel */}
-                {showPropertyPanel && (
-                  <div className="w-80 flex-shrink-0">
-                    <NodePropertyPanel
-                      selectedNode={selectedNode}
-                      onNodeUpdate={onNodeUpdate}
-                      onClose={() => {
-                        setShowPropertyPanel(false);
-                        setSelectedNode(null);
-                      }}
-                    />
+                  );
+                })}
+                {getFilteredNodeTypes().length === 0 && (
+                  <div className="text-center py-4 text-gray-500">
+                    No nodes found
                   </div>
                 )}
               </div>
-            ) : (
-              <Card className="flex-1 h-full">
-                <CardContent className="flex items-center justify-center h-full min-h-[400px]">
-                  <div className="text-center space-y-4">
-                    <Bot className="w-16 h-16 text-gray-400 mx-auto" />
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">
-                        Create or Select a Workflow
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Get started by creating a new workflow or selecting an existing one to begin building your IVR flow
-                      </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="lg:col-span-3 flex flex-col h-full min-h-0">
+          {isBuilding ? (
+            <div className="flex gap-4 flex-1 min-h-0">
+              {/* Workflow Canvas */}
+              <div className="flex-1 flex flex-col min-h-0">
+                <Card className="flex-1 flex flex-col min-h-0">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CardTitle>
+                          {selectedWorkflow?.name || 'Untitled Workflow'}
+                        </CardTitle>
+                        <Badge variant="secondary">
+                          {nodes.length} nodes
+                        </Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => setShowMiniMap(!showMiniMap)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {showMiniMap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          onClick={() => reactFlowInstance?.fitView()}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Maximize2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={saveWorkflow}
+                          disabled={isSaving}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          {isSaving ? 'Saving...' : 'Save'}
+                        </Button>
+                        <Button
+                          onClick={executeWorkflowRealtime}
+                          disabled={isExecuting}
+                          size="sm"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          {isExecuting ? 'Executing...' : 'Test Run'}
+                        </Button>
+                      </div>
                     </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col min-h-0">
+                    <div className="flex-1 min-h-[400px] border rounded-lg overflow-hidden" ref={reactFlowWrapper}>
+                      <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        onNodeClick={onNodeClick}
+                        onInit={onInit}
+                        onDrop={onDrop}
+                        onDragOver={onDragOver}
+                        nodeTypes={{ custom: CustomNode }}
+                        fitView
+                        attributionPosition="bottom-left"
+                      >
+                        <Controls
+                          position="top-left"
+                          showFitView={true}
+                          showInteractive={true}
+                        />
+                        {showMiniMap && (
+                          <MiniMap
+                            position="bottom-right"
+                            nodeColor={(node) => {
+                              const nodeType = nodeTypes[node.data.type as keyof typeof nodeTypes];
+                              return nodeType?.color?.replace('bg-', '').replace('-500', '') || 'gray';
+                            }}
+                          />
+                        )}
+                        <Background
+                          variant="dots"
+                          gap={20}
+                          size={1}
+                          color="#e2e8f0"
+                        />
+                      </ReactFlow>
+                    </div>
+
+                    {/* Real-time Status Panel */}
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div className="bg-white border rounded-lg p-3">
+                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                          Real-time Status
+                        </h4>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Connection:</span>
+                            <span className={isConnected ? 'text-green-600' : 'text-red-600'}>
+                              {isConnected ? 'Connected' : 'Disconnected'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Active Workflows:</span>
+                            <span className="text-blue-600">{liveData.systemMetrics.activeWorkflows}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Queue:</span>
+                            <span className="text-orange-600">{liveData.systemMetrics.queuedExecutions}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>System Load:</span>
+                            <span className="text-purple-600">{liveData.systemMetrics.systemLoad.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        {wsError && (
+                          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                            {wsError}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="bg-white border rounded-lg p-3">
+                        <h4 className="font-semibold text-sm mb-2">Workflow Statistics</h4>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Total Nodes:</span>
+                            <span className="text-blue-600">{nodes.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Connections:</span>
+                            <span className="text-green-600">{edges.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Valid Nodes:</span>
+                            <span className="text-emerald-600">{nodes.filter(n => validateNode(n.data)).length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Active Executions:</span>
+                            <span className="text-orange-600">
+                              {liveData.executions.filter(e => e.status === 'running').length}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Current Execution Status */}
+                    {liveData.executions.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="font-semibold text-sm mb-2">Recent Executions</h4>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {liveData.executions.slice(0, 3).map((execution) => (
+                            <div
+                              key={execution.workflowId}
+                              className="bg-gray-50 p-2 rounded text-xs"
+                            >
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-medium">Workflow: {execution.workflowId}</span>
+                                <Badge
+                                  variant={
+                                    execution.status === 'running' ? 'default' :
+                                      execution.status === 'completed' ? 'secondary' :
+                                        'destructive'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {execution.status}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between text-gray-600">
+                                <span>Progress: {execution.progress.toFixed(0)}%</span>
+                                <span>
+                                  {execution.currentNodeId && `Current: ${execution.currentNodeId}`}
+                                </span>
+                              </div>
+                              {execution.executionLog.length > 0 && (
+                                <div className="mt-1 text-gray-500 truncate">
+                                  Last: {execution.executionLog[execution.executionLog.length - 1].message}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {testResults && (
+                      <Alert className="mt-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">Test Results</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setTestResults(null)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
+                            {JSON.stringify(testResults, null, 2)}
+                          </pre>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Property Panel */}
+              {showPropertyPanel && (
+                <div className="w-80 flex-shrink-0">
+                  <NodePropertyPanel
+                    selectedNode={selectedNode}
+                    onNodeUpdate={onNodeUpdate}
+                    onClose={() => {
+                      setShowPropertyPanel(false);
+                      setSelectedNode(null);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Card className="flex-1 h-full">
+              <CardContent className="flex items-center justify-center h-full min-h-[400px]">
+                <div className="text-center space-y-4">
+                  <Bot className="w-16 h-16 text-gray-400 mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Create or Select a Workflow
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Get started by creating a new workflow or selecting an existing one to begin building your IVR flow
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
-    </ManagementLayout>
+    </div>
   );
 };
 
