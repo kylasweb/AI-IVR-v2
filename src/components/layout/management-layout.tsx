@@ -45,7 +45,8 @@ import {
     Globe as WifiIcon,
     Menu,
     ChevronRight,
-    Star
+    Star,
+    ChevronDown
 } from 'lucide-react';
 import { useMockData } from '@/hooks/use-mock-data';
 
@@ -83,6 +84,16 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
     const [isHovered, setIsHovered] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const autoHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Collapsible sections state
+    const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+    const toggleSection = (sectionTitle: string) => {
+        setCollapsedSections(prev => ({
+            ...prev,
+            [sectionTitle]: !prev[sectionTitle]
+        }));
+    };
 
     // Auto-hide sidebar only on smaller screens
     const startAutoHideTimer = () => {
@@ -575,31 +586,42 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     </div>
 
                     <div className="flex-1 overflow-y-auto overflow-x-hidden">
-                        {navigationSections.map((section, sectionIndex) => (
-                            <div key={sectionIndex} className="py-2">
-                                <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {section.title}
+                        {navigationSections.map((section, sectionIndex) => {
+                            const isCollapsed = collapsedSections[section.title];
+                            const hasActiveItem = section.items.some(item => item.isActive);
+
+                            return (
+                                <div key={sectionIndex} className="py-1">
+                                    <button
+                                        onClick={() => toggleSection(section.title)}
+                                        className="w-full px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100 transition-colors"
+                                    >
+                                        <span className={hasActiveItem ? 'text-blue-600' : ''}>{section.title}</span>
+                                        <ChevronDown
+                                            className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+                                        />
+                                    </button>
+                                    <div className={`overflow-hidden transition-all duration-200 ${isCollapsed ? 'max-h-0' : 'max-h-[1000px]'}`}>
+                                        {section.items.map((item, itemIndex) => (
+                                            <button
+                                                key={itemIndex}
+                                                onClick={() => handleNavigation(item.url)}
+                                                className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${item.isActive ? 'bg-blue-50 border-r-2 border-blue-600' : ''
+                                                    }`}
+                                            >
+                                                <item.icon className="h-4 w-4 flex-shrink-0" />
+                                                <span className="flex-1 text-left text-sm">{item.title}</span>
+                                                {item.badge && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        {item.badge}
+                                                    </Badge>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div>
-                                    {section.items.map((item, itemIndex) => (
-                                        <button
-                                            key={itemIndex}
-                                            onClick={() => handleNavigation(item.url)}
-                                            className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors ${item.isActive ? 'bg-blue-50 border-r-2 border-blue-600' : ''
-                                                }`}
-                                        >
-                                            <item.icon className="h-4 w-4 flex-shrink-0" />
-                                            <span className="flex-1 text-left text-sm">{item.title}</span>
-                                            {item.badge && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                    {item.badge}
-                                                </Badge>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="border-t border-gray-200 p-4 flex-shrink-0">
