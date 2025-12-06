@@ -263,6 +263,13 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     isActive: pathname.includes('/admin/kpi-dashboard')
                 },
                 {
+                    title: 'CRM',
+                    url: '/crm',
+                    icon: Users,
+                    badge: 'Pro',
+                    isActive: pathname.includes('/crm')
+                },
+                {
                     title: 'Client Onboarding',
                     url: '/bpo-management/onboarding',
                     icon: Zap,
