@@ -44,7 +44,8 @@ import {
     Settings as CommandIcon,
     Globe as WifiIcon,
     Menu,
-    ChevronRight
+    ChevronRight,
+    Star
 } from 'lucide-react';
 import { useMockData } from '@/hooks/use-mock-data';
 
@@ -246,6 +247,20 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     icon: Users,
                     badge: 'WFM',
                     isActive: pathname.includes('/admin/workforce')
+                },
+                {
+                    title: 'Quality Monitoring',
+                    url: '/admin/quality',
+                    icon: Star,
+                    badge: 'QA',
+                    isActive: pathname.includes('/admin/quality')
+                },
+                {
+                    title: 'KPI Dashboard',
+                    url: '/admin/kpi-dashboard',
+                    icon: BarChart3,
+                    badge: 'KPI',
+                    isActive: pathname.includes('/admin/kpi-dashboard')
                 },
                 {
                     title: 'Client Onboarding',
