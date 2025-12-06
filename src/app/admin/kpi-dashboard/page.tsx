@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import BPOLayout from '@/components/layout/bpo-layout';
 import {
     BarChart3,
     TrendingUp,
@@ -14,11 +15,11 @@ import {
     Phone,
     Users,
     Star,
-    DollarSign,
+    Target as DollarSign,
     Target,
-    Percent,
-    ArrowUpRight,
-    ArrowDownRight,
+    BarChart3 as Percent,
+    TrendingUp as ArrowUpRight,
+    TrendingDown as ArrowDownRight,
     Calendar,
     Download,
     RefreshCw,
@@ -27,8 +28,8 @@ import {
     AlertTriangle,
     XCircle,
     Headphones,
-    Timer,
-    ThumbsUp
+    Clock as Timer,
+    CheckCircle as ThumbsUp
 } from 'lucide-react';
 
 // Types
@@ -125,7 +126,7 @@ export default function KPIDashboardPage() {
                         <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full ${kpi.changeType === 'positive' ? 'bg-green-500' :
-                                        kpi.changeType === 'negative' ? 'bg-red-500' : 'bg-blue-500'
+                                    kpi.changeType === 'negative' ? 'bg-red-500' : 'bg-blue-500'
                                     }`}
                                 style={{ width: `${Math.min(100, (Number(String(kpi.value).replace(':', '.')) / kpi.target) * 100)}%` }}
                             />
@@ -137,222 +138,224 @@ export default function KPIDashboardPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <BarChart3 className="w-7 h-7 text-blue-400" />
-                        BPO KPI Dashboard
-                    </h1>
-                    <p className="text-gray-400 mt-1">Enterprise performance metrics and analytics</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <select
-                        value={clientFilter}
-                        onChange={(e) => setClientFilter(e.target.value)}
-                        className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm"
-                    >
-                        <option value="all">All Clients</option>
-                        <option value="acme">ACME Corp</option>
-                        <option value="global">Global Finance</option>
-                    </select>
-                    <div className="flex rounded-lg overflow-hidden border border-gray-700">
-                        {(['today', 'week', 'month'] as const).map((range) => (
-                            <button
-                                key={range}
-                                onClick={() => setTimeRange(range)}
-                                className={`px-4 py-2 text-sm capitalize ${timeRange === range
+        <BPOLayout title="KPI Dashboard" subtitle="Enterprise performance metrics">
+            <div className="h-full bg-gray-900 text-white p-6 overflow-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            <BarChart3 className="w-7 h-7 text-blue-400" />
+                            BPO KPI Dashboard
+                        </h1>
+                        <p className="text-gray-400 mt-1">Enterprise performance metrics and analytics</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <select
+                            value={clientFilter}
+                            onChange={(e) => setClientFilter(e.target.value)}
+                            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm"
+                        >
+                            <option value="all">All Clients</option>
+                            <option value="acme">ACME Corp</option>
+                            <option value="global">Global Finance</option>
+                        </select>
+                        <div className="flex rounded-lg overflow-hidden border border-gray-700">
+                            {(['today', 'week', 'month'] as const).map((range) => (
+                                <button
+                                    key={range}
+                                    onClick={() => setTimeRange(range)}
+                                    className={`px-4 py-2 text-sm capitalize ${timeRange === range
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-gray-800 text-gray-400 hover:text-white'
-                                    }`}
-                            >
-                                {range}
-                            </button>
-                        ))}
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
-                        <Download className="w-4 h-4" />
-                        Export
-                    </button>
-                </div>
-            </div>
-
-            {/* Quick Summary */}
-            <div className="grid grid-cols-6 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-blue-200 mb-1">
-                        <Phone className="w-4 h-4" />
-                        <span className="text-sm">Total Calls</span>
-                    </div>
-                    <div className="text-3xl font-bold">2,847</div>
-                </div>
-                <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-green-200 mb-1">
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="text-sm">Resolved</span>
-                    </div>
-                    <div className="text-3xl font-bold">2,052</div>
-                </div>
-                <div className="bg-gradient-to-br from-yellow-600 to-yellow-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-yellow-200 mb-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm">Escalated</span>
-                    </div>
-                    <div className="text-3xl font-bold">342</div>
-                </div>
-                <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-red-200 mb-1">
-                        <XCircle className="w-4 h-4" />
-                        <span className="text-sm">Abandoned</span>
-                    </div>
-                    <div className="text-3xl font-bold">128</div>
-                </div>
-                <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-purple-200 mb-1">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">Active Agents</span>
-                    </div>
-                    <div className="text-3xl font-bold">24</div>
-                </div>
-                <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-indigo-200 mb-1">
-                        <DollarSign className="w-4 h-4" />
-                        <span className="text-sm">Revenue</span>
-                    </div>
-                    <div className="text-3xl font-bold">$35.6K</div>
-                </div>
-            </div>
-
-            {/* KPI Sections */}
-            <div className="space-y-6">
-                {/* Efficiency KPIs */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Timer className="w-5 h-5 text-blue-400" />
-                        Efficiency Metrics
-                    </h2>
-                    <div className="grid grid-cols-4 gap-4">
-                        {EFFICIENCY_KPIS.map((kpi, i) => (
-                            <div key={i}>
-                                {renderKPICard(kpi, <Clock className="w-5 h-5 text-blue-400" />, 'bg-blue-500/20')}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Quality KPIs */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Star className="w-5 h-5 text-yellow-400" />
-                        Quality Metrics
-                    </h2>
-                    <div className="grid grid-cols-4 gap-4">
-                        {QUALITY_KPIS.map((kpi, i) => (
-                            <div key={i}>
-                                {renderKPICard(kpi, <ThumbsUp className="w-5 h-5 text-yellow-400" />, 'bg-yellow-500/20')}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Service Level KPIs */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Target className="w-5 h-5 text-purple-400" />
-                        Service Level Metrics
-                    </h2>
-                    <div className="grid grid-cols-4 gap-4">
-                        {SERVICE_KPIS.map((kpi, i) => (
-                            <div key={i}>
-                                {renderKPICard(kpi, <Headphones className="w-5 h-5 text-purple-400" />, 'bg-purple-500/20')}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Financial KPIs */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 text-green-400" />
-                        Financial Metrics
-                    </h2>
-                    <div className="grid grid-cols-4 gap-4">
-                        {FINANCIAL_KPIS.map((kpi, i) => (
-                            <div key={i}>
-                                {renderKPICard(kpi, <DollarSign className="w-5 h-5 text-green-400" />, 'bg-green-500/20')}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Agent Performance Table */}
-            <div className="mt-8">
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-400" />
-                    Agent Performance
-                </h2>
-                <div className="bg-gray-800 rounded-xl overflow-hidden">
-                    <table className="w-full">
-                        <thead className="bg-gray-700/50">
-                            <tr>
-                                <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Agent</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Calls</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">AHT</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">FCR</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">CSAT</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Adherence</th>
-                                <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Utilization</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-700">
-                            {AGENT_KPIS.map((agent, i) => (
-                                <tr key={i} className="hover:bg-gray-700/30">
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-medium">
-                                                {agent.avatar}
-                                            </div>
-                                            <span className="font-medium">{agent.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="text-center px-4 py-3 font-medium">{agent.calls}</td>
-                                    <td className="text-center px-4 py-3 font-mono text-sm">{agent.aht}</td>
-                                    <td className="text-center px-4 py-3">
-                                        <span className={agent.fcr >= 75 ? 'text-green-400' : agent.fcr >= 65 ? 'text-yellow-400' : 'text-red-400'}>
-                                            {agent.fcr}%
-                                        </span>
-                                    </td>
-                                    <td className="text-center px-4 py-3">
-                                        <span className={agent.csat >= 4.3 ? 'text-green-400' : agent.csat >= 3.8 ? 'text-yellow-400' : 'text-red-400'}>
-                                            {agent.csat}
-                                        </span>
-                                    </td>
-                                    <td className="text-center px-4 py-3">
-                                        <span className={agent.adherence >= 95 ? 'text-green-400' : agent.adherence >= 90 ? 'text-yellow-400' : 'text-red-400'}>
-                                            {agent.adherence}%
-                                        </span>
-                                    </td>
-                                    <td className="text-center px-4 py-3">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
-                                                <div
-                                                    className={`h-full rounded-full ${agent.utilization >= 85 ? 'bg-green-500' :
-                                                            agent.utilization >= 75 ? 'bg-yellow-500' : 'bg-red-500'
-                                                        }`}
-                                                    style={{ width: `${agent.utilization}%` }}
-                                                />
-                                            </div>
-                                            <span className="text-sm">{agent.utilization}%</span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        }`}
+                                >
+                                    {range}
+                                </button>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
+                            <Download className="w-4 h-4" />
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                {/* Quick Summary */}
+                <div className="grid grid-cols-6 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-blue-200 mb-1">
+                            <Phone className="w-4 h-4" />
+                            <span className="text-sm">Total Calls</span>
+                        </div>
+                        <div className="text-3xl font-bold">2,847</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-green-200 mb-1">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-sm">Resolved</span>
+                        </div>
+                        <div className="text-3xl font-bold">2,052</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-600 to-yellow-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-yellow-200 mb-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-sm">Escalated</span>
+                        </div>
+                        <div className="text-3xl font-bold">342</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-red-200 mb-1">
+                            <XCircle className="w-4 h-4" />
+                            <span className="text-sm">Abandoned</span>
+                        </div>
+                        <div className="text-3xl font-bold">128</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-purple-200 mb-1">
+                            <Users className="w-4 h-4" />
+                            <span className="text-sm">Active Agents</span>
+                        </div>
+                        <div className="text-3xl font-bold">24</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-indigo-200 mb-1">
+                            <DollarSign className="w-4 h-4" />
+                            <span className="text-sm">Revenue</span>
+                        </div>
+                        <div className="text-3xl font-bold">$35.6K</div>
+                    </div>
+                </div>
+
+                {/* KPI Sections */}
+                <div className="space-y-6">
+                    {/* Efficiency KPIs */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Timer className="w-5 h-5 text-blue-400" />
+                            Efficiency Metrics
+                        </h2>
+                        <div className="grid grid-cols-4 gap-4">
+                            {EFFICIENCY_KPIS.map((kpi, i) => (
+                                <div key={i}>
+                                    {renderKPICard(kpi, <Clock className="w-5 h-5 text-blue-400" />, 'bg-blue-500/20')}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Quality KPIs */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Star className="w-5 h-5 text-yellow-400" />
+                            Quality Metrics
+                        </h2>
+                        <div className="grid grid-cols-4 gap-4">
+                            {QUALITY_KPIS.map((kpi, i) => (
+                                <div key={i}>
+                                    {renderKPICard(kpi, <ThumbsUp className="w-5 h-5 text-yellow-400" />, 'bg-yellow-500/20')}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Service Level KPIs */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Target className="w-5 h-5 text-purple-400" />
+                            Service Level Metrics
+                        </h2>
+                        <div className="grid grid-cols-4 gap-4">
+                            {SERVICE_KPIS.map((kpi, i) => (
+                                <div key={i}>
+                                    {renderKPICard(kpi, <Headphones className="w-5 h-5 text-purple-400" />, 'bg-purple-500/20')}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Financial KPIs */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <DollarSign className="w-5 h-5 text-green-400" />
+                            Financial Metrics
+                        </h2>
+                        <div className="grid grid-cols-4 gap-4">
+                            {FINANCIAL_KPIS.map((kpi, i) => (
+                                <div key={i}>
+                                    {renderKPICard(kpi, <DollarSign className="w-5 h-5 text-green-400" />, 'bg-green-500/20')}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Agent Performance Table */}
+                <div className="mt-8">
+                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-400" />
+                        Agent Performance
+                    </h2>
+                    <div className="bg-gray-800 rounded-xl overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-gray-700/50">
+                                <tr>
+                                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Agent</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Calls</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">AHT</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">FCR</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">CSAT</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Adherence</th>
+                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Utilization</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700">
+                                {AGENT_KPIS.map((agent, i) => (
+                                    <tr key={i} className="hover:bg-gray-700/30">
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-medium">
+                                                    {agent.avatar}
+                                                </div>
+                                                <span className="font-medium">{agent.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="text-center px-4 py-3 font-medium">{agent.calls}</td>
+                                        <td className="text-center px-4 py-3 font-mono text-sm">{agent.aht}</td>
+                                        <td className="text-center px-4 py-3">
+                                            <span className={agent.fcr >= 75 ? 'text-green-400' : agent.fcr >= 65 ? 'text-yellow-400' : 'text-red-400'}>
+                                                {agent.fcr}%
+                                            </span>
+                                        </td>
+                                        <td className="text-center px-4 py-3">
+                                            <span className={agent.csat >= 4.3 ? 'text-green-400' : agent.csat >= 3.8 ? 'text-yellow-400' : 'text-red-400'}>
+                                                {agent.csat}
+                                            </span>
+                                        </td>
+                                        <td className="text-center px-4 py-3">
+                                            <span className={agent.adherence >= 95 ? 'text-green-400' : agent.adherence >= 90 ? 'text-yellow-400' : 'text-red-400'}>
+                                                {agent.adherence}%
+                                            </span>
+                                        </td>
+                                        <td className="text-center px-4 py-3">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full ${agent.utilization >= 85 ? 'bg-green-500' :
+                                                            agent.utilization >= 75 ? 'bg-yellow-500' : 'bg-red-500'
+                                                            }`}
+                                                        style={{ width: `${agent.utilization}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-sm">{agent.utilization}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        </BPOLayout>
     );
 }

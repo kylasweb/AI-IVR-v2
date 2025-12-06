@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import BPOLayout from '@/components/layout/bpo-layout';
 import {
     Users,
     Building2,
@@ -174,311 +175,313 @@ export default function CRMPage() {
     const pipelineValue = DEALS.reduce((sum, d) => sum + d.value, 0);
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <Briefcase className="w-7 h-7 text-blue-400" />
-                        Advanced CRM
-                    </h1>
-                    <p className="text-gray-400 mt-1">Customer relationship management for BPO operations</p>
+        <BPOLayout title="Advanced CRM" subtitle="Customer relationship management">
+            <div className="h-full bg-gray-900 text-white p-6 overflow-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            <Briefcase className="w-7 h-7 text-blue-400" />
+                            Advanced CRM
+                        </h1>
+                        <p className="text-gray-400 mt-1">Customer relationship management for BPO operations</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
+                            <Upload className="w-4 h-4" />
+                            Import
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
+                            <Download className="w-4 h-4" />
+                            Export
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                            <Plus className="w-4 h-4" />
+                            Add Contact
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
-                        <Upload className="w-4 h-4" />
-                        Import
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg">
-                        <Download className="w-4 h-4" />
-                        Export
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
-                        <Plus className="w-4 h-4" />
-                        Add Contact
-                    </button>
-                </div>
-            </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">Total Contacts</span>
+                {/* Stats Row */}
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-gray-400 mb-1">
+                            <Users className="w-4 h-4" />
+                            <span className="text-sm">Total Contacts</span>
+                        </div>
+                        <div className="text-3xl font-bold">{totalContacts}</div>
+                        <div className="flex items-center gap-1 text-sm text-green-400 mt-1">
+                            <ArrowUpRight className="w-3 h-3" />
+                            <span>+12 this week</span>
+                        </div>
                     </div>
-                    <div className="text-3xl font-bold">{totalContacts}</div>
-                    <div className="flex items-center gap-1 text-sm text-green-400 mt-1">
-                        <ArrowUpRight className="w-3 h-3" />
-                        <span>+12 this week</span>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-green-400 mb-1">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-sm">Active</span>
+                        </div>
+                        <div className="text-3xl font-bold text-green-400">{activeContacts}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-purple-400 mb-1">
+                            <Target className="w-4 h-4" />
+                            <span className="text-sm">Open Deals</span>
+                        </div>
+                        <div className="text-3xl font-bold text-purple-400">{totalDeals}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-blue-400 mb-1">
+                            <DollarSign className="w-4 h-4" />
+                            <span className="text-sm">Pipeline Value</span>
+                        </div>
+                        <div className="text-3xl font-bold text-blue-400">${(pipelineValue / 1000).toFixed(0)}K</div>
                     </div>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-green-400 mb-1">
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="text-sm">Active</span>
-                    </div>
-                    <div className="text-3xl font-bold text-green-400">{activeContacts}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-purple-400 mb-1">
-                        <Target className="w-4 h-4" />
-                        <span className="text-sm">Open Deals</span>
-                    </div>
-                    <div className="text-3xl font-bold text-purple-400">{totalDeals}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-blue-400 mb-1">
-                        <DollarSign className="w-4 h-4" />
-                        <span className="text-sm">Pipeline Value</span>
-                    </div>
-                    <div className="text-3xl font-bold text-blue-400">${(pipelineValue / 1000).toFixed(0)}K</div>
-                </div>
-            </div>
 
-            {/* View Tabs */}
-            <div className="flex gap-2 mb-6">
-                {(['contacts', 'accounts', 'deals', 'pipeline'] as const).map((view) => (
-                    <button
-                        key={view}
-                        onClick={() => setActiveView(view)}
-                        className={`px-4 py-2 rounded-lg font-medium capitalize ${activeView === view
+                {/* View Tabs */}
+                <div className="flex gap-2 mb-6">
+                    {(['contacts', 'accounts', 'deals', 'pipeline'] as const).map((view) => (
+                        <button
+                            key={view}
+                            onClick={() => setActiveView(view)}
+                            className={`px-4 py-2 rounded-lg font-medium capitalize ${activeView === view
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-800 text-gray-400 hover:text-white'
-                            }`}
-                    >
-                        {view}
-                    </button>
-                ))}
-            </div>
-
-            {/* Main Content */}
-            <div className="grid grid-cols-3 gap-6">
-                {/* Left - Contact List */}
-                <div className="col-span-2">
-                    {activeView === 'contacts' && (
-                        <div className="bg-gray-800 rounded-xl">
-                            {/* Search & Filters */}
-                            <div className="p-4 border-b border-gray-700 flex items-center gap-4">
-                                <div className="flex-1 relative">
-                                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search contacts..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm focus:border-blue-500 outline-none"
-                                    />
-                                </div>
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm"
-                                >
-                                    <option value="all">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="lead">Lead</option>
-                                    <option value="prospect">Prospect</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
-
-                            {/* Contact List */}
-                            <div className="divide-y divide-gray-700">
-                                {filteredContacts.map((contact) => (
-                                    <button
-                                        key={contact.id}
-                                        onClick={() => setSelectedContact(contact)}
-                                        className={`w-full p-4 text-left hover:bg-gray-700/50 transition-colors ${selectedContact?.id === contact.id ? 'bg-gray-700/50' : ''
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-medium">
-                                                    {contact.firstName[0]}{contact.lastName[0]}
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium">{contact.firstName} {contact.lastName}</span>
-                                                        <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(contact.status)}`}>
-                                                            {contact.status}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-sm text-gray-400">{contact.title} at {contact.company}</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-right">
-                                                    <div className={`text-lg font-bold ${getScoreColor(contact.score)}`}>
-                                                        {contact.score}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">Lead Score</div>
-                                                </div>
-                                                <ChevronRight className="w-4 h-4 text-gray-400" />
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Mail className="w-3 h-3" />
-                                                {contact.email}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {contact.lastActivity}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeView === 'deals' && (
-                        <div className="bg-gray-800 rounded-xl">
-                            <div className="p-4 border-b border-gray-700">
-                                <h3 className="font-semibold">Open Deals</h3>
-                            </div>
-                            <div className="divide-y divide-gray-700">
-                                {DEALS.map((deal) => (
-                                    <div key={deal.id} className="p-4 hover:bg-gray-700/50">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div>
-                                                <div className="font-medium">{deal.name}</div>
-                                                <div className="text-sm text-gray-400">{deal.accountName}</div>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-lg font-bold text-green-400">${(deal.value / 1000).toFixed(0)}K</div>
-                                                <div className="text-xs text-gray-500">{deal.probability}% probability</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">{deal.stage}</span>
-                                            <span className="text-gray-400">Close: {deal.closeDate}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeView === 'pipeline' && (
-                        <div className="bg-gray-800 rounded-xl p-6">
-                            <h3 className="font-semibold mb-4">Sales Pipeline</h3>
-                            <div className="space-y-4">
-                                {PIPELINE_STAGES.map((stage) => (
-                                    <div key={stage.name}>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-medium">{stage.name}</span>
-                                                <span className="text-sm text-gray-400">({stage.count} deals)</span>
-                                            </div>
-                                            <span className="text-green-400 font-medium">${(stage.value / 1000).toFixed(0)}K</span>
-                                        </div>
-                                        <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full bg-${stage.color}-500`}
-                                                style={{ width: `${(stage.value / 890000) * 100}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                                }`}
+                        >
+                            {view}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Right - Contact Detail / Activities */}
-                <div className="col-span-1 space-y-4">
-                    {selectedContact ? (
+                {/* Main Content */}
+                <div className="grid grid-cols-3 gap-6">
+                    {/* Left - Contact List */}
+                    <div className="col-span-2">
+                        {activeView === 'contacts' && (
+                            <div className="bg-gray-800 rounded-xl">
+                                {/* Search & Filters */}
+                                <div className="p-4 border-b border-gray-700 flex items-center gap-4">
+                                    <div className="flex-1 relative">
+                                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search contacts..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm focus:border-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm"
+                                    >
+                                        <option value="all">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="lead">Lead</option>
+                                        <option value="prospect">Prospect</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+                                {/* Contact List */}
+                                <div className="divide-y divide-gray-700">
+                                    {filteredContacts.map((contact) => (
+                                        <button
+                                            key={contact.id}
+                                            onClick={() => setSelectedContact(contact)}
+                                            className={`w-full p-4 text-left hover:bg-gray-700/50 transition-colors ${selectedContact?.id === contact.id ? 'bg-gray-700/50' : ''
+                                                }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-medium">
+                                                        {contact.firstName[0]}{contact.lastName[0]}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium">{contact.firstName} {contact.lastName}</span>
+                                                            <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(contact.status)}`}>
+                                                                {contact.status}
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-sm text-gray-400">{contact.title} at {contact.company}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-right">
+                                                        <div className={`text-lg font-bold ${getScoreColor(contact.score)}`}>
+                                                            {contact.score}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">Lead Score</div>
+                                                    </div>
+                                                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                                <span className="flex items-center gap-1">
+                                                    <Mail className="w-3 h-3" />
+                                                    {contact.email}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {contact.lastActivity}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeView === 'deals' && (
+                            <div className="bg-gray-800 rounded-xl">
+                                <div className="p-4 border-b border-gray-700">
+                                    <h3 className="font-semibold">Open Deals</h3>
+                                </div>
+                                <div className="divide-y divide-gray-700">
+                                    {DEALS.map((deal) => (
+                                        <div key={deal.id} className="p-4 hover:bg-gray-700/50">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div>
+                                                    <div className="font-medium">{deal.name}</div>
+                                                    <div className="text-sm text-gray-400">{deal.accountName}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-lg font-bold text-green-400">${(deal.value / 1000).toFixed(0)}K</div>
+                                                    <div className="text-xs text-gray-500">{deal.probability}% probability</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">{deal.stage}</span>
+                                                <span className="text-gray-400">Close: {deal.closeDate}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeView === 'pipeline' && (
+                            <div className="bg-gray-800 rounded-xl p-6">
+                                <h3 className="font-semibold mb-4">Sales Pipeline</h3>
+                                <div className="space-y-4">
+                                    {PIPELINE_STAGES.map((stage) => (
+                                        <div key={stage.name}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium">{stage.name}</span>
+                                                    <span className="text-sm text-gray-400">({stage.count} deals)</span>
+                                                </div>
+                                                <span className="text-green-400 font-medium">${(stage.value / 1000).toFixed(0)}K</span>
+                                            </div>
+                                            <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full bg-${stage.color}-500`}
+                                                    style={{ width: `${(stage.value / 890000) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right - Contact Detail / Activities */}
+                    <div className="col-span-1 space-y-4">
+                        {selectedContact ? (
+                            <div className="bg-gray-800 rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold">Contact Details</h3>
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-2 hover:bg-gray-700 rounded-lg">
+                                            <Edit className="w-4 h-4" />
+                                        </button>
+                                        <button className="p-2 hover:bg-gray-700 rounded-lg text-red-400">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl font-bold">
+                                        {selectedContact.firstName[0]}{selectedContact.lastName[0]}
+                                    </div>
+                                    <div>
+                                        <div className="text-lg font-semibold">
+                                            {selectedContact.firstName} {selectedContact.lastName}
+                                        </div>
+                                        <div className="text-gray-400">{selectedContact.title}</div>
+                                        <div className="text-sm text-blue-400">{selectedContact.company}</div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <Mail className="w-4 h-4 text-gray-400" />
+                                        <span>{selectedContact.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Phone className="w-4 h-4 text-gray-400" />
+                                        <span>{selectedContact.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Tag className="w-4 h-4 text-gray-400" />
+                                        <div className="flex flex-wrap gap-1">
+                                            {selectedContact.tags.map((tag, i) => (
+                                                <span key={i} className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2 mt-4">
+                                    <button className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium">
+                                        <Phone className="w-4 h-4 inline mr-1" /> Call
+                                    </button>
+                                    <button className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
+                                        <Mail className="w-4 h-4 inline mr-1" /> Email
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-gray-800 rounded-xl p-8 text-center">
+                                <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                                <p className="text-gray-500">Select a contact to view details</p>
+                            </div>
+                        )}
+
+                        {/* Recent Activity */}
                         <div className="bg-gray-800 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold">Contact Details</h3>
-                                <div className="flex items-center gap-2">
-                                    <button className="p-2 hover:bg-gray-700 rounded-lg">
-                                        <Edit className="w-4 h-4" />
-                                    </button>
-                                    <button className="p-2 hover:bg-gray-700 rounded-lg text-red-400">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl font-bold">
-                                    {selectedContact.firstName[0]}{selectedContact.lastName[0]}
-                                </div>
-                                <div>
-                                    <div className="text-lg font-semibold">
-                                        {selectedContact.firstName} {selectedContact.lastName}
-                                    </div>
-                                    <div className="text-gray-400">{selectedContact.title}</div>
-                                    <div className="text-sm text-blue-400">{selectedContact.company}</div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3 text-sm">
-                                <div className="flex items-center gap-3">
-                                    <Mail className="w-4 h-4 text-gray-400" />
-                                    <span>{selectedContact.email}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Phone className="w-4 h-4 text-gray-400" />
-                                    <span>{selectedContact.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Tag className="w-4 h-4 text-gray-400" />
-                                    <div className="flex flex-wrap gap-1">
-                                        {selectedContact.tags.map((tag, i) => (
-                                            <span key={i} className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2 mt-4">
-                                <button className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium">
-                                    <Phone className="w-4 h-4 inline mr-1" /> Call
-                                </button>
-                                <button className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium">
-                                    <Mail className="w-4 h-4 inline mr-1" /> Email
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-gray-800 rounded-xl p-8 text-center">
-                            <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                            <p className="text-gray-500">Select a contact to view details</p>
-                        </div>
-                    )}
-
-                    {/* Recent Activity */}
-                    <div className="bg-gray-800 rounded-xl p-4">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-blue-400" />
-                            Recent Activity
-                        </h3>
-                        <div className="space-y-3">
-                            {ACTIVITIES.map((activity) => (
-                                <div key={activity.id} className="flex items-start gap-3 p-2 hover:bg-gray-700/50 rounded-lg">
-                                    <div className={`p-2 rounded-lg ${activity.type === 'call' ? 'bg-green-500/20 text-green-400' :
+                            <h3 className="font-semibold mb-4 flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-blue-400" />
+                                Recent Activity
+                            </h3>
+                            <div className="space-y-3">
+                                {ACTIVITIES.map((activity) => (
+                                    <div key={activity.id} className="flex items-start gap-3 p-2 hover:bg-gray-700/50 rounded-lg">
+                                        <div className={`p-2 rounded-lg ${activity.type === 'call' ? 'bg-green-500/20 text-green-400' :
                                             activity.type === 'email' ? 'bg-blue-500/20 text-blue-400' :
                                                 activity.type === 'meeting' ? 'bg-purple-500/20 text-purple-400' :
                                                     'bg-gray-500/20 text-gray-400'
-                                        }`}>
-                                        {getActivityIcon(activity.type)}
+                                            }`}>
+                                            {getActivityIcon(activity.type)}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-medium">{activity.subject}</div>
+                                            <div className="text-xs text-gray-400">{activity.contactName} • {activity.date}</div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="text-sm font-medium">{activity.subject}</div>
-                                        <div className="text-xs text-gray-400">{activity.contactName} • {activity.date}</div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </BPOLayout>
     );
 }
