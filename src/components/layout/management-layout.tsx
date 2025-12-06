@@ -215,16 +215,22 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
             title: 'BPO & Enterprise',
             items: [
                 {
+                    title: 'BPO Center',
+                    url: '/bpo',
+                    icon: Headphones,
+                    badge: 'Hub',
+                    isActive: pathname === '/bpo'
+                },
+                {
                     title: 'BPO Solutions',
                     url: '/bpo-solutions',
-                    icon: Headphones,
-                    badge: 'New',
+                    icon: Users,
                     isActive: pathname.includes('/bpo-solutions')
                 },
                 {
                     title: 'BPO Management',
                     url: '/bpo-management',
-                    icon: Users,
+                    icon: Settings,
                     isActive: pathname.includes('/bpo-management') && !pathname.includes('/onboarding')
                 },
                 {
