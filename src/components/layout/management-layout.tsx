@@ -224,7 +224,14 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     title: 'BPO Management',
                     url: '/bpo-management',
                     icon: Users,
-                    isActive: pathname.includes('/bpo-management')
+                    isActive: pathname.includes('/bpo-management') && !pathname.includes('/onboarding')
+                },
+                {
+                    title: 'Agent Desktop',
+                    url: '/bpo-desk',
+                    icon: Headphones,
+                    badge: 'CTI',
+                    isActive: pathname.includes('/bpo-desk')
                 },
                 {
                     title: 'Agent Assist',
@@ -232,6 +239,19 @@ export default function ManagementLayout({ children, title, subtitle }: Manageme
                     icon: Bot,
                     badge: 'AI',
                     isActive: pathname.includes('/agent-assist')
+                },
+                {
+                    title: 'Workforce Mgmt',
+                    url: '/admin/workforce',
+                    icon: Users,
+                    badge: 'WFM',
+                    isActive: pathname.includes('/admin/workforce')
+                },
+                {
+                    title: 'Client Onboarding',
+                    url: '/bpo-management/onboarding',
+                    icon: Zap,
+                    isActive: pathname.includes('/onboarding')
                 }
             ]
         },
