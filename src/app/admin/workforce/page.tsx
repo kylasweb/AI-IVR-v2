@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import BPOLayout from '@/components/layout/bpo-layout';
 import {
     Users,
     Clock,
@@ -16,7 +17,7 @@ import {
     CheckCircle,
     Phone,
     PhoneOff,
-    Coffee,
+    Clock as Coffee,
     LogOut,
     RefreshCw,
     Download,
@@ -131,299 +132,301 @@ export default function WorkforcePage() {
     const avgAdherence = Math.round(AGENTS.reduce((sum, a) => sum + a.adherence, 0) / AGENTS.length);
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <Users className="w-7 h-7 text-blue-400" />
-                        Workforce Management
-                    </h1>
-                    <p className="text-gray-400 mt-1">Real-time monitoring, forecasting, and scheduling</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleRefresh}
-                        className={`p-2 bg-gray-800 rounded-lg hover:bg-gray-700 ${isRefreshing ? 'animate-spin' : ''}`}
-                    >
-                        <RefreshCw className="w-5 h-5" />
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
-                        <Download className="w-4 h-4" />
-                        Export
-                    </button>
-                </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-5 gap-4 mb-6">
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">Total Agents</span>
+        <BPOLayout title="Workforce Management" subtitle="Forecasting, scheduling, and adherence">
+            <div className="h-full bg-gray-900 text-white p-6 overflow-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold flex items-center gap-2">
+                            <Users className="w-7 h-7 text-blue-400" />
+                            Workforce Management
+                        </h1>
+                        <p className="text-gray-400 mt-1">Real-time monitoring, forecasting, and scheduling</p>
                     </div>
-                    <div className="text-3xl font-bold">{AGENTS.length}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-green-400 mb-1">
-                        <CheckCircle className="w-4 h-4" />
-                        <span className="text-sm">Available</span>
-                    </div>
-                    <div className="text-3xl font-bold text-green-400">{availableAgents}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-blue-400 mb-1">
-                        <Phone className="w-4 h-4" />
-                        <span className="text-sm">On Call</span>
-                    </div>
-                    <div className="text-3xl font-bold text-blue-400">{onCallAgents}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-yellow-400 mb-1">
-                        <Coffee className="w-4 h-4" />
-                        <span className="text-sm">On Break</span>
-                    </div>
-                    <div className="text-3xl font-bold text-yellow-400">{breakAgents}</div>
-                </div>
-                <div className="bg-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                        <Target className="w-4 h-4" />
-                        <span className="text-sm">Avg Adherence</span>
-                    </div>
-                    <div className={`text-3xl font-bold ${getAdherenceColor(avgAdherence)}`}>{avgAdherence}%</div>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6">
-                {(['realtime', 'forecast', 'schedule'] as const).map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 rounded-lg font-medium capitalize ${activeTab === tab
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-800 text-gray-400 hover:text-white'
-                            }`}
-                    >
-                        {tab === 'realtime' ? 'Real-Time Status' : tab}
-                    </button>
-                ))}
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'realtime' && (
-                <div className="bg-gray-800 rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-700/50">
-                                <tr>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Agent</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Status</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Scheduled</th>
-                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Adherence</th>
-                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Calls</th>
-                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">AHT</th>
-                                    <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Login</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Skill</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-700">
-                                {AGENTS.map((agent) => (
-                                    <tr key={agent.id} className="hover:bg-gray-700/30">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-medium">
-                                                    {agent.name.split(' ').map(n => n[0]).join('')}
-                                                </div>
-                                                <span className="font-medium">{agent.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${getStatusColor(agent.status)}`}>
-                                                {getStatusLabel(agent.status)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-gray-600`}>
-                                                {getStatusLabel(agent.scheduledStatus)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-center">
-                                            <span className={`font-medium ${getAdherenceColor(agent.adherence)}`}>
-                                                {agent.adherence}%
-                                            </span>
-                                            {agent.status !== agent.scheduledStatus && (
-                                                <AlertTriangle className="w-3 h-3 text-yellow-400 inline ml-1" />
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-3 text-center font-medium">{agent.callsToday}</td>
-                                        <td className="px-4 py-3 text-center font-mono text-sm">{agent.avgHandleTime}</td>
-                                        <td className="px-4 py-3 text-center font-mono text-sm">{agent.loginTime}</td>
-                                        <td className="px-4 py-3">
-                                            <span className="px-2 py-1 bg-gray-700 rounded text-xs">{agent.skill}</span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'forecast' && (
-                <div className="bg-gray-800 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-blue-400" />
-                            Call Volume Forecast vs Staffing
-                        </h3>
-                        <div className="flex items-center gap-2">
-                            <button className="p-1 hover:bg-gray-700 rounded">
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <span className="text-sm font-medium">Today</span>
-                            <button className="p-1 hover:bg-gray-700 rounded">
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Forecast Chart */}
-                    <div className="h-64 flex items-end gap-2 mb-4">
-                        {FORECAST.map((interval, i) => {
-                            const maxValue = Math.max(...FORECAST.map(f => f.predicted));
-                            const height = (interval.predicted / maxValue) * 100;
-                            const actualHeight = interval.actual ? (interval.actual / maxValue) * 100 : 0;
-
-                            return (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                                    <div className="relative w-full h-48 flex items-end justify-center gap-1">
-                                        <div
-                                            className="w-4 bg-blue-500/30 rounded-t absolute left-1/2 -translate-x-4"
-                                            style={{ height: `${height}%` }}
-                                        />
-                                        {interval.actual && (
-                                            <div
-                                                className="w-4 bg-green-500 rounded-t absolute left-1/2"
-                                                style={{ height: `${actualHeight}%` }}
-                                            />
-                                        )}
-                                    </div>
-                                    <span className="text-xs text-gray-400">{interval.time}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex items-center justify-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-blue-500/30" />
-                            <span className="text-gray-400">Forecast</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded bg-green-500" />
-                            <span className="text-gray-400">Actual</span>
-                        </div>
-                    </div>
-
-                    {/* Staffing Table */}
-                    <div className="mt-6 overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="text-gray-400">
-                                    <th className="text-left py-2">Interval</th>
-                                    {FORECAST.slice(0, 8).map((f, i) => (
-                                        <th key={i} className="text-center py-2">{f.time}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="py-2 text-gray-400">Predicted Calls</td>
-                                    {FORECAST.slice(0, 8).map((f, i) => (
-                                        <td key={i} className="text-center py-2">{f.predicted}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="py-2 text-gray-400">Required Agents</td>
-                                    {FORECAST.slice(0, 8).map((f, i) => (
-                                        <td key={i} className="text-center py-2">{f.required}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="py-2 text-gray-400">Scheduled</td>
-                                    {FORECAST.slice(0, 8).map((f, i) => (
-                                        <td key={i} className={`text-center py-2 font-medium ${f.scheduled >= f.required ? 'text-green-400' : 'text-red-400'
-                                            }`}>
-                                            {f.scheduled}
-                                        </td>
-                                    ))}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'schedule' && (
-                <div className="bg-gray-800 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-blue-400" />
-                            Agent Schedule
-                        </h3>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium">
-                            <Zap className="w-4 h-4" />
-                            Auto-Generate Schedule
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleRefresh}
+                            className={`p-2 bg-gray-800 rounded-lg hover:bg-gray-700 ${isRefreshing ? 'animate-spin' : ''}`}
+                        >
+                            <RefreshCw className="w-5 h-5" />
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                            <Download className="w-4 h-4" />
+                            Export
                         </button>
                     </div>
+                </div>
 
-                    {/* Timeline View */}
-                    <div className="relative">
-                        {/* Time Headers */}
-                        <div className="flex mb-2 ml-32">
-                            {['08', '09', '10', '11', '12', '13', '14', '15', '16', '17'].map((hour) => (
-                                <div key={hour} className="flex-1 text-xs text-gray-400 text-center">
-                                    {hour}:00
-                                </div>
-                            ))}
+                {/* Quick Stats */}
+                <div className="grid grid-cols-5 gap-4 mb-6">
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-gray-400 mb-1">
+                            <Users className="w-4 h-4" />
+                            <span className="text-sm">Total Agents</span>
                         </div>
-
-                        {/* Agent Rows */}
-                        <div className="space-y-2">
-                            {AGENTS.slice(0, 5).map((agent) => (
-                                <div key={agent.id} className="flex items-center">
-                                    <div className="w-32 text-sm truncate">{agent.name}</div>
-                                    <div className="flex-1 h-8 bg-gray-700/30 rounded relative">
-                                        {/* Shift bar */}
-                                        <div
-                                            className="absolute h-full bg-blue-500/50 rounded"
-                                            style={{ left: '10%', width: '80%' }}
-                                        />
-                                        {/* Break */}
-                                        <div
-                                            className="absolute h-full bg-yellow-500/50 rounded"
-                                            style={{ left: '40%', width: '10%' }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="text-3xl font-bold">{AGENTS.length}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-green-400 mb-1">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-sm">Available</span>
                         </div>
+                        <div className="text-3xl font-bold text-green-400">{availableAgents}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-blue-400 mb-1">
+                            <Phone className="w-4 h-4" />
+                            <span className="text-sm">On Call</span>
+                        </div>
+                        <div className="text-3xl font-bold text-blue-400">{onCallAgents}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-yellow-400 mb-1">
+                            <Coffee className="w-4 h-4" />
+                            <span className="text-sm">On Break</span>
+                        </div>
+                        <div className="text-3xl font-bold text-yellow-400">{breakAgents}</div>
+                    </div>
+                    <div className="bg-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-2 text-gray-400 mb-1">
+                            <Target className="w-4 h-4" />
+                            <span className="text-sm">Avg Adherence</span>
+                        </div>
+                        <div className={`text-3xl font-bold ${getAdherenceColor(avgAdherence)}`}>{avgAdherence}%</div>
+                    </div>
+                </div>
 
-                        {/* Legend */}
-                        <div className="flex items-center gap-6 mt-4 text-sm">
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6">
+                    {(['realtime', 'forecast', 'schedule'] as const).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-4 py-2 rounded-lg font-medium capitalize ${activeTab === tab
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-800 text-gray-400 hover:text-white'
+                                }`}
+                        >
+                            {tab === 'realtime' ? 'Real-Time Status' : tab}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === 'realtime' && (
+                    <div className="bg-gray-800 rounded-xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-700/50">
+                                    <tr>
+                                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Agent</th>
+                                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Status</th>
+                                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Scheduled</th>
+                                        <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Adherence</th>
+                                        <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Calls</th>
+                                        <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">AHT</th>
+                                        <th className="text-center px-4 py-3 text-sm font-medium text-gray-300">Login</th>
+                                        <th className="text-left px-4 py-3 text-sm font-medium text-gray-300">Skill</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-700">
+                                    {AGENTS.map((agent) => (
+                                        <tr key={agent.id} className="hover:bg-gray-700/30">
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-medium">
+                                                        {agent.name.split(' ').map(n => n[0]).join('')}
+                                                    </div>
+                                                    <span className="font-medium">{agent.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${getStatusColor(agent.status)}`}>
+                                                    {getStatusLabel(agent.status)}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-gray-600`}>
+                                                    {getStatusLabel(agent.scheduledStatus)}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className={`font-medium ${getAdherenceColor(agent.adherence)}`}>
+                                                    {agent.adherence}%
+                                                </span>
+                                                {agent.status !== agent.scheduledStatus && (
+                                                    <AlertTriangle className="w-3 h-3 text-yellow-400 inline ml-1" />
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-center font-medium">{agent.callsToday}</td>
+                                            <td className="px-4 py-3 text-center font-mono text-sm">{agent.avgHandleTime}</td>
+                                            <td className="px-4 py-3 text-center font-mono text-sm">{agent.loginTime}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="px-2 py-1 bg-gray-700 rounded text-xs">{agent.skill}</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'forecast' && (
+                    <div className="bg-gray-800 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-semibold flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-blue-400" />
+                                Call Volume Forecast vs Staffing
+                            </h3>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 rounded bg-blue-500/50" />
-                                <span className="text-gray-400">Scheduled</span>
+                                <button className="p-1 hover:bg-gray-700 rounded">
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <span className="text-sm font-medium">Today</span>
+                                <button className="p-1 hover:bg-gray-700 rounded">
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Forecast Chart */}
+                        <div className="h-64 flex items-end gap-2 mb-4">
+                            {FORECAST.map((interval, i) => {
+                                const maxValue = Math.max(...FORECAST.map(f => f.predicted));
+                                const height = (interval.predicted / maxValue) * 100;
+                                const actualHeight = interval.actual ? (interval.actual / maxValue) * 100 : 0;
+
+                                return (
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                                        <div className="relative w-full h-48 flex items-end justify-center gap-1">
+                                            <div
+                                                className="w-4 bg-blue-500/30 rounded-t absolute left-1/2 -translate-x-4"
+                                                style={{ height: `${height}%` }}
+                                            />
+                                            {interval.actual && (
+                                                <div
+                                                    className="w-4 bg-green-500 rounded-t absolute left-1/2"
+                                                    style={{ height: `${actualHeight}%` }}
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-gray-400">{interval.time}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex items-center justify-center gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded bg-blue-500/30" />
+                                <span className="text-gray-400">Forecast</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 rounded bg-yellow-500/50" />
-                                <span className="text-gray-400">Break</span>
+                                <div className="w-3 h-3 rounded bg-green-500" />
+                                <span className="text-gray-400">Actual</span>
+                            </div>
+                        </div>
+
+                        {/* Staffing Table */}
+                        <div className="mt-6 overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="text-gray-400">
+                                        <th className="text-left py-2">Interval</th>
+                                        {FORECAST.slice(0, 8).map((f, i) => (
+                                            <th key={i} className="text-center py-2">{f.time}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="py-2 text-gray-400">Predicted Calls</td>
+                                        {FORECAST.slice(0, 8).map((f, i) => (
+                                            <td key={i} className="text-center py-2">{f.predicted}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 text-gray-400">Required Agents</td>
+                                        {FORECAST.slice(0, 8).map((f, i) => (
+                                            <td key={i} className="text-center py-2">{f.required}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td className="py-2 text-gray-400">Scheduled</td>
+                                        {FORECAST.slice(0, 8).map((f, i) => (
+                                            <td key={i} className={`text-center py-2 font-medium ${f.scheduled >= f.required ? 'text-green-400' : 'text-red-400'
+                                                }`}>
+                                                {f.scheduled}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'schedule' && (
+                    <div className="bg-gray-800 rounded-xl p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-semibold flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-blue-400" />
+                                Agent Schedule
+                            </h3>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium">
+                                <Zap className="w-4 h-4" />
+                                Auto-Generate Schedule
+                            </button>
+                        </div>
+
+                        {/* Timeline View */}
+                        <div className="relative">
+                            {/* Time Headers */}
+                            <div className="flex mb-2 ml-32">
+                                {['08', '09', '10', '11', '12', '13', '14', '15', '16', '17'].map((hour) => (
+                                    <div key={hour} className="flex-1 text-xs text-gray-400 text-center">
+                                        {hour}:00
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Agent Rows */}
+                            <div className="space-y-2">
+                                {AGENTS.slice(0, 5).map((agent) => (
+                                    <div key={agent.id} className="flex items-center">
+                                        <div className="w-32 text-sm truncate">{agent.name}</div>
+                                        <div className="flex-1 h-8 bg-gray-700/30 rounded relative">
+                                            {/* Shift bar */}
+                                            <div
+                                                className="absolute h-full bg-blue-500/50 rounded"
+                                                style={{ left: '10%', width: '80%' }}
+                                            />
+                                            {/* Break */}
+                                            <div
+                                                className="absolute h-full bg-yellow-500/50 rounded"
+                                                style={{ left: '40%', width: '10%' }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Legend */}
+                            <div className="flex items-center gap-6 mt-4 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-blue-500/50" />
+                                    <span className="text-gray-400">Scheduled</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded bg-yellow-500/50" />
+                                    <span className="text-gray-400">Break</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        </BPOLayout>
     );
 }
